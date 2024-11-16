@@ -1,0 +1,35 @@
+:root {
+  --blue: #1110ee;
+  --blue-light: #5a5bff;
+  --eunry: #ca9e97;
+  --eunry-light: #e4c6b7;
+  --pottersClay: #8d4c38;
+  --pottersClay-light: #d89770;
+
+  --background: #ffffff;
+  --foreground: #333333;
+
+  /* Status Colors */
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --disabled: #e0e0e0;
+
+  /* Grayscale Colors */
+  --gray-dark: #333;
+  --gray-light: #f4f4f4;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+/* Dark Mode Styles */
+.dark {
+  --background: #333;
+  --foreground: #ffffff;
+  --text-primary: #fff;
+  --text-secondary: #bbb;
+  --gray-light: #444;
+}
