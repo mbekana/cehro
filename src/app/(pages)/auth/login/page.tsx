@@ -100,17 +100,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             elevation={3}
             onClick={handleLogin}
           />
-          <Link href="/pages/auth/signup">
+          {/* <Link href="/pages/auth/signup">
             <Button color="default" text="Sign Up" />
-          </Link>
+          </Link> */}
         </div>
 
-        <div className="mt-10 flex justify-between w-[600px]">
+        {/* <div className="mt-10 flex justify-between w-[600px]">
           <span className="text-gray-600">Or Login with</span>
           <Link href="#facebook" className="text-primary font-bold">Facebook</Link>
           <Link href="#linkedin" className="text-primary font-bold">LinkedIn</Link>
           <Link href="#google" className="text-primary font-bold">Google</Link>
-        </div>
+        </div> */}
       </div>
 
       <div className="w-1/2 flex items-center justify-center">

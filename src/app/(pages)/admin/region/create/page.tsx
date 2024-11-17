@@ -43,12 +43,12 @@ const RegionForm = () => {
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaCalendar />}
-        title="Incident Maintenance"
+        title="Region Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
       >
         <Card
-          title="Incident Form"
+          title="Region Form"
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -67,7 +67,7 @@ const RegionForm = () => {
                 <Input
                   type="text"
                   label="Region Name"
-                  placeholder="Enter region"
+                  placeholder="Enter region name"
                   value={formData.regionName}
                   onChange={handleChange}
                   name="region"
@@ -77,18 +77,17 @@ const RegionForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="Lat"
-                  placeholder="Enter respondent residence"
+                  label="Latitude"
                   value={formData.location.lat}
                   onChange={handleChange}
-                  name="respondent_residence"
+                  name="latitude"
                 />
               </div>
 
               <div>
                 <Input
                   type="text"
-                  label="Long"
+                  label="Longitude"
                   value={formData.location.long}
                   onChange={handleChange}
                   name=""
@@ -101,7 +100,7 @@ const RegionForm = () => {
                 <Input
                   type="text"
                   label="City Name"
-                  placeholder="City Name"
+                  placeholder="Enter City Name"
                   value={formData.main_city}
                   onChange={handleChange}
                   name="main_city"
@@ -116,7 +115,7 @@ const RegionForm = () => {
       <div className="flex justify-end mt-4 mr-24">
         <Button
           color="primary"
-          text="Save Incident"
+          text="Save Region"
           size="large"
           elevation={4}
         />

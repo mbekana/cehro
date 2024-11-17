@@ -7,7 +7,7 @@ type ButtonProps = {
   icon?: React.ReactNode;
   size?: 'small' | 'medium' | 'large'; 
   className?:string;
-  borderRadius?:string
+  borderRadius?:number
 };
 
 const Button: React.FC<ButtonProps> = ({ color, text, onClick, disabled = false, elevation = 0, icon, size = 'medium', className, borderRadius}) => {

@@ -10,19 +10,19 @@ import { Region } from '@/app/model/RegionModel';
 import Search from '@/app/components/UI/Search';
 
 const regionsData = [
-  { id: 1, name: 'Region 1', population: 2000000 },
-  { id: 2, name: 'Region 2', population: 1500000 },
-  { id: 3, name: 'Region 3', population: 3000000 },
-  { id: 4, name: 'Region 4', population: 2500000 },
-  { id: 5, name: 'Region 5', population: 4000000 },
-  { id: 6, name: 'Region 6', population: 1800000 },
-  { id: 7, name: 'Region 7', population: 2100000 },
-  { id: 8, name: 'Region 8', population: 3300000 },
-  { id: 9, name: 'Region 9', population: 2200000 },
-  { id: 10, name: 'Region 10', population: 3500000 },
+  { id: 1, name: 'Addis Ababa',city:"Addis Ababa",lat:10000,long:200 },
+  { id: 2, name: 'Afar', city:"Semera",lat:1200000,long:1234 },
+  { id: 3, name: 'Amhara',city:"Bahirdar",lat:12009,long:90000 },
+  { id: 4, name: 'Bensahngulgumz',city:"Assossa",lat:2000,long:1000000 },
+  { id: 5, name: 'Harare',city:"Harar",lat:200000,long:998877 },
+  { id: 6, name: 'Oromia',city:"Adama",lat:29000,long:20000 },
+  { id: 7, name: 'Somali',city:"Giggiga",lat:28899,long:10000000 },
+  { id: 8, name: 'Sidama',city:"Hawasa",lat:30000900,long:889900 },
+  { id: 9, name: 'SSNP',city:"Aribaminch",lat:2000998,long:887767 },
+  { id: 10, name: 'Tigray',city:"Mekele",lat:2000,long:1099988 },
 ];
 
-const columns: (keyof Region)[] = ['id', 'name', 'population'];
+const columns: (keyof Region)[] = ['id', 'name', 'city','lat','long'];
 
 const Regions = () => {
   const [currentPage, setCurrentPage] = useState(1);
