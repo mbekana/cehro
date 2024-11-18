@@ -39,6 +39,7 @@ const LogoWithText: React.FC<LogoWithTextProps> = ({
 
   return (
     <div className="flex items-center space-x-4 p-3 px-[80px]  rounded-md ">
+      {/* Replace with Image later */}
       <img
         src={logoSrc}
         alt={altText}
