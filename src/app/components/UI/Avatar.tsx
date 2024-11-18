@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import React from 'react';
 
 interface AvatarProps {
@@ -33,7 +32,7 @@ const Avatar: React.FC<AvatarProps> = ({
       className={`flex items-center justify-center rounded-full ${sizeClasses[size]} ${borderClasses} bg-gray-200 ${className}`}
     >
       {src ? (
-        <Image src={src} alt={alt || 'avatar'} className="w-full h-full rounded-full object-cover" />
+        <img src={src} alt={alt || 'avatar'} className="w-full h-full rounded-full object-cover" />
       ) : icon ? (
         <span className="text-white">{icon}</span> 
       ) : text ? (
