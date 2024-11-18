@@ -15,8 +15,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       href: "/admin/auth/signup/history",
       icon: <FaUsersCog />, 
       submenu: [
-        { label: "Users", href: "/admin/auth/signup/history", icon:<FaUsers/>},
-        { label: "Add User", href: "/admin/auth/signup/create", icon:<FaEdit/>},
+        { label: "Users", href: "/auth/signup/history", icon:<FaUsers/>},
+        { label: "Add User", href: "/auth/signup/create", icon:<FaEdit/>},
       ],
     },
     {
