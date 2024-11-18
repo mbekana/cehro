@@ -1,5 +1,7 @@
 export interface Region {
   id: number;
   name: string;
-  population: number;
+  city: string;
+  lat:number,
+  long:number
 }

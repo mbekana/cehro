@@ -43,12 +43,12 @@ const RegionForm = () => {
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaCalendar />}
-        title="Incident Maintenance"
+        title="Region Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
       >
         <Card
-          title="Incident Form"
+          title="Region Form"
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -67,7 +67,7 @@ const RegionForm = () => {
                 <Input
                   type="text" 
                   label="Region Name"
-                  placeholder="Enter region"
+                  placeholder="Enter region name"
                   value={formData.regionName}
                   onChange={handleChange}
                   name="regionName" 

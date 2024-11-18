@@ -4,10 +4,21 @@ import React from 'react';
 import Sidebar from './Sidebar'; 
 import LogoWithText from '../UI/LogoWithText';
 import Button from '@/app/components/UI/Button'; 
-import { FaCalendarAlt, FaExclamationTriangle,  FaCog, FaEdit, FaGlobe,  FaSignOutAlt, FaTag } from 'react-icons/fa';
+import { FaCalendarAlt, FaExclamationTriangle,FaFolder,FaUserTie, FaCog,FaInfoCircle, FaEdit,FaUserShield, FaGlobe, FaSignOutAlt,FaUsers,FaUsersCog, FaGraduationCap } from 'react-icons/fa';
+
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const sidebarLinks = [
+
+    {
+      label: "Users",
+      href: "/admin/auth/signup/history",
+      icon: <FaUsersCog />, 
+      submenu: [
+        { label: "Users", href: "/admin/auth/signup/history", icon:<FaUsers/>},
+        { label: "Add User", href: "/admin/auth/signup/create", icon:<FaEdit/>},
+      ],
+    },
     {
       label: "Incidents",
       href: "/admin/incident/history",
@@ -25,7 +36,28 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     {
       label: "Categories",
       href: "/admin/category/history",
-      icon: <FaTag/>, 
+      icon: <FaFolder/>, 
+    },
+    {
+      label: "Educations",
+      href: "/admin/education/history",
+      icon: <FaGraduationCap/>, 
+    },
+    {
+      label: "User Roles",
+      href: "/admin/role/history",
+      icon: <FaUserShield/>, 
+    },
+
+    {
+      label: "Source",
+      href: "/admin/source/history",
+      icon: <FaInfoCircle/>, 
+    },
+    {
+      label: "Occupations",
+      href: "/admin/occupation/history",
+      icon: <FaUserTie/>, 
     },
     {
       label: "Settings",
@@ -34,6 +66,10 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       submenu: [
         { label: "Region", href: "/admin/region/create", icon:<FaEdit/>},
         { label: "Category", href: "/admin/category/create", icon:<FaEdit/>},
+        { label: "Education", href: "/admin/education/create", icon:<FaEdit/>},
+        { label: "User Role", href: "/admin/role/create", icon:<FaEdit/>},
+        { label: "Source", href: "/admin/source/create", icon:<FaEdit/>},
+        { label: "Occupations", href: "/admin/occupation/create", icon:<FaEdit/>},
       ],
     },
 

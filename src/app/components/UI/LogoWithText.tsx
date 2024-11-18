@@ -42,6 +42,7 @@ const LogoWithText: React.FC<LogoWithTextProps> = ({
       <img
         src={logoSrc}
         alt={altText}
+        
         className={`${logoSizeClasses[size]} object-contain`}
       />
       {text && <p className={`${textSizeClasses[textSize]} text-gray-800 font-bold w-[230px] font-crimso`}>{text}</p>} 
