@@ -92,7 +92,6 @@ const CategoryForm = () => {
               text="Save Category"
               size="large"
               elevation={4}
-              borderRadius={3} 
             />
           </div>
         </div>

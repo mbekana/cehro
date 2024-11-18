@@ -9,19 +9,19 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 
 type RegionFormData = {
-  regionName:string;
-  location:{
-    lat:number,
-    long:number
-  },
-  main_city:string
+  regionName: string;
+  location: {
+    lat: number;
+    long: number;
+  };
+  main_city: string;
 };
 
 const RegionForm = () => {
   const [formData, setFormData] = useState<RegionFormData>({
     regionName: "",
     location: { lat: 0, long: 0 },
-    main_city:""
+    main_city: "",
   });
 
   const handleChange = (
@@ -30,7 +30,7 @@ const RegionForm = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: name === "lat" || name === "long" ? Number(value) : value, 
     }));
   };
 
@@ -62,15 +62,15 @@ const RegionForm = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Left Column */}
+            
               <div>
                 <Input
-                  type="text"
+                  type="text" 
                   label="Region Name"
                   placeholder="Enter region name"
                   value={formData.regionName}
                   onChange={handleChange}
-                  name="region"
+                  name="regionName" 
                 />
               </div>
 
@@ -90,10 +90,8 @@ const RegionForm = () => {
                   label="Longitude"
                   value={formData.location.long}
                   onChange={handleChange}
-                  name=""
-                >
-               
-                </Input>
+                  name="long" 
+                />
               </div>
 
               <div>
@@ -103,15 +101,14 @@ const RegionForm = () => {
                   placeholder="Enter City Name"
                   value={formData.main_city}
                   onChange={handleChange}
-                  name="main_city"
+                  name="main_city" 
                 />
               </div>
-
-            
             </div>
           </form>
         </Card>
       </BoxWrapper>
+
       <div className="flex justify-end mt-4 mr-24">
         <Button
           color="primary"
