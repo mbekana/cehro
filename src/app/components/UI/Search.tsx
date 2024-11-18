@@ -42,7 +42,7 @@ const Search: React.FC<SearchProps> = ({ placeholder = "Search...", onSearch, bu
         icon={<FaSearch />}
         className="col-span-1" 
         size='large'
-        borderRadius="rounded-lg"
+        borderRadius={5}
       />
     </div>
   );
