@@ -9,19 +9,19 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 
 type RegionFormData = {
-  regionName:string;
-  location:{
-    lat:number,
-    long:number
-  },
-  main_city:string
+  regionName: string;
+  location: {
+    lat: number;
+    long: number;
+  };
+  main_city: string;
 };
 
 const RegionForm = () => {
   const [formData, setFormData] = useState<RegionFormData>({
     regionName: "",
     location: { lat: 0, long: 0 },
-    main_city:""
+    main_city: "",
   });
 
   const handleChange = (
@@ -30,7 +30,7 @@ const RegionForm = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: name === "lat" || name === "long" ? Number(value) : value, 
     }));
   };
 
@@ -62,63 +62,57 @@ const RegionForm = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Left Column */}
+            
               <div>
                 <Input
-                  type="text"
+                  type="text" 
                   label="Region Name"
                   placeholder="Enter region name"
                   value={formData.regionName}
                   onChange={handleChange}
-                  name="region"
+                  name="regionName" 
                 />
               </div>
 
               <div>
                 <Input
-                  type="text"
-                  label="Latitude"
-                  value={formData.location.lat}
+                  type="number"
+                  label="Lat"
+                  placeholder="Enter latitude"
+                  value={formData.location.lat.toString()} 
                   onChange={handleChange}
-                  name="latitude"
+                  name="lat"
                 />
               </div>
 
               <div>
                 <Input
-                  type="text"
-                  label="Longitude"
-                  value={formData.location.long}
+                  type="number"
+                  label="Long"
+                  placeholder="Enter longitude"
+                  value={formData.location.long.toString()} 
                   onChange={handleChange}
-                  name=""
-                >
-               
-                </Input>
+                  name="long" 
+                />
               </div>
 
               <div>
                 <Input
                   type="text"
                   label="City Name"
-                  placeholder="Enter City Name"
+                  placeholder="Enter city name"
                   value={formData.main_city}
                   onChange={handleChange}
-                  name="main_city"
+                  name="main_city" 
                 />
               </div>
-
-            
             </div>
           </form>
         </Card>
       </BoxWrapper>
+
       <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text="Save Region"
-          size="large"
-          elevation={4}
-        />
+        <Button color="primary" text="Save Incident" size="large" elevation={4} />
       </div>
     </div>
   );

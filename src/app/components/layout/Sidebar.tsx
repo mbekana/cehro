@@ -2,7 +2,6 @@
 import Avatar from "../UI/Avatar";
 import {
   FaSearch,
-  FaUser,
   FaChevronDown,
   FaChevronUp,
   FaSignOutAlt,

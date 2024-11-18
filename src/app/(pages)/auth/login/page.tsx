@@ -1,25 +1,23 @@
 'use client';
 
-import Button from "@/app/components/UI/Button";
-import Input from "@/app/components/UI/Input";
-import LogoWithText from "@/app/components/UI/LogoWithText";
-import Link from "next/link";
-import { useState } from "react";
+import { useState } from 'react';
+import { useUserContext } from '@/app/context/UserContext'; // Import the context hook
+import Button from '@/app/components/UI/Button';
+import Input from '@/app/components/UI/Input';
+import LogoWithText from '@/app/components/UI/LogoWithText';
 
-interface LoginPageProps {
-  onLogin: (email: string, password: string) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const LoginPage = () => {
+  const { setLogin, setRole } = useUserContext(); // Access context values and setters
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState<string | null>(null);  // For handling errors
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "email") {
+    if (name === 'email') {
       setEmail(value);
-    } else if (name === "password") {
+    } else if (name === 'password') {
       setPassword(value);
     }
   };
@@ -29,10 +27,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   const handleLogin = () => {
-    if (typeof onLogin === 'function') {
-      onLogin(email, password);  
+    if (email === 'admin@admin.com' && password === 'password') {
+      setLogin(true);
+      setRole('admin');
+    } else if (email === 'user@user.com' && password === 'password') {
+      setLogin(true);
+      setRole('user');
     } else {
-      console.error("onLogin is not a function");
+      setError('Invalid credentials');
     }
   };
 
@@ -47,6 +49,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             Welcome back! Please login to your account.
           </p>
         </div>
+        {error && <p className="text-red-500">{error}</p>}
         <div className="flex flex-col gap-6">
           <Input
             type="email"
