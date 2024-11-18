@@ -60,14 +60,15 @@
 // };
 
 // export default Table;
-"use-client"
+"use-client";
 
 import React from 'react';
 
+// Utility function to get nested values from an object by path
 const getNestedValue = (obj: Record<string, any>, path: string): any => {
   const keys = path.split('.');
   let value = obj;
-  for (let key of keys) {
+  for (const key of keys) {  // Change 'let' to 'const' here
     value = value?.[key]; 
     if (value === undefined || value === null) {
       return ''; 
@@ -84,7 +85,7 @@ interface TableProps {
 
 const Table: React.FC<TableProps> = ({ columns, data }) => {
   return (
-    <div className="overflow-x-auto bg-white  rounded-sm w-full">
+    <div className="overflow-x-auto bg-white rounded-sm w-full">
       <table className="min-w-full table-auto">
         <thead>
           <tr className="bg-gray-100 text-gray-600 uppercase text-[14px]">

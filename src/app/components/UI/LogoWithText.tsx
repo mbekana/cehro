@@ -24,6 +24,13 @@ const LogoWithText: React.FC<LogoWithTextProps> = ({
     xl: 'w-[270px] h-[270px]',
   };
 
+  // const logoSize = {
+  //   small: { width: 32, height: 32 },  
+  //   medium: { width: 48, height: 48 }, 
+  //   large: { width: 64, height: 64 }, 
+  //   xl: { width: 270, height: 270 },   
+  // };
+
   const textSizeClasses = {
     sm: 'text-sm',
     base: 'text-base',
@@ -35,6 +42,7 @@ const LogoWithText: React.FC<LogoWithTextProps> = ({
       <img
         src={logoSrc}
         alt={altText}
+        
         className={`${logoSizeClasses[size]} object-contain`}
       />
       {text && <p className={`${textSizeClasses[textSize]} text-gray-800 font-bold w-[230px] font-crimso`}>{text}</p>} {/* Apply text size */}

@@ -6,11 +6,7 @@ import LogoWithText from "@/app/components/UI/LogoWithText";
 import Link from "next/link";
 import { useState } from "react";
 
-interface SignupPageProps {
-  onSignup: (firstName: string, lastName: string, username: string, email: string, password: string, phoneNumber: string) => void;
-}
-
-const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
+const SignupPage: React.FC = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
@@ -21,26 +17,36 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "firstName") {
-      setFirstName(value);
-    } else if (name === "lastName") {
-      setLastName(value);
-    } else if (name === "username") {
-      setUsername(value);
-    } else if (name === "email") {
-      setEmail(value);
-    } else if (name === "password") {
-      setPassword(value);
-    } else if (name === "confirmPassword") {
-      setConfirmPassword(value);
-    } else if (name === "phoneNumber") {
-      setPhoneNumber(value);
+    switch (name) {
+      case "firstName":
+        setFirstName(value);
+        break;
+      case "lastName":
+        setLastName(value);
+        break;
+      case "username":
+        setUsername(value);
+        break;
+      case "email":
+        setEmail(value);
+        break;
+      case "password":
+        setPassword(value);
+        break;
+      case "confirmPassword":
+        setConfirmPassword(value);
+        break;
+      case "phoneNumber":
+        setPhoneNumber(value);
+        break;
+      default:
+        break;
     }
   };
 
   const handleSignup = () => {
     if (password === confirmPassword) {
-      onSignup(firstName, lastName, username, email, password, phoneNumber);  
+      console.log({ firstName, lastName, username, email, password, phoneNumber });
     } else {
       alert("Passwords do not match!");
     }
@@ -61,7 +67,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
         <div className="flex flex-col gap-6">
           <Input
             type="text"
-            // label="First Name"
             placeholder="Enter your first name"
             value={firstName}
             name="firstName"
@@ -71,7 +76,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="text"
-            // label="Last Name"
             placeholder="Enter your last name"
             value={lastName}
             name="lastName"
@@ -81,7 +85,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="text"
-            // label="Username"
             placeholder="Enter your username"
             value={username}
             name="username"
@@ -91,7 +94,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="email"
-            // label="Email"
             placeholder="Enter your email"
             value={email}
             name="email"
@@ -101,7 +103,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="password"
-            // label="Password"
             placeholder="Enter your password"
             value={password}
             name="password"
@@ -111,7 +112,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="password"
-            // label="Confirm Password"
             placeholder="Confirm your password"
             value={confirmPassword}
             name="confirmPassword"
@@ -121,7 +121,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
           <Input
             type="text"
-            // label="Phone Number"
             placeholder="Enter your phone number"
             value={phoneNumber}
             name="phoneNumber"
@@ -131,9 +130,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
           />
         </div>
 
-        {/* Signup Button */}
         <div className="mt-8 flex gap-4">
-       
           <Link href="/pages/auth/login">
             <Button
               color="default"
