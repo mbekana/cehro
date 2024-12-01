@@ -15,12 +15,10 @@ export async function GET(req: Request) {
   }
 }
 
-export async function DELETE(
-  req: Request,
-  context: { params: { id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const { id } = context.params;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
     if (!id || id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid ID parameter" },
