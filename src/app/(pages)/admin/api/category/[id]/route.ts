@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+interface Params {
+  params: {
+    id: string;
+  };
+}
+
+export async function GET(req: Request, { params }: Params) {
   try {
     const { id } = params;
 
@@ -17,12 +20,9 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  context: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: Params) {
   try {
-    const { id } = context.params;
+    const { id } = params;
     if (!id || id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid ID parameter" },
@@ -47,9 +47,9 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: Params) {
   try {
-    const { id } = context.params;
+    const { id } = params;
 
     if (!id || id.trim() === "") {
       return NextResponse.json(
@@ -60,10 +60,8 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
       );
     }
 
-    // Parse the body of the request for updated data
     const updatedData = await req.json();
 
-    // Ensure the data to be updated is valid
     if (!updatedData || Object.keys(updatedData).length === 0) {
       return NextResponse.json(
         { error: "No data provided to update" },
