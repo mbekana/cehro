@@ -13,10 +13,10 @@ const IncidentDetail = () => {
 
   useEffect(() => {
     if (id) {
-      fetchIncident(id);
+      // Ensure id is treated as a string
+      fetchIncident(Array.isArray(id) ? id[0] : id);
     }
   }, [id]);
-
 
   const fetchIncident = async (id: string) => {
     setLoading(true);
