@@ -18,12 +18,10 @@ export async function GET(req: Request) {
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const id = params.id;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     await deleteAuthorityDecision(id);
     return new Response(
@@ -43,25 +41,13 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    // Parse the body of the request for update data
     const updatedData = await req.json();
 
-    // Ensure the data to be updated is valid
     if (!updatedData || Object.keys(updatedData).length === 0) {
       return new Response(
         JSON.stringify({ error: "No data provided to update" }),
@@ -121,13 +107,12 @@ async function deleteAuthorityDecision(id: string) {
   }
 }
 
-// Function to update an authority decision by ID
 async function updateAuthorityDecision(id: string, updatedData: any) {
   try {
     const response = await fetch(
       `http://localhost:5000/authorityDecisions/${id}`,
       {
-        method: "PATCH", // Use PATCH or PUT depending on the situation
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

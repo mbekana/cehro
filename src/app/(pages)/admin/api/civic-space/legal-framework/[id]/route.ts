@@ -46,10 +46,8 @@ export async function PATCH(req: Request) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
 
-    // Parse the body of the request for update data
     const updatedData = await req.json();
 
-    // Ensure the data to be updated is valid
     if (!updatedData || Object.keys(updatedData).length === 0) {
       return new Response(
         JSON.stringify({ error: "No data provided to update" }),
