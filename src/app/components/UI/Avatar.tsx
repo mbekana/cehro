@@ -33,7 +33,7 @@ const Avatar: React.FC<AvatarProps> = ({
       className={`flex items-center justify-center rounded-full ${sizeClasses[size]} ${borderClasses} bg-gray-200 ${className}`}
     >
       {src ? (
-        <Image src={src} alt={alt || 'avatar'} className="w-full h-full rounded-full object-cover" />
+        <Image src={src} alt={alt || 'avatar'} width={10} height={10} className="w-full h-full rounded-full object-cover" />
       ) : icon ? (
         <span className="text-white">{icon}</span> 
       ) : text ? (

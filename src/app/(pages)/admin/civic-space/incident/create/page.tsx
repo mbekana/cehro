@@ -15,7 +15,7 @@ type IncidentFormData = {
   age_group: string;
   education: string;
   occupation: string;
-  date_of_incidence: string; 
+  date_of_incidence: string;
   location_of_incidence: string;
   incident_happened: {
     woreda: string;
@@ -40,19 +40,66 @@ const IncidentForm = () => {
     source_of_information: "",
   });
 
+  // Handle form input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    // Check if the input belongs to 'incident_happened' object
+    if (name.startsWith("incident_happened")) {
+      const field = name.split(".")[1]; // Get 'woreda' or 'zone'
+      setFormData((prevData) => ({
+        ...prevData,
+        incident_happened: {
+          ...prevData.incident_happened,
+          [field]: value, // Update the correct field
+        },
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle form submission and send data to the API
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+
+    try {
+      const response = await fetch("/admin/api/civic-space/incident", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // Send form data as JSON
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save incident");
+      }
+
+      // Optionally reset form data
+      setFormData({
+        region: "",
+        respondent_residence: "",
+        gender: "",
+        age_group: "",
+        education: "",
+        occupation: "",
+        date_of_incidence: "",
+        location_of_incidence: "",
+        incident_happened: { woreda: "", zone: "" },
+        category: "",
+        source_of_information: "",
+      });
+
+      console.log("Incident saved successfully!");
+    } catch (error) {
+      console.error("Error saving incident:", error);
+    }
   };
 
   return (
@@ -133,7 +180,7 @@ const IncidentForm = () => {
                   placeholder="Enter Education"
                   value={formData.education}
                   onChange={handleChange}
-                  name="category"
+                  name="education"
                 >
                   <option value="">Select Education</option>
                   <option value="1">Education 1</option>
@@ -224,17 +271,17 @@ const IncidentForm = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text="Save Incident"
+                size="large"
+                elevation={4}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text="Save Incident"
-          size="large"
-          elevation={4}
-        />
-      </div>
     </div>
   );
 };

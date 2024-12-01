@@ -1,4 +1,5 @@
 export interface Incident {
+  id: number;
   region: string;
   residence: string;
   gender: string;

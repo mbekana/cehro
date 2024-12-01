@@ -1,16 +1,6 @@
-"use-client";
-import Avatar from "../UI/Avatar";
-import {
-  FaSearch,
-  FaChevronDown,
-  FaChevronUp,
-  FaSignOutAlt,
-  FaQuestionCircle,
-} from "react-icons/fa";
-import Input from "../UI/Input";
 import { useState } from "react";
 import LinkItem from "../UI/LinkItem";
-import Button from "../UI/Button";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 interface SidebarProps {
   links: {
@@ -18,42 +8,68 @@ interface SidebarProps {
     href: string;
     icon?: React.ReactNode;
     size?: number;
-    submenu?: { label: string; href: string; icon: React.ReactNode }[];
+    submenu?: { label: string; href: string; icon: React.ReactNode; submenu?: any[] }[];
   }[];
+  isOpen: boolean; 
+  onClose: () => void; 
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ links }) => {
-  const [openSubmenu, setOpenSubmenu] = useState<{ [key: string]: boolean }>(
-    {}
-  );
+const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
+  const [openSubmenu, setOpenSubmenu] = useState<{ [key: string]: boolean }>({});
 
-  const toggleSubmenu = (index: string) => {
+  const toggleSubmenu = (submenuKey: string) => {
     setOpenSubmenu((prevState) => ({
       ...prevState,
-      [index]: !prevState[index],
+      [submenuKey]: !prevState[submenuKey],
     }));
   };
 
+  const renderSubmenu = (submenu: any[], parentLabel: string) => {
+    return submenu.map((submenuItem, subIndex) => {
+      const submenuKey = `${parentLabel}-${submenuItem.label}`;
+
+      return (
+        <div key={subIndex}>
+          <LinkItem
+            href={submenuItem.href}
+            label={submenuItem.label}
+            icon={submenuItem.icon}
+            className="flex items-center py-2 px-4 text-white rounded-md transition-colors duration-200"
+          />
+
+          {/* If this submenu has nested submenus, render them recursively */}
+          {submenuItem.submenu && openSubmenu[submenuKey] && (
+            <div className="pl-6 mt-2">{renderSubmenu(submenuItem.submenu, submenuKey)}</div>
+          )}
+        </div>
+      );
+    });
+  };
+
   return (
-    <div className="w-64 bg-primary shadow-lg p-6 h-full flex flex-col">
+    // <div
+    //   className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform ${
+    //     isOpen ? "translate-x-0" : "-translate-x-full"
+    //   }`}
+    // >
+         <div
+      className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform `}
+    >
+      
+      {/* Close Button for Mobile Devices */}
+      <div className="absolute top-4 right-4 lg:hidden">
+        <button onClick={onClose} className="text-white">
+          <FaChevronDown size={24} />
+        </button>
+      </div>
+
       <div className="py-2 px-4">
         <div className="flex items-center justify-left space-x-3">
-          <Avatar src="./logo.jpg" size="small" border={false} />
           <p className="text-white">John Doe</p>
         </div>
       </div>
       <div className="my-1 border-t border-gray-300" />
-      <div>
-        <Input
-          type="text"
-          placeholder="Search..."
-          value="search"
-          name="search"
-          onChange={() => {}}
-          className="border-l-4 border-primary"
-          icon={<FaSearch />}
-        />
-      </div>
+
       <nav className="mt-6 flex-1">
         <ul>
           {links.map((link, index) => (
@@ -64,16 +80,16 @@ const Sidebar: React.FC<SidebarProps> = ({ links }) => {
                   href={link.href}
                   label={link.label}
                   icon={link.icon}
-                  className="flex items-center py-2 px-4 font-medium text-gray-200  rounded-md transition-colors duration-200"
+                  className="flex items-center py-2 px-4 font-medium text-gray-200 rounded-md transition-colors duration-200"
                   onClick={(e) => {
                     if (link.submenu) {
-                      e.preventDefault();
-                      toggleSubmenu(index.toString());
+                      e.preventDefault(); 
+                      toggleSubmenu(link.label); 
                     }
                   }}
                   trailingIcon={
                     link.submenu ? (
-                      openSubmenu[index] ? (
+                      openSubmenu[link.label] ? (
                         <FaChevronUp />
                       ) : (
                         <FaChevronDown />
@@ -83,48 +99,14 @@ const Sidebar: React.FC<SidebarProps> = ({ links }) => {
                 />
               </li>
 
-              {link.submenu && openSubmenu[index] && (
-                <ul className="pl-6 mt-2">
-                  {link.submenu.map((submenuItem, subIndex) => (
-                    <li key={subIndex}>
-                      <LinkItem
-                        href={submenuItem.href}
-                        label={submenuItem.label}
-                        icon={submenuItem.icon}
-                        className="flex items-center py-2 px-4 text-white  rounded-md transition-colors duration-200"
-                      />
-                    </li>
-                  ))}
-                </ul>
+              {/* Render the submenu if it's open */}
+              {link.submenu && openSubmenu[link.label] && (
+                <div className="pl-6 mt-2">{renderSubmenu(link.submenu, link.label)}</div>
               )}
             </div>
           ))}
         </ul>
       </nav>
-
-      <div className="mt-auto">
-        <ul>
-          <li>
-            <LinkItem
-              href="/help"
-              label="Help"
-              icon={<FaQuestionCircle className="mr-3" />}
-              className="text-white hover:bg-gray-200"
-            />
-          </li>
-          <li>
-            <span>
-              <Button
-                color="danger"
-                text="Logout"
-                onClick={() => console.log("Logout")}
-                icon={<FaSignOutAlt />}
-                size="medium"
-              />
-            </span>
-          </li>
-        </ul>
-      </div>
     </div>
   );
 };

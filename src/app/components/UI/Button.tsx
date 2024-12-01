@@ -1,11 +1,13 @@
+"use-client"
+
 type ButtonProps = {
   color: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'default' | 'danger';
   text: string;
-  onClick?: () => void;
+  onClick?: (e?: React.FormEvent) => void;
   disabled?: boolean;
   elevation?: number;
   icon?: React.ReactNode;
-  size?: 'small' | 'medium' | 'large'; 
+  size?: 'small' | 'medium' | 'large' ; 
   className?:string;
   borderRadius?:number
 };
@@ -42,7 +44,7 @@ const Button: React.FC<ButtonProps> = ({ color, text, onClick, disabled = false,
   const sizeClasses = {
     small: "w-24",  
     medium: "w-32", 
-    large: "w-48"   
+    large: "w-[300px]"   
   };
 
   return (

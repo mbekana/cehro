@@ -1,66 +1,131 @@
 'use client';
 
-
-import React, {useState} from 'react'
-import { FaGlobe } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaExclamationTriangle, FaPlus } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Table from '@/app/components/UI/Table';
 import Pagination from '@/app/components/UI/Pagination';
-import { Region } from '@/app/model/RegionModel';
 import Search from '@/app/components/UI/Search';
+import { Region } from '@/app/model/RegionModel'; 
+import Link from 'next/link';
+import Button from '@/app/components/UI/Button';
+import { useRouter } from 'next/navigation';
 
-const regionsData = [
-  { id: 1, name: 'Addis Ababa',city:"Addis Ababa",lat:10000,long:200 },
-  { id: 2, name: 'Afar', city:"Semera",lat:1200000,long:1234 },
-  { id: 3, name: 'Amhara',city:"Bahirdar",lat:12009,long:90000 },
-  { id: 4, name: 'Bensahngulgumz',city:"Assossa",lat:2000,long:1000000 },
-  { id: 5, name: 'Harare',city:"Harar",lat:200000,long:998877 },
-  { id: 6, name: 'Oromia',city:"Adama",lat:29000,long:20000 },
-  { id: 7, name: 'Somali',city:"Giggiga",lat:28899,long:10000000 },
-  { id: 8, name: 'Sidama',city:"Hawasa",lat:30000900,long:889900 },
-  { id: 9, name: 'SSNP',city:"Aribaminch",lat:2000998,long:887767 },
-  { id: 10, name: 'Tigray',city:"Mekele",lat:2000,long:1099988 },
-];
-
-const columns: (keyof Region)[] = ['id', 'name', 'city','lat','long'];
+const columns: (keyof Region)[] = ['id', 'name', 'city', 'lat', 'long'];
 
 const Regions = () => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5; 
-  const totalPages = Math.ceil(regionsData.length / rowsPerPage);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [filteredRegions, setFilteredRegions] = useState<Region[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const currentData = regionsData.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const rowsPerPage = 5;
+  const totalPages = Math.ceil(filteredRegions.length / rowsPerPage);
+
+  useEffect(() => {
+    fetchRegions();
+  }, []);
+
+  const fetchRegions = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/admin/api/region', { method: 'GET' });
+      if (response.ok) {
+        const data = await response.json();
+        setRegions(data);
+        setFilteredRegions(data); 
+      } else {
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page); 
+      setCurrentPage(page);
     }
   };
 
   const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+    console.log('Searching for:', query);
+    const filtered = regions.filter((region) =>
+      region.name.toLowerCase().includes(query.toLowerCase()) ||
+      region.city.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredRegions(filtered);
+    setCurrentPage(1); 
   };
+
+  const handleAction = (action: string, row: Record<string, any>) => {
+    console.log('AM here handle action: ', row.id);
+    switch (action) {
+      case 'details':
+        router.push(`/admin/region/detail/${row.id}`);
+        break;
+      case 'update':
+        router.push(`/admin/region/update/${row.id}`);
+        break;
+      case 'delete':
+        handleDelete(row.id); 
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/admin/api/region/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete the region');
+      }
+
+      console.log(`Region with id ${id} deleted successfully`);
+      fetchRegions();
+    } catch (error) {
+      console.error('Error deleting the region: ', error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <BoxWrapper
-      icon={<FaGlobe />}  
-      title="Regions"  
-      borderColor="border-primary"  
-      borderThickness="border-b-4"  
+      icon={<FaExclamationTriangle />}
+      title="Regions"
+      borderColor="border-primary"
+      borderThickness="border-b-4"
     >
-      <div className="m-2 w-full">
-      <Search onSearch={handleSearch} placeholder="Search Incidents..." buttonText="Search Incidents" />
+      <div className="flex flex-1 items-center justify-between m-2 w-full">
+        <Search onSearch={handleSearch} placeholder="Search Regions..." buttonText="Search Regions" />
+        <Link href="/admin/region/create">
+          <Button
+            color="primary"
+            text="Create Region"
+            icon={<FaPlus />}
+            className="ml-auto"
+            size="large"
+            borderRadius={5}
+          />
+        </Link>
       </div>
-      <Table columns={columns} data={currentData} sortKey="name" /> 
+      <Table columns={columns} data={filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
       <div className="flex justify-end mt-4">
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </BoxWrapper>
   );
