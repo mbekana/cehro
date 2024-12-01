@@ -203,6 +203,24 @@ const UserList = () => {
     console.log("Searching for:", query);
   };
 
+  const handleAction = (action: string, row: Record<string, any>) => {
+    console.log('AM here handle action: ', row.id);
+    // switch (action) {
+    //   case 'details':
+    //     router.push(`/admin/education/detail/${row.id}`);
+    //     break;
+    //   case 'update':
+    //     router.push(`/admin/education/update/${row.id}`);
+    //     break;
+    //   case 'delete':
+    //     handleDelete(row.id); // Delete action
+    //     break;
+    //   default:
+    //     break;
+    // }
+  };
+
+
 
   return (
     <BoxWrapper
@@ -214,7 +232,7 @@ const UserList = () => {
         <div className="m-2 w-full">
       <Search onSearch={handleSearch} placeholder="Search Incidents..." buttonText="Search Incidents" />
       </div>
-      <Table columns={columns} data={currentData} /> 
+      <Table columns={columns} data={currentData} onAction={handleAction}/> 
       <div className="flex justify-end mt-4">
       <Pagination
         currentPage={currentPage}
