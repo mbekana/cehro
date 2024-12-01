@@ -2,7 +2,7 @@
 
 import { useUserContext } from '@/app/context/UserContext';
 import AdminLayout from './components/layout/AdminLayout';
-import AdminDashboard from './(pages)/admin/dashboard';
+import AdminDashboard from './(pages)/admin/dashboard/page';
 import LoginPage from './(pages)/auth/login/page';
 
 export default function Home() {

@@ -1,34 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { FaExclamationTriangle, FaPlus } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Table from '@/app/components/UI/Table';
 import Pagination from '@/app/components/UI/Pagination';
 import Search from '@/app/components/UI/Search';
 import { Category } from '@/app/model/CategoryModel';
+import Button from '@/app/components/UI/Button';
+import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
-const categoriesData = [
-    { id: 1, name: "Civic Feedoms", remark: "Incidents involving vehicles or traffic collisions." },
-    { id: 2, name: "Unlawfull Government Actions", remark: "Violent acts occurring within the home, often involving family members." },
-    { id: 3, name: "Social Descrrimination", remark: "Dishonest or illegal behavior by public officials or authorities." },
-    { id: 4, name: "Media and Digital Writes", remark: "Incidents involving medical errors, negligence, or accidents in healthcare settings." },
-    { id: 5, name: "Civic Feedom,Civic participation,Unlaw government actions", remark: "Disputes or violent incidents that occur on university or school campuses." },
-    { id: 6, name: "Media and degital rights,unlawful goverment actions", remark: "Incidents where property is stolen or taken without permission." },
-    { id: 7, name: "Unlawfull gevernment actions,civic freedoms,social descrimination", remark: "Incidents related to farming activities, crop production, or livestock management." },
-    { id: 8, name: "Civic freedom,civicparticiapation,media adn digital rights,social descrimination,unlawful goverment actions", remark: "Cases of cheating, plagiarism, or other dishonest practices in academic settings." },
-    { id: 9, name: "Social descrimination,unlawfull governmet actions", remark: "Any form of abuse or mistreatment of older individuals." },
-    { id: 10, name: "civic feedom,civicparticipation,cso-enabling", remark: "Incidents that lead to harm or destruction of the environment, such as pollution or deforestation." }
-  ];
   
 const columns: (keyof Category)[] = ['id','name', 'remark'];
 
 const Categories = () => {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(categoriesData.length / rowsPerPage);
+  const [loading, setLoading] = useState(true); 
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const currentData = categoriesData.slice(
+  const rowsPerPage = 5;
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/admin/api/category`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const totalPages = Math.ceil(categories.length / rowsPerPage);
+
+  const currentData = categories.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -38,10 +55,45 @@ const Categories = () => {
       setCurrentPage(page);  
     }
   };
+  const handleAction = (action: string, row: Record<string, any>) => {
+    console.log("AM here handle action: ", row.id);
+    switch (action) {
+      case "details":
+        router.push(`/admin/category/detail/${row.id}`);
+        break;
+      case "update":
+        router.push(`/admin/category/update/${row.id}`); 
+        break;
+      case "delete":
+        handleDelete(row.id); // Delete action
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/admin/api/civic-space/incident/${id}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the incident");
+      }
+
+      console.log(`Incident with id ${id} deleted successfully`);
+      fetchCategories(); 
+    } catch (error) {
+      console.error("Error deleting the incident: ", error);
+    }
+  };
 
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
   };
+
+  if(loading){
+    return <div>Loading...</div> 
+  }
 
   return (
     <BoxWrapper
@@ -50,11 +102,27 @@ const Categories = () => {
       borderColor="border-primary"  
       borderThickness="border-b-4"  
     >
+            <div className="flex flex-1 items-center justify-between m-2 w-full">
+
       <div className="m-2 w-full">
         <Search onSearch={handleSearch} placeholder="Search Categories..." buttonText="Search Categories" />
       </div>
-      <Table columns={columns} data={currentData} sortKey="name" />
-      <div className="flex justify-end mt-4">
+      <div className="mr-2">
+          <Link href="/admin/category/create">
+            <Button
+              color="primary"
+              text="Create Category"
+              onClick={() => { console.log("Hei"); }}
+              icon={<FaPlus />}
+              className="ml-auto"
+              size="large"
+              borderRadius={5}
+            />
+          </Link>
+        </div>
+        </div>
+        <Table columns={columns} data={currentData} onAction={handleAction} />
+        <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

@@ -1,0 +1,313 @@
+{
+  "incidents": [
+    {
+      "id": "1",
+      "region": "Test 1 updated",
+      "respondent_residence": "Test 1",
+      "gender": "male",
+      "age_group": "Test 1",
+      "education": "1",
+      "occupation": "Test 1",
+      "date_of_incidence": "2024-12-08",
+      "location_of_incidence": "Test 1",
+      "incident_happened": {
+        "woreda": "Test 1",
+        "zone": "Test 1"
+      },
+      "category": "1",
+      "source_of_information": "Test source of information"
+    },
+    {
+      "id": "2",
+      "region": "Test 2",
+      "respondent_residence": "Test 2",
+      "gender": "male",
+      "age_group": "Test 2",
+      "education": "1",
+      "occupation": "Test 2",
+      "date_of_incidence": "2024-12-04",
+      "location_of_incidence": "Test 2",
+      "incident_happened": {
+        "woreda": "Test 2",
+        "zone": "Test 2"
+      },
+      "category": "1",
+      "source_of_information": "Test 2"
+    }
+  ],
+  "legalFrameworks": [
+    {
+      "assesementCategory": "Legal Review",
+      "affectedArea": "Economic Impact",
+      "city": "Addis Ababa",
+      "region": "Addis Ababa",
+      "source": "Ministry of Justice",
+      "file": "https://plus.unsplash.com/premium_photo-1664006988924-16f386bcd40e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Ym9va3xlbnwwfHwwfHx8MA%3D%3D",
+      "media": "/home/micky/Downloads/317182772_273211325185347_1136104713921862743_n.mp4",
+      "metrics": "Impact Assessment",
+      "remark": "Initial legal review done, awaiting further investigation.",
+      "impact": "High",
+      "id": "1"
+    },
+    {
+      "assesementCategory": "Policy Analysis",
+      "affectedArea": "Social Welfare",
+      "city": "Gondar",
+      "region": "Amhara",
+      "source": "National Social Welfare Board",
+      "file": "policy_analysis_2.pdf",
+      "media": "/home/micky/Downloads/317182772_273211325185347_1136104713921862743_n.mp4",
+      "metrics": "Risk Assessment",
+      "remark": "Policy gaps identified, drafting new recommendations.",
+      "impact": "Medium",
+      "id": "2"
+    },
+    {
+      "assesementCategory": "Human Rights Compliance",
+      "affectedArea": "Civil Rights",
+      "city": "Bahir Dar",
+      "region": "Amhara",
+      "source": "Human Rights Commission",
+      "file": "human_rights_compliance_3.pdf",
+      "media": "http://example.com/media/audio1.mp3",
+      "metrics": "Compliance Check",
+      "remark": "Ongoing investigations into local human rights violations.",
+      "impact": "Low",
+      "id": "3"
+    },
+    {
+      "assesementCategory": "Regulatory Framework",
+      "affectedArea": "Environmental Protection",
+      "city": "Dire Dawa",
+      "region": "Dire Dawa",
+      "source": "Environmental Protection Agency",
+      "file": "regulatory_framework_4.pdf",
+      "media": "http://example.com/media/report1.pdf",
+      "metrics": "Legal Framework Analysis",
+      "remark": "Drafting new regulations for waste management.",
+      "impact": "High",
+      "id": "4"
+    },
+    {
+      "id": "6",
+      "assesementCategory": "Assessment Category",
+      "affectedArea": "Affected Area",
+      "city": "Addis Ababa",
+      "region": "Oromoia",
+      "source": "",
+      "file": "20230712_100031.heic",
+      "media": "Depositor.mp4",
+      "mediaType": "video",
+      "metrics": "Affected Area",
+      "remark": "This is remark",
+      "impact": ""
+    }
+  ],
+  "socialMediaPosts": [
+    {
+      "assesementCategory": "Legal Consultation",
+      "affectedArea": "Public Health",
+      "city": "Mekelle",
+      "region": "Tigray",
+      "source": "Ministry of Health",
+      "file": null,
+      "media": null,
+      "mediaType": "",
+      "metrics": "Consultation Feedback",
+      "remark": "Legal advice provided for health infrastructure projects.",
+      "impact": "low",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "assesementCategory": "Assessment Category",
+      "affectedArea": "Affected Area",
+      "city": "Addis Ababa",
+      "region": "Oromoia",
+      "source": "",
+      "file": "20230712_100031.heic",
+      "media": "Depositor.mp4",
+      "mediaType": "video",
+      "metrics": "Affected Area",
+      "remark": "This is remark",
+      "impact": ""
+    }
+  ],
+  "authorityDecisions": [
+    {
+      "id": "1",
+      "assesementCategory": "Assessment Category",
+      "affectedArea": "Affected Area",
+      "city": "Addis Ababa",
+      "region": "Oromoia",
+      "source": "",
+      "file": "20230712_100031.heic",
+      "media": "Depositor.mp4",
+      "mediaType": "video",
+      "metrics": "Affected Area",
+      "remark": "This is remark",
+      "impact": ""
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Civic Freedoms",
+      "remark": "Incidents involving vehicles or traffic collisions."
+    },
+    {
+      "id": "2",
+      "name": "Unlawful Government Actions",
+      "remark": "Violent acts occurring within the home, often involving family members."
+    },
+    {
+      "id": "3",
+      "name": "Social Discrimination",
+      "remark": "Dishonest or illegal behavior by public officials or authorities."
+    },
+    {
+      "id": "4",
+      "name": "Media and Digital Rights",
+      "remark": "Incidents involving medical errors, negligence, or accidents in healthcare settings."
+    },
+    {
+      "id": "5",
+      "name": "Civic Freedom, Civic Participation, Unlawful Government Actions",
+      "remark": "Disputes or violent incidents that occur on university or school campuses."
+    },
+    {
+      "id": "6",
+      "name": "Media and Digital Rights, Unlawful Government Actions",
+      "remark": "Incidents where property is stolen or taken without permission."
+    },
+    {
+      "id": "7",
+      "name": "Unlawful Government Actions, Civic Freedoms, Social Discrimination",
+      "remark": "Incidents related to farming activities, crop production, or livestock management."
+    },
+    {
+      "id": "8",
+      "name": "Civic Freedom, Civic Participation, Media and Digital Rights, Social Discrimination, Unlawful Government Actions",
+      "remark": "Cases of cheating, plagiarism, or other dishonest practices in academic settings."
+    },
+    {
+      "id": "9",
+      "name": "Social Discrimination, Unlawful Government Actions",
+      "remark": "Any form of abuse or mistreatment of older individuals."
+    },
+    {
+      "id": "10",
+      "name": "Civic Freedom, Civic Participation, CSO-Enabling",
+      "remark": "Incidents that lead to harm or destruction of the environment, such as pollution or deforestation."
+    }
+  ],
+  "educations": [
+    {
+      "id": "1",
+      "name": "Read and Write",
+      "remark": "I Can Read and write."
+    },
+    {
+      "id": "2",
+      "name": "First Degree",
+      "remark": "I have First Degree."
+    },
+    {
+      "id": "3",
+      "name": "Deploma",
+      "remark": "I have Deploma"
+    },
+    {
+      "id": "4",
+      "name": "Post-graduate Education(MSC,above)",
+      "remark": "Post-graduate and above."
+    },
+    {
+      "id": "5",
+      "name": "Second Degree",
+      "remark": "Second Degree"
+    },
+    {
+      "id": "6",
+      "name": "Secondary Education",
+      "remark": "Secondary Education"
+    },
+    {
+      "id": "7",
+      "name": "Primary Education",
+      "remark": "Primary Education."
+    }
+  ],
+  "occupations": [
+    {
+      "id": "1",
+      "name": "Civil society worker",
+      "remark": "Civil Society Worker."
+    },
+    {
+      "id": "2",
+      "name": "Informal Worker",
+      "remark": "Informal worker."
+    },
+    {
+      "id": "3",
+      "name": "Civil Servant",
+      "remark": "Civil Servant"
+    },
+    {
+      "id": "4",
+      "name": "NGO",
+      "remark": "Non-Governmental Worker."
+    },
+    {
+      "id": "5",
+      "name": "Private Company",
+      "remark": "Private Company"
+    },
+    {
+      "id": "6",
+      "name": "Student,Private",
+      "remark": "Student Private"
+    },
+    {
+      "id": "7",
+      "name": "Trader",
+      "remark": "Trader."
+    },
+    {
+      "id": "8",
+      "name": "Others",
+      "remark": "Others "
+    }
+  ],
+  "regions": [
+    {
+      "id": "1",
+      "name": "North Region",
+      "city": "City A",
+      "lat": 40.7128,
+      "long": -74.006
+    },
+    {
+      "id": "2",
+      "name": "South Region",
+      "city": "City B",
+      "lat": 34.0522,
+      "long": -118.2437
+    },
+    {
+      "id": "3",
+      "name": "East Region",
+      "city": "City C",
+      "lat": 51.5074,
+      "long": -0.1278
+    },
+    {
+      "id": "4",
+      "name": "West Region",
+      "city": "City D",
+      "lat": 48.8566,
+      "long": 2.3522
+    }
+  ]
+}
