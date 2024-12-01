@@ -4,16 +4,8 @@ export async function GET(
 ) {
   try {
     const id = params.id;
-    const numId = Number(id);
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    const authorityDecision = await fetchAuthorityDecision(numId);
+    const authorityDecision = await fetchAuthorityDecision(id);
     return new Response(JSON.stringify(authorityDecision), {
       status: 200,
     });
@@ -34,16 +26,8 @@ export async function DELETE(
 ) {
   try {
     const id = params.id;
-    const numId = Number(id);
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    await deleteAuthorityDecision(numId);
+    await deleteAuthorityDecision(id);
     return new Response(
       JSON.stringify({
         message: `Authority Decision with ID ${id} deleted successfully`,
@@ -88,7 +72,7 @@ export async function PATCH(
     }
 
     const updatedAuthorityDecision = await updateAuthorityDecision(
-      numId,
+      id,
       updatedData
     );
     return new Response(JSON.stringify(updatedAuthorityDecision), {
@@ -105,8 +89,7 @@ export async function PATCH(
   }
 }
 
-// Function to fetch a single authority decision by ID
-async function fetchAuthorityDecision(id: number) {
+async function fetchAuthorityDecision(id: string) {
   try {
     const response = await fetch(
       `http://localhost:5000/authorityDecisions/${id}`
@@ -122,8 +105,7 @@ async function fetchAuthorityDecision(id: number) {
   }
 }
 
-// Function to delete an authority decision by ID
-async function deleteAuthorityDecision(id: number) {
+async function deleteAuthorityDecision(id: string) {
   try {
     const response = await fetch(
       `http://localhost:5000/authorityDecisions/${id}`,
@@ -142,7 +124,7 @@ async function deleteAuthorityDecision(id: number) {
 }
 
 // Function to update an authority decision by ID
-async function updateAuthorityDecision(id: number, updatedData: any) {
+async function updateAuthorityDecision(id: string, updatedData: any) {
   try {
     const response = await fetch(
       `http://localhost:5000/authorityDecisions/${id}`,

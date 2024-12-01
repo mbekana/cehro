@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const { id } = params;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     const category = await fetchCategory(id);
     return NextResponse.json(category, { status: 200 });
@@ -60,10 +58,8 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
       );
     }
 
-    // Parse the body of the request for updated data
     const updatedData = await req.json();
 
-    // Ensure the data to be updated is valid
     if (!updatedData || Object.keys(updatedData).length === 0) {
       return NextResponse.json(
         { error: "No data provided to update" },
