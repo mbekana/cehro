@@ -5,7 +5,6 @@ export async function GET(
   try {
     const id = params.id;
 
-    // No need to convert the id to a number anymore since it's a string
     const category = await fetchCategory(id);
     return new Response(JSON.stringify(category), {
       status: 200,
