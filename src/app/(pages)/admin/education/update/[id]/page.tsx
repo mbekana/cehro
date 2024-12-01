@@ -7,7 +7,7 @@ import Divider from "@/app/components/UI/Divider";
 import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-import { useParams, useRouter } from "next/navigation"; 
+import { useParams } from "next/navigation"; 
 
 type EducationFormData = {
   name: string;
@@ -20,7 +20,6 @@ const UpdateEducationForm = () => {
     name: "",
     remark: "",
   });
-  const router = useRouter();
 
   useEffect(() => {
     const fetchEducationData = async () => {
