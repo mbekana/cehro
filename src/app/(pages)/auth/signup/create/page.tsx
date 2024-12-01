@@ -2,8 +2,7 @@
 
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
-import LogoWithText from "@/app/components/UI/LogoWithText";
-import Link from "next/link";
+
 import { useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
