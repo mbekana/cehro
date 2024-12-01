@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = context.params; // Destructure params from context
+    const { id } = params;
 
     const category = await fetchCategory(id);
     return NextResponse.json(category, { status: 200 });
@@ -19,9 +22,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params; // Destructure params from context
-
-    // Validate if the ID is a non-empty string
+    const { id } = context.params;
     if (!id || id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid ID parameter" },
@@ -48,9 +49,8 @@ export async function DELETE(
 
 export async function PATCH(req: Request, context: { params: { id: string } }) {
   try {
-    const { id } = context.params; // Destructure params from context
+    const { id } = context.params;
 
-    // Ensure the ID is valid (non-empty string)
     if (!id || id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid ID parameter" },
@@ -81,7 +81,6 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
   }
 }
 
-// Function to fetch the category by ID
 async function fetchCategory(id: string) {
   try {
     const response = await fetch(`http://localhost:5000/categories/${id}`);
@@ -95,7 +94,6 @@ async function fetchCategory(id: string) {
   }
 }
 
-// Function to delete a category by ID
 async function deleteCategory(id: string) {
   try {
     const response = await fetch(`http://localhost:5000/categories/${id}`, {
@@ -110,7 +108,6 @@ async function deleteCategory(id: string) {
   }
 }
 
-// Function to update a category by ID
 async function updateCategory(id: string, updatedData: any) {
   try {
     const response = await fetch(`http://localhost:5000/categories/${id}`, {
