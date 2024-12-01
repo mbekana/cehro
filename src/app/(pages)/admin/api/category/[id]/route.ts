@@ -4,7 +4,7 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
-
+    console.log();
     const category = await fetchCategory(id);
     return NextResponse.json(category, { status: 200 });
   } catch (error: any) {

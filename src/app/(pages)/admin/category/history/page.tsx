@@ -74,7 +74,7 @@ const Categories = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/admin/api/civic-space/incident/${id}`);
+      const response = await fetch(`/admin/api/category/${id}`);
 
       if (!response.ok) {
         throw new Error("Failed to delete the incident");

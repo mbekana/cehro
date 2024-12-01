@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "concurrently \"next dev --turbopack\" \"json-server --watch db.json --port 5000\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "json-server":"json-server --watch db.json --port 5000"
+    "json-server": "json-server --watch db.json --port 5000"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.9",
@@ -23,6 +23,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "concurrently": "^9.1.0",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "json-server": "^1.0.0-beta.3",
