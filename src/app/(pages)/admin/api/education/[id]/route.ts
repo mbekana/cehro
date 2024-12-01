@@ -1,9 +1,8 @@
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const id = params.id;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+
     const education = await fetchEducation(id);
     return new Response(JSON.stringify(education), {
       status: 200,
@@ -19,12 +18,10 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const id = params.id;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id || id.trim() === "") {
       return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
@@ -50,12 +47,10 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request) {
   try {
-    const id = params.id;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id || id.trim() === "") {
       return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {

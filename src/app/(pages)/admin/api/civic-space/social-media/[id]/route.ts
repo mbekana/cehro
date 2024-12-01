@@ -1,19 +1,9 @@
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    const socialMediaPost = await fetchSocialMediaPost(numId);
+    const socialMediaPost = await fetchSocialMediaPost(id);
     return new Response(JSON.stringify(socialMediaPost), {
       status: 200,
     });
@@ -28,22 +18,12 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    await deleteSocialMediaPost(numId);
+    await deleteSocialMediaPost(id);
     return new Response(
       JSON.stringify({
         message: `Social Media Post with ID ${id} deleted successfully`,
@@ -61,25 +41,12 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    // Parse the body of the request for update data
     const updatedData = await req.json();
-
-    // Ensure the data to be updated is valid
     if (!updatedData || Object.keys(updatedData).length === 0) {
       return new Response(
         JSON.stringify({ error: "No data provided to update" }),
@@ -87,10 +54,7 @@ export async function PATCH(
       );
     }
 
-    const updatedSocialMediaPost = await updateSocialMediaPost(
-      numId,
-      updatedData
-    );
+    const updatedSocialMediaPost = await updateSocialMediaPost(id, updatedData);
     return new Response(JSON.stringify(updatedSocialMediaPost), {
       status: 200,
     });
@@ -105,8 +69,7 @@ export async function PATCH(
   }
 }
 
-// Function to fetch a single social media post by ID
-async function fetchSocialMediaPost(id: number) {
+async function fetchSocialMediaPost(id: string) {
   try {
     const response = await fetch(
       `http://localhost:5000/socialMediaPosts/${id}`
@@ -122,8 +85,7 @@ async function fetchSocialMediaPost(id: number) {
   }
 }
 
-// Function to delete a social media post by ID
-async function deleteSocialMediaPost(id: number) {
+async function deleteSocialMediaPost(id: string) {
   try {
     const response = await fetch(
       `http://localhost:5000/socialMediaPosts/${id}`,
@@ -141,13 +103,12 @@ async function deleteSocialMediaPost(id: number) {
   }
 }
 
-// Function to update a social media post by ID
-async function updateSocialMediaPost(id: number, updatedData: any) {
+async function updateSocialMediaPost(id: string, updatedData: any) {
   try {
     const response = await fetch(
       `http://localhost:5000/socialMediaPosts/${id}`,
       {
-        method: "PATCH", // Use PATCH or PUT depending on the situation
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

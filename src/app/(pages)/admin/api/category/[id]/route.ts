@@ -45,9 +45,10 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(req: Request) {
   try {
-    const { id } = context.params;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id || id.trim() === "") {
       return NextResponse.json(
