@@ -37,6 +37,24 @@ const SourceOfInformation = () => {
     }
   };
 
+
+  const handleAction = (action: string, row: Record<string, any>) => {
+    console.log('AM here handle action: ', row.id);
+    switch (action) {
+      case 'details':
+        // router.push(`/admin/occupation/detail/${row.id}`);
+        break;
+      case 'update':
+        // router.push(`/admin/occupation/update/${row.id}`);
+        break;
+      case 'delete':
+        // handleDelete(row.id);
+        break;
+      default:
+        break;
+    }
+  };
+
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
   };
@@ -51,7 +69,7 @@ const SourceOfInformation = () => {
       <div className="m-2 w-full">
         <Search onSearch={handleSearch} placeholder="Search Source..." buttonText="Search Source" />
       </div>
-      <Table columns={columns} data={currentData} sortKey="name" />
+      <Table columns={columns} data={currentData} onAction={handleAction} />
       <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
