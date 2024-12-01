@@ -44,7 +44,7 @@ const SocialMediaEdit = () => {
   useEffect(() => {
     if (id) {
       setRouterLoaded(true);
-      fetchSocialMediaData(id);  
+      fetchSocialMediaData(Array.isArray(id) ? id[0] : id);  
     }
   }, [id]);  // Depend on `id`
 

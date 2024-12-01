@@ -13,7 +13,6 @@ const IncidentDetail = () => {
 
   useEffect(() => {
     if (id) {
-      // Ensure id is treated as a string
       fetchIncident(Array.isArray(id) ? id[0] : id);
     }
   }, [id]);
