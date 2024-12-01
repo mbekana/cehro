@@ -1,9 +1,7 @@
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const id = params.id;
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
     if (!id || typeof id !== "string" || id.trim() === "") {
       return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
         status: 400,

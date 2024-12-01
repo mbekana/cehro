@@ -1,19 +1,9 @@
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    const legalFramework = await fetchLegalFramework(numId);
+    const legalFramework = await fetchLegalFramework(id);
     return new Response(JSON.stringify(legalFramework), {
       status: 200,
     });
@@ -28,22 +18,12 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
-
-    await deleteLegalFramework(numId);
+    await deleteLegalFramework(id);
     return new Response(
       JSON.stringify({
         message: `Legal Framework with ID ${id} deleted successfully`,
@@ -61,20 +41,10 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request) {
   try {
-    const id = params.id;
-    const numId = Number(id);
-
-    // Validate if the ID is a number
-    if (isNaN(numId)) {
-      return new Response(JSON.stringify({ error: "Invalid ID parameter" }), {
-        status: 400,
-      });
-    }
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     // Parse the body of the request for update data
     const updatedData = await req.json();
@@ -87,10 +57,7 @@ export async function PATCH(
       );
     }
 
-    const updatedLegalFramework = await updateLegalFramework(
-      numId,
-      updatedData
-    );
+    const updatedLegalFramework = await updateLegalFramework(id, updatedData);
     return new Response(JSON.stringify(updatedLegalFramework), {
       status: 200,
     });
@@ -105,8 +72,7 @@ export async function PATCH(
   }
 }
 
-// Function to fetch a single legal framework by ID
-async function fetchLegalFramework(id: number) {
+async function fetchLegalFramework(id: string) {
   try {
     const response = await fetch(`http://localhost:5000/legalFrameworks/${id}`);
     if (!response.ok) {
@@ -120,8 +86,7 @@ async function fetchLegalFramework(id: number) {
   }
 }
 
-// Function to delete a legal framework by ID
-async function deleteLegalFramework(id: number) {
+async function deleteLegalFramework(id: string) {
   try {
     const response = await fetch(
       `http://localhost:5000/legalFrameworks/${id}`,
@@ -139,13 +104,12 @@ async function deleteLegalFramework(id: number) {
   }
 }
 
-// Function to update a legal framework by ID
-async function updateLegalFramework(id: number, updatedData: any) {
+async function updateLegalFramework(id: string, updatedData: any) {
   try {
     const response = await fetch(
       `http://localhost:5000/legalFrameworks/${id}`,
       {
-        method: "PATCH", // Use PATCH or PUT depending on the situation
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
