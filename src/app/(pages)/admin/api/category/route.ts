@@ -1,5 +1,3 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
 export async function GET() {
   try {
     const categories = await fetchAllCategories();
@@ -46,6 +44,8 @@ export async function POST(req: Request) {
 // Function to fetch all categories
 async function fetchAllCategories() {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
     const response = await fetch(`${apiUrl}/categories`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
@@ -60,6 +60,8 @@ async function fetchAllCategories() {
 // Function to create a new category
 async function createCategory(newCategory: any) {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
     const response = await fetch(`${apiUrl}/categories`, {
       method: "POST",
       headers: {

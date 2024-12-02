@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET(req: Request) {
   try {
@@ -79,6 +78,7 @@ export async function PATCH(req: Request) {
 
 async function fetchCategory(id: string) {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await fetch(`${apiUrl}/categories/${id}`, {
       method: "GET",
     });
@@ -95,6 +95,7 @@ async function fetchCategory(id: string) {
 
 async function deleteCategory(id: string) {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await fetch(`${apiUrl}/categories/${id}`, {
       method: "DELETE",
     });
@@ -109,6 +110,7 @@ async function deleteCategory(id: string) {
 
 async function updateCategory(id: string, updatedData: any) {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await fetch(`${apiUrl}/categories/${id}`, {
       method: "PATCH",
       headers: {
