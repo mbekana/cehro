@@ -7,13 +7,9 @@ import Table from '@/app/components/UI/Table';
 import Pagination from '@/app/components/UI/Pagination';
 import Search from '@/app/components/UI/Search';
 import { useRouter } from "next/navigation";
+import { Impact } from '@/app/model/Impact';
 
 
-export class Impact{
-  id?:string;
-  name?:string;
-  remark?:string
-}
 
 const columns: (keyof Impact)[] = ['id', 'name', 'remark'];
 
@@ -69,7 +65,7 @@ const Impacts = () => {
         router.push(`/admin/impact/update/${row.id}`);
         break;
       case 'delete':
-        handleDelete(row.id); // Delete action
+        handleDelete(row.id);
         break;
       default:
         break;

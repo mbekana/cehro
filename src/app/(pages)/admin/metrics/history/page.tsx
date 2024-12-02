@@ -8,12 +8,9 @@ import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
 
 import { useRouter } from "next/navigation";
+import { Metrics } from "@/app/model/Metrics";
 
-export class Metrics {
-  id: number;
-  name: string;
-  remark: string;
-}
+
 
 const columns: (keyof Metrics)[] = ["id", "name", "remark"];
 
