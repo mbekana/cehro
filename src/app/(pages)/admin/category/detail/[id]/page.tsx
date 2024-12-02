@@ -23,7 +23,9 @@ const CategoryDetailsPage = () => {
     if (id) {
       const fetchCategoryData = async () => {
         try {
-          const response = await fetch(`/admin/api/category/${id}`);
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+          const response = await fetch(`${apiUrl}/${id}`);
           if (response.ok) {
             const data = await response.json();
             setCategory(data);
