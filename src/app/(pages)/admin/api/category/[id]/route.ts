@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 
+// Handles GET requests to fetch a category by ID from the URL path
 export async function GET(req: Request) {
   try {
-    const url = new URL(req.url);
-    const id = url.searchParams.get("id");
-    console.log(" url.searchParams. ", url.searchParams.get("id"));
+    // Extract the ID directly from the URL path
+    const { pathname } = new URL(req.url);
+    const segments = pathname.split("/"); // Split the path into segments
+    const id = segments[segments.length - 1]; // The last segment is the ID
+    console.log("ID from URL path: ", id);
+
     const category = await fetchCategory(id);
     return NextResponse.json(category, { status: 200 });
   } catch (error: any) {
@@ -15,10 +19,14 @@ export async function GET(req: Request) {
   }
 }
 
+// Handles DELETE requests to delete a category by ID from the URL path
 export async function DELETE(req: Request) {
   try {
-    const url = new URL(req.url);
-    const id = url.searchParams.get("id");
+    // Extract the ID from the URL path in the same way
+    const { pathname } = new URL(req.url);
+    const segments = pathname.split("/");
+    const id = segments[segments.length - 1];
+
     if (!id || id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid ID parameter" },
@@ -43,10 +51,13 @@ export async function DELETE(req: Request) {
   }
 }
 
+// Handles PATCH requests to update a category by ID from the URL path
 export async function PATCH(req: Request) {
   try {
-    const url = new URL(req.url);
-    const id = url.searchParams.get("id");
+    // Extract the ID from the URL path
+    const { pathname } = new URL(req.url);
+    const segments = pathname.split("/");
+    const id = segments[segments.length - 1];
 
     if (!id || id.trim() === "") {
       return NextResponse.json(
@@ -85,7 +96,6 @@ async function fetchCategory(id: string) {
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
-    console.log("Response: ", response.json());
     return response.json();
   } catch (error) {
     console.error("Error fetching category:", error);

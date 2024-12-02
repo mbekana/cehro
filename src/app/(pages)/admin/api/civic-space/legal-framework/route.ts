@@ -41,7 +41,9 @@ export async function POST(req: Request) {
 
 // Helper functions
 async function fetchAllIncidents() {
-  const response = await fetch("http://localhost:5000/legalFrameworks");
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const response = await fetch(`${apiUrl}/legalFrameworks`);
   if (!response.ok) {
     throw new Error("Failed to fetch data from the server");
   }
@@ -49,7 +51,9 @@ async function fetchAllIncidents() {
 }
 
 async function createIncident(newIncident: any) {
-  const response = await fetch("http://localhost:5000/legalFrameworks", {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const response = await fetch(`${apiUrl}/legalFrameworks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
