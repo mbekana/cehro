@@ -34,8 +34,6 @@ const CategoryForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Start submitting process
     setIsSubmitting(true);
     setResponseMessage(null);
 
@@ -90,7 +88,7 @@ const CategoryForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
@@ -136,6 +134,7 @@ const CategoryForm = () => {
           size="large"
           elevation={4}
           disabled={isSubmitting}
+          onClick={handleSubmit}
         />
       </div>
     </div>
