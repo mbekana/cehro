@@ -108,7 +108,7 @@ const UpdateCategory = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
@@ -145,6 +145,7 @@ const UpdateCategory = () => {
           text="Update Category"
           size="large"
           elevation={4}
+          onClick={handleSubmit}
         />
       </div>
     </div>
