@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
-    console.log();
+    console.log(" url.searchParams. ", url.searchParams.get("id"));
     const category = await fetchCategory(id);
     return NextResponse.json(category, { status: 200 });
   } catch (error: any) {
@@ -78,10 +79,13 @@ export async function PATCH(req: Request) {
 
 async function fetchCategory(id: string) {
   try {
-    const response = await fetch(`http://localhost:5000/categories/${id}`);
+    const response = await fetch(`${apiUrl}/categories/${id}`, {
+      method: "GET",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
+    console.log("Response: ", response.json());
     return response.json();
   } catch (error) {
     console.error("Error fetching category:", error);
@@ -91,7 +95,7 @@ async function fetchCategory(id: string) {
 
 async function deleteCategory(id: string) {
   try {
-    const response = await fetch(`http://localhost:5000/categories/${id}`, {
+    const response = await fetch(`${apiUrl}/categories/${id}`, {
       method: "DELETE",
     });
     if (!response.ok) {
@@ -105,7 +109,7 @@ async function deleteCategory(id: string) {
 
 async function updateCategory(id: string, updatedData: any) {
   try {
-    const response = await fetch(`http://localhost:5000/categories/${id}`, {
+    const response = await fetch(`${apiUrl}/categories/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

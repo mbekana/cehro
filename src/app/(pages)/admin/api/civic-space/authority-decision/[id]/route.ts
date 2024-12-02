@@ -76,7 +76,7 @@ export async function PATCH(req: Request) {
 async function fetchAuthorityDecision(id: string) {
   try {
     const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`
+      `https://cehro-backend.onrender.com/authorityDecisions/${id}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
@@ -92,7 +92,7 @@ async function fetchAuthorityDecision(id: string) {
 async function deleteAuthorityDecision(id: string) {
   try {
     const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`,
+      `https://cehro-backend.onrender.com/authorityDecisions/${id}`,
       {
         method: "DELETE",
       }
@@ -110,7 +110,7 @@ async function deleteAuthorityDecision(id: string) {
 async function updateAuthorityDecision(id: string, updatedData: any) {
   try {
     const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`,
+      `https://cehro-backend.onrender.com/authorityDecisions/${id}`,
       {
         method: "PATCH",
         headers: {

@@ -49,7 +49,9 @@ export async function POST(req: Request) {
 // Function to fetch all authority decisions
 async function fetchAllAuthorityDecisions() {
   try {
-    const response = await fetch("http://localhost:5000/authorityDecisions");
+    const response = await fetch(
+      "https://cehro-backend.onrender.com/authorityDecisions"
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -63,13 +65,16 @@ async function fetchAllAuthorityDecisions() {
 // Function to create a new authority decision
 async function createAuthorityDecision(newAuthorityDecision: any) {
   try {
-    const response = await fetch("http://localhost:5000/authorityDecisions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newAuthorityDecision),
-    });
+    const response = await fetch(
+      "https://cehro-backend.onrender.com/authorityDecisions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newAuthorityDecision),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to create authority decision");

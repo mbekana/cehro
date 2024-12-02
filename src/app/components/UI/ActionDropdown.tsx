@@ -14,7 +14,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ onAction }) => {
   };
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 bg-gray-100 border rounded text-sm focus:outline-none flex items-center"
