@@ -76,7 +76,9 @@ const { id } = useParams();
     const updatedUser = { firstName, lastName, username, email, phoneNumber };
 
     try {
-      const response = await fetch(`/api/users/${id}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -84,6 +86,7 @@ const { id } = useParams();
         body: JSON.stringify(updatedUser),
       });
 
+      
       const data = await response.json();
 
       if (response.ok) {
