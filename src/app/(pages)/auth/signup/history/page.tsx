@@ -1,201 +1,69 @@
-"use client"
+"use client";
 
-import { FaExclamationTriangle } from 'react-icons/fa';
-import BoxWrapper from '@/app/components/UI/BoxWrapper';
-import Table from '@/app/components/UI/Table';
-import { Incident } from '@/app/model/IncidentModel';
-import { useState } from 'react';
-import Pagination from '@/app/components/UI/Pagination';
-import Search from '@/app/components/UI/Search';
-const incidentsData = [
-  {
-    "region": "Addis Ababa",
-    "residence": "Bole",
-    "gender": "Male",
-    "age_group": "25-34",
-    "education": "Bachelor's Degree",
-    "occupation": "Engineer",
-    "date": "2024-10-01T08:30:00Z",
-    "location": "Bole Medhanialem",
-    "incident_happened": {
-      "woreda": "Bole 1",
-      "zone": "Addis Ketema"
-    },
-    "category": "Road Accident",
-    "source_of_information": "Police Report"
-  },
-  {
-    "region": "Oromia",
-    "residence": "Adama",
-    "gender": "Female",
-    "age_group": "35-44",
-    "education": "High School",
-    "occupation": "Teacher",
-    "date": "2024-09-22T15:00:00Z",
-    "location": "Adama City",
-    "incident_happened": {
-      "woreda": "Adama 3",
-      "zone": "East Shewa"
-    },
-    "category": "Domestic Violence",
-    "source_of_information": "Witness"
-  },
-  {
-    "region": "Amhara",
-    "residence": "Bahir Dar",
-    "gender": "Male",
-    "age_group": "18-24",
-    "education": "Diploma",
-    "occupation": "Student",
-    "date": "2024-10-05T10:45:00Z",
-    "location": "Bahir Dar University",
-    "incident_happened": {
-      "woreda": "Bahir Dar 2",
-      "zone": "Western Gojjam"
-    },
-    "category": "Campus Conflict",
-    "source_of_information": "Peer"
-  },
-  {
-    "region": "Tigray",
-    "residence": "Mekelle",
-    "gender": "Female",
-    "age_group": "45-54",
-    "education": "Master's Degree",
-    "occupation": "Government Employee",
-    "date": "2024-08-15T12:00:00Z",
-    "location": "Mekelle City",
-    "incident_happened": {
-      "woreda": "Mekelle 1",
-      "zone": "Central Zone"
-    },
-    "category": "Corruption",
-    "source_of_information": "Public Announcement"
-  },
-  {
-    "region": "Sidama",
-    "residence": "Hawassa",
-    "gender": "Male",
-    "age_group": "55-64",
-    "education": "Primary School",
-    "occupation": "Farmer",
-    "date": "2024-07-20T14:30:00Z",
-    "location": "Hawassa City",
-    "incident_happened": {
-      "woreda": "Hawassa 1",
-      "zone": "Sidama Zone"
-    },
-    "category": "Agricultural Incident",
-    "source_of_information": "Family Member"
-  },
-  {
-    "region": "SNNPR",
-    "residence": "Jima",
-    "gender": "Female",
-    "age_group": "35-44",
-    "education": "Bachelor's Degree",
-    "occupation": "Healthcare Worker",
-    "date": "2024-09-10T17:00:00Z",
-    "location": "Jima Town",
-    "incident_happened": {
-      "woreda": "Jima 2",
-      "zone": "Jimma Zone"
-    },
-    "category": "Healthcare Incident",
-    "source_of_information": "Healthcare Provider"
-  },
-  {
-    "region": "Gambela",
-    "residence": "Gambela City",
-    "gender": "Male",
-    "age_group": "18-24",
-    "education": "Secondary School",
-    "occupation": "Unemployed",
-    "date": "2024-08-30T09:00:00Z",
-    "location": "Gambela City Center",
-    "incident_happened": {
-      "woreda": "Gambela 1",
-      "zone": "Gambela Zone"
-    },
-    "category": "Theft",
-    "source_of_information": "Police Report"
-  },
-  {
-    "region": "Benishangul-Gumuz",
-    "residence": "Asosa",
-    "gender": "Female",
-    "age_group": "45-54",
-    "education": "No Formal Education",
-    "occupation": "Housewife",
-    "date": "2024-06-12T11:30:00Z",
-    "location": "Asosa Town",
-    "incident_happened": {
-      "woreda": "Asosa 1",
-      "zone": "Asosa Zone"
-    },
-    "category": "Domestic Violence",
-    "source_of_information": "Family Member"
-  },
-  {
-    "region": "Harari",
-    "residence": "Harar",
-    "gender": "Male",
-    "age_group": "25-34",
-    "education": "Doctorate",
-    "occupation": "Professor",
-    "date": "2024-09-18T13:30:00Z",
-    "location": "Harar University",
-    "incident_happened": {
-      "woreda": "Harar 2",
-      "zone": "Harari Zone"
-    },
-    "category": "Academic Fraud",
-    "source_of_information": "Academic Colleague"
-  },
-  {
-    "region": "Dire Dawa",
-    "residence": "Dire Dawa City",
-    "gender": "Female",
-    "age_group": "65+",
-    "education": "Master's Degree",
-    "occupation": "Retired",
-    "date": "2024-10-02T16:15:00Z",
-    "location": "Dire Dawa City Center",
-    "incident_happened": {
-      "woreda": "Dire Dawa 3",
-      "zone": "Dire Dawa Zone"
-    },
-    "category": "Elder Abuse",
-    "source_of_information": "Social Worker"
-  }
-]
+import React, { useEffect, useState } from "react";
+import { FaUsers } from "react-icons/fa";
+import BoxWrapper from "@/app/components/UI/BoxWrapper";
+import Table from "@/app/components/UI/Table";
+import Pagination from "@/app/components/UI/Pagination";
+import Search from "@/app/components/UI/Search";
+import { useRouter } from "next/navigation";
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  gender: string;
+  role: string;
+  status: string;
+  lastLogin: string;
+};
 
-const columns: (keyof Incident)[] = [
-  'region',
-  'residence',
-  'gender',
-  'age_group',
-  'education',
-  'occupation',
-  'date',
-  'location',
-  'incident_happened',
-  'category',
-  'source_of_information',
+const columns: (keyof User)[] = [
+  "id",
+  "name",
+  "email",
+  "gender",
+  "role",
 ];
-const UserList = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5; 
-  const totalPages = Math.ceil(incidentsData.length / rowsPerPage);
 
-  const currentData = incidentsData.slice(
+const UserList = () => {
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const rowsPerPage = 5;
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/users`);
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        setError("Failed to fetch users");
+      }
+    } catch (err) {
+      setError(`Error fetching users: ${err}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalPages = Math.ceil(users.length / rowsPerPage);
+  const currentData = users.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);  
+      setCurrentPage(page);
     }
   };
 
@@ -203,43 +71,75 @@ const UserList = () => {
     console.log("Searching for:", query);
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/users/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the incident");
+      }
+      console.log(`Incident with id ${id} deleted successfully`);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error deleting the incident: ", error);
+    }
+  };
+
   const handleAction = (action: string, row: Record<string, any>) => {
-    console.log('AM here handle action: ', row.id);
-    // switch (action) {
-    //   case 'details':
-    //     router.push(`/admin/education/detail/${row.id}`);
-    //     break;
-    //   case 'update':
-    //     router.push(`/admin/education/update/${row.id}`);
-    //     break;
-    //   case 'delete':
-    //     handleDelete(row.id); // Delete action
-    //     break;
-    //   default:
-    //     break;
-    // }
+    console.log("AM here handle action: ", row.id);
+    switch (action) {
+      case "details":
+        router.push(`/auth/signup/detail/${row.id}`);
+        break;
+      case "update":
+        router.push(`/auth/signup/update/${row.id}`);
+        break;
+      case "delete":
+        handleDelete(row.id); // Delete action
+        break;
+      default:
+        break;
+    }
   };
 
 
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <BoxWrapper
-      icon={<FaExclamationTriangle />}  
-      title="Incidents"  
-      borderColor="border-primary"  
-      borderThickness="border-b-4" 
+      icon={<FaUsers />}
+      title="Users"
+      borderColor="border-primary"
+      borderThickness="border-b-4"
     >
-        <div className="m-2 w-full">
-      <Search onSearch={handleSearch} placeholder="Search Incidents..." buttonText="Search Incidents" />
+      <div className="m-2 w-full">
+        <Search
+          onSearch={handleSearch}
+          placeholder="Search Users..."
+          buttonText="Search Users"
+        />
       </div>
-      <Table columns={columns} data={currentData} onAction={handleAction}/> 
-      <div className="flex justify-end mt-4">
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-      </div>
+
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <div className="flex justify-end mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
+      )}
     </BoxWrapper>
   );
 };
