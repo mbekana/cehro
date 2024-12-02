@@ -1,16 +1,15 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react";
-import { FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
-
 import { useRouter } from "next/navigation";
 import { Metrics } from "@/app/model/Metrics";
-
-
+import Link from "next/link";
+import Button from "@/app/components/UI/Button";
 
 const columns: (keyof Metrics)[] = ["id", "name", "remark"];
 
@@ -104,34 +103,44 @@ const Metricses = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
-        <div className="m-2 w-full">
+      <div className="flex items-center justify-between m-4">
+        <div className="flex items-center space-x-4 w-full">
           <Search
             onSearch={handleSearch}
             placeholder="Search Metrics..."
             buttonText="Search Metrics"
           />
-        </div>
-
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <>
-            <Table
-              columns={columns}
-              data={currentData}
-              onAction={handleAction}
+          <Link href="/admin/metrics/create">
+            <Button
+              color="primary"
+              text="Create Metrics"
+              onClick={() => { console.log(""); }}
+              icon={<FaPlus />}
+              size="large"
+              borderRadius={5}
             />
-            <div className="flex justify-end mt-4">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          </>
-        )}
+          </Link>
+        </div>
       </div>
+
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <Table
+            columns={columns}
+            data={currentData}
+            onAction={handleAction}
+          />
+          <div className="flex justify-end mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
+      )}
     </BoxWrapper>
   );
 };

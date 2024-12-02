@@ -131,16 +131,18 @@ const LegalFrameworkForm = () => {
     };
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
       const response = id
-        ? await fetch(`http://localhost:5000/legalFrameworks/${id}`, {
-            method: "PUT", // Use PUT for updating
+        ? await fetch(`${apiUrl}/legalFrameworks/${id}`, {
+            method: "PUT", 
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(formPayload),
           })
-        : await fetch("http://localhost:5000/legalFrameworks", {
-            method: "POST", // Use POST for creating new entry
+        : await fetch(`${apiUrl}/legalFrameworks`, {
+            method: "POST", 
             headers: {
               "Content-Type": "application/json",
             },

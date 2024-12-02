@@ -67,17 +67,6 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       icon: <FaUserShield />, 
     },
     {
-      label: "Metrics",
-      href: "/admin/metrics/history",
-      icon: <FaChartBar />, 
-    },
-
-    {
-      label: "Impact Levels",
-      href: "/admin/impact/history",
-      icon: <FaFire />, 
-    },
-    {
       label: "Source",
       href: "/admin/source/history",
       icon: <FaInfoCircle />, 
@@ -98,6 +87,17 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         { label: "User Role", href: "/admin/role/create", icon: <FaEdit /> },
         { label: "Source", href: "/admin/source/create", icon: <FaEdit /> },
         { label: "Occupations", href: "/admin/occupation/create", icon: <FaEdit /> },
+        {
+          label: "Metrics",
+          href: "/admin/metrics/history",
+          icon: <FaChartBar />, 
+        },
+    
+        {
+          label: "Impact Levels",
+          href: "/admin/impact/history",
+          icon: <FaFire />, 
+        },
       ],
     },
   ];

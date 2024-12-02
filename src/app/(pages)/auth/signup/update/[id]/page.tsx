@@ -2,23 +2,48 @@
 
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaUserPlus } from "react-icons/fa";
+import { FaUserEdit } from "react-icons/fa";
+import { useParams } from "next/navigation";
 
-const SignupPage: React.FC = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
+
+const UpdateUserPage = () => {
+const { id } = useParams();
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`/api/users/${id}`);
+        const data = await response.json();
+        if (response.ok) {
+          setFirstName(data.firstName);
+          setLastName(data.lastName);
+          setUsername(data.username);
+          setEmail(data.email);
+          setPhoneNumber(data.phoneNumber);
+        } else {
+          setError("Failed to fetch user data.");
+        }
+      } catch (error) {
+        console.log(error)
+        setError("Error fetching user data.");
+      }
+    };
+
+    fetchUserData();
+  }, [id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,12 +60,6 @@ const SignupPage: React.FC = () => {
       case "email":
         setEmail(value);
         break;
-      case "password":
-        setPassword(value);
-        break;
-      case "confirmPassword":
-        setConfirmPassword(value);
-        break;
       case "phoneNumber":
         setPhoneNumber(value);
         break;
@@ -49,40 +68,29 @@ const SignupPage: React.FC = () => {
     }
   };
 
-  const handleSignup = async () => {
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
+  const handleUpdate = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    const userData = { firstName, lastName, username, email, password, phoneNumber };
+    const updatedUser = { firstName, lastName, username, email, phoneNumber };
 
     try {
-      const response = await fetch("/api/signup", {
-        method: "POST",
+      const response = await fetch(`/api/users/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(updatedUser),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("User created successfully!");
-        setFirstName("");
-        setLastName("");
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setPhoneNumber("");
+        setSuccess("User updated successfully!");
+        setFirstName(""); setLastName(""); setUsername(""); setEmail(""); setPhoneNumber("");
       } else {
-        setError(data.message || "An error occurred during signup.");
+        setError(data.message || "An error occurred while updating the user.");
       }
     } catch (err) {
       setError(`${err}`);
@@ -94,13 +102,13 @@ const SignupPage: React.FC = () => {
   return (
     <div className="bg-gray-100">
       <BoxWrapper
-        icon={<FaUserPlus />}
-        title="User Signup"
+        icon={<FaUserEdit />}
+        title="Update User"
         borderColor="border-primary"
         borderThickness="border-b-4"
       >
         <Card
-          title="Create Your Account"
+          title="Update Your Account Information"
           borderColor="border-primary"
           borderThickness="border-1"
           bgColor="bg-white"
@@ -112,7 +120,7 @@ const SignupPage: React.FC = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+          <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <Input
                 type="text"
@@ -143,20 +151,6 @@ const SignupPage: React.FC = () => {
                 onChange={handleInputChange}
               />
               <Input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                name="password"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                name="confirmPassword"
-                onChange={handleInputChange}
-              />
-              <Input
                 type="text"
                 placeholder="Enter your phone number"
                 value={phoneNumber}
@@ -169,9 +163,9 @@ const SignupPage: React.FC = () => {
             <div className="mt-4 flex justify-between">
               <Button
                 color="primary"
-                text={loading ? "Creating..." : "Create User"}
+                text={loading ? "Updating..." : "Update User"}
                 elevation={3}
-                onClick={handleSignup}
+                onClick={handleUpdate}
                 disabled={loading}
               />
             </div>
@@ -185,4 +179,4 @@ const SignupPage: React.FC = () => {
   );
 };
 
-export default SignupPage;
+export default UpdateUserPage;

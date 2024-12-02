@@ -310,8 +310,19 @@
       "long": 2.3522
     }
   ],
-  "roles":[{"id":"1", "name":"DATA_OFFICER", "remark":"This role is for data officers"}, {"id":"1", "name":"DATA_MANAGER", "remark":"This role is for data officers"}],
-  "sources":[
+  "roles": [
+    {
+      "id": "1",
+      "name": "DATA_OFFICER",
+      "remark": "This role is for data officers"
+    },
+    {
+      "id": "1",
+      "name": "DATA_MANAGER",
+      "remark": "This role is for data officers"
+    }
+  ],
+  "sources": [
     {
       "id": 1,
       "name": "I observed the incident my self",
@@ -353,8 +364,50 @@
       "remark": "Other sources."
     }
   ],
-  "users": [],
-  "metrics":[
+  "users": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "johndoe",
+      "email": "johndoe@example.com",
+      "phoneNumber": "+1234567890"
+    },
+    {
+      "id": 2,
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "username": "janesmith",
+      "email": "janesmith@example.com",
+      "phoneNumber": "+0987654321"
+    },
+    {
+      "id": 3,
+      "firstName": "Emily",
+      "lastName": "Johnson",
+      "username": "emilyj",
+      "email": "emilyj@example.com",
+      "phoneNumber": "+1122334455"
+    },
+    {
+      "id": 4,
+      "firstName": "Michael",
+      "lastName": "Williams",
+      "username": "michaelw",
+      "email": "michaelw@example.com",
+      "phoneNumber": "+1222333444"
+    },
+    {
+      "id": 5,
+      "firstName": "Sarah",
+      "lastName": "Brown",
+      "username": "sarahb",
+      "email": "sarahb@example.com",
+      "phoneNumber": "+1333444555"
+    }
+  ]
+  ,
+  "metrics": [
     {
       "id": 1,
       "name": "Sales Growth",
@@ -375,7 +428,32 @@
       "name": "Employee Retention",
       "remark": "This metric measures the percentage of employees staying with the company."
     }
+  ],
+  "impacts": [
+    {
+      "id": 1,
+      "name": "Health Improvement Program",
+      "remark": "Aimed at reducing the prevalence of preventable diseases in rural areas by providing free healthcare services."
+    },
+    {
+      "id": 2,
+      "name": "Tree Plantation Initiative",
+      "remark": "A project focused on reducing carbon emissions by planting trees in urban and suburban areas."
+    },
+    {
+      "id": 3,
+      "name": "Solar Energy Adoption",
+      "remark": "A business initiative to transition factories to solar energy, reducing operational costs and carbon footprint."
+    },
+    {
+      "id": 4,
+      "name": "Educational Access for Children",
+      "remark": "A program designed to provide underprivileged children with access to quality education, especially in remote areas."
+    },
+    {
+      "id": 5,
+      "name": "Waste Reduction Campaign",
+      "remark": "A campaign to reduce single-use plastics and encourage recycling in local communities, contributing to a cleaner environment."
+    }
   ]
-  
-  
 }
