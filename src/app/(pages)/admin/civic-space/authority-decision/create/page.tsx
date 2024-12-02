@@ -83,7 +83,9 @@ const AuthorityDecisionForm = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/authority-decisions", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/authorityDecisions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

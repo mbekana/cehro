@@ -20,7 +20,8 @@ const IncidentDetail = () => {
   const fetchIncident = async (id: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/civic-space/incident/${id}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/incidents${id}`, {method:'GET'});
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data)

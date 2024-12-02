@@ -124,15 +124,16 @@ const UpdateAuthorityDecision = () => {
     };
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = id
-        ? await fetch(`http://localhost:5000/authorityDecisions/${id}`, {
+        ? await fetch(`${apiUrl}/authorityDecisions/authorityDecisions/${id}`, {
             method: "PUT", 
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(formPayload),
           })
-        : await fetch("http://localhost:5000/authorityDecisions", {
+        : await fetch(`${apiUrl}/authorityDecisions`, {
             method: "POST", 
             headers: {
               "Content-Type": "application/json",

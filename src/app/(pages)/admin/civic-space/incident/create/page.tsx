@@ -69,7 +69,8 @@ const IncidentForm = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/admin/api/civic-space/incident", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/incidents`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

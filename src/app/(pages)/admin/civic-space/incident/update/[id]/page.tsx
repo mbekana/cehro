@@ -101,7 +101,8 @@ const UpdateIncidentForm = () => {
     }
 
     try {
-      const response = await fetch(`/admin/api/civic-space/incident/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/incidents/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -29,7 +29,7 @@ const UpdateCategory = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/categories/${id}`);
+          const response = await fetch(`${apiUrl}/categories/${id}`, {method:'PATCH'});
           if (!response.ok) {
             throw new Error("Failed to fetch category");
           }

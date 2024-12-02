@@ -33,7 +33,8 @@ const AuthorityDecisionDetail = () => {
     const fetchAuthorityDecisionData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/admin/api/civic-space/authority-decision/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'GET'});
         if (response.ok) {
           const data: AuthorityDecisionData = await response.json();
           setAuthorityDecision(data);
