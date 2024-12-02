@@ -72,7 +72,9 @@ export async function PATCH(req: Request) {
 
 async function fetchLegalFramework(id: string) {
   try {
-    const response = await fetch(`http://localhost:5000/legalFrameworks/${id}`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -86,12 +88,11 @@ async function fetchLegalFramework(id: string) {
 
 async function deleteLegalFramework(id: string) {
   try {
-    const response = await fetch(
-      `http://localhost:5000/legalFrameworks/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
+      method: "DELETE",
+    });
 
     if (!response.ok) {
       throw new Error("Failed to delete legal framework");
@@ -104,16 +105,15 @@ async function deleteLegalFramework(id: string) {
 
 async function updateLegalFramework(id: string, updatedData: any) {
   try {
-    const response = await fetch(
-      `http://localhost:5000/legalFrameworks/${id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      }
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to update legal framework");
