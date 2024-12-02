@@ -10,6 +10,15 @@ import { FaUserEdit } from "react-icons/fa";
 import { useParams } from "next/navigation";
 
 
+interface User {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    phoneNumber: string;
+  }
+  
+
 const UpdateUserPage = () => {
 const { id } = useParams();
   const [firstName, setFirstName] = useState<string>("");
@@ -20,19 +29,24 @@ const { id } = useParams();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null); 
 
   
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/users/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        const response = await fetch(`${apiUrl}/users/${id}`);
         const data = await response.json();
         if (response.ok) {
-          setFirstName(data.firstName);
-          setLastName(data.lastName);
-          setUsername(data.username);
-          setEmail(data.email);
-          setPhoneNumber(data.phoneNumber);
+         setUser(data);  
+
+          setFirstName(user.firstName);
+          setLastName(user.lastName);
+          setUsername(user.username);
+          setEmail(user.email);
+          setPhoneNumber(user.phoneNumber);
         } else {
           setError("Failed to fetch user data.");
         }
