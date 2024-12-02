@@ -38,7 +38,7 @@ const CategoryForm = () => {
     setResponseMessage(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL; // External API URL
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
 
       const response = await fetch(`${apiUrl}/categories`, {
         method: "POST",

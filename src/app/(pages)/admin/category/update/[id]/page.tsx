@@ -62,7 +62,8 @@ const UpdateCategory = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/admin/api/category/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
+      const response = await fetch(`${apiUrl}/categories/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
