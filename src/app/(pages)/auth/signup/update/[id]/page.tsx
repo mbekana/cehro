@@ -25,7 +25,7 @@ const { id } = useParams();
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/users/${id}`);
+        const response = await fetch(`/users/${id}`);
         const data = await response.json();
         if (response.ok) {
           setFirstName(data.firstName);
