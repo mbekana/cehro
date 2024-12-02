@@ -25,7 +25,7 @@ const CategoryDetailsPage = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/${id}`);
+          const response = await fetch(`${apiUrl}/categories/${id}`);
           if (response.ok) {
             const data = await response.json();
             setCategory(data);

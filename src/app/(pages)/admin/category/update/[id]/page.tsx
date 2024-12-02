@@ -27,7 +27,9 @@ const UpdateCategory = () => {
     if (id) {
       const fetchCategoryData = async () => {
         try {
-          const response = await fetch(`/admin/api/category/${id}`);
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+          const response = await fetch(`${apiUrl}/categories/${id}`);
           if (!response.ok) {
             throw new Error("Failed to fetch category");
           }
