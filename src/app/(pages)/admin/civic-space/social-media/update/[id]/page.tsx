@@ -128,8 +128,10 @@ const SocialMediaEdit = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/socialMediaPosts/${id}`, {
-        method: "PUT", // Update request
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/socialMediaPosts/${id}`, {
+        method: "PUT", 
         headers: {
           "Content-Type": "application/json",
         },
