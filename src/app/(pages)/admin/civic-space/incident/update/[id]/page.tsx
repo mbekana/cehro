@@ -51,7 +51,9 @@ const UpdateIncidentForm = () => {
 
     const fetchIncidentData = async () => {
       try {
-        const response = await fetch(`/admin/api/civic-space/incident/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        const response = await fetch(`${apiUrl}/incidents/${id}`);
         if (!response.ok) {
           console.error("Failed to fetch incident data", response.status);
           return;
@@ -141,8 +143,7 @@ const UpdateIncidentForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* You no longer need to enter the incidentId manually, as it's now part of the URL */}
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -295,6 +296,7 @@ const UpdateIncidentForm = () => {
                 text="Update Incident"
                 size="large"
                 elevation={4}
+                onClick={handleSubmit}
               />
             </div>
           </form>

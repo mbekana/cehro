@@ -51,7 +51,9 @@ const SocialMediaEdit = () => {
   const fetchSocialMediaData = async (id: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/test/${id}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/socialMediaPosts/${id}`);
       if (response.ok) {
         const data = await response.json();
         console.log("Data: ", data);

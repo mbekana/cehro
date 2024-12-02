@@ -85,7 +85,9 @@ const LegalFrameworkForm = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/legalFrameworks", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/legalFrameworks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +143,7 @@ const LegalFrameworkForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <div>
                 <Input

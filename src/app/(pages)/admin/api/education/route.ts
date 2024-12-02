@@ -43,7 +43,9 @@ export async function POST(req: Request) {
 
 async function fetchAllEducation() {
   try {
-    const response = await fetch("http://localhost:5000/educations");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/educations`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }

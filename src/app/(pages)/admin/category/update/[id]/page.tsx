@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
@@ -20,8 +20,9 @@ const UpdateCategory = () => {
     name: "",
     remark: "",
   });
-  const [loading, setLoading] = useState<boolean>(true); 
-  const [error, setError] = useState<string | null>(null); 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -29,7 +30,7 @@ const UpdateCategory = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/categories/${id}`, {method:'PATCH'});
+          const response = await fetch(`${apiUrl}/categories/${id}`);
           if (!response.ok) {
             throw new Error("Failed to fetch category");
           }
@@ -62,7 +63,7 @@ const UpdateCategory = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${apiUrl}/categories/${id}`, {
         method: "PATCH",
         headers: {
@@ -75,17 +76,24 @@ const UpdateCategory = () => {
         throw new Error("Failed to update category");
       }
 
+      // Success - Set success message
+      setSuccessMessage("Category updated successfully");
+
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     } catch (error) {
       setError(`${error}`);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>; 
+    return <div>{error}</div>;
   }
 
   return (
@@ -109,7 +117,7 @@ const UpdateCategory = () => {
             marginBottom="mb-6"
           />
 
-          <form  className="space-y-6">
+          <form className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
@@ -139,6 +147,16 @@ const UpdateCategory = () => {
           </form>
         </Card>
       </BoxWrapper>
+
+      {/* Display success message */}
+      {successMessage && (
+        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      )}
+
+      {/* Display error message */}
+      {error && (
+        <div className="mt-4 text-center text-red-500">{error}</div>
+      )}
 
       <div className="flex justify-end mt-4 mr-24">
         <Button

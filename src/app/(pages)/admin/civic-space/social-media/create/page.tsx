@@ -85,7 +85,9 @@ const SocialMediaForm = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/socialMediaPosts", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/socialMediaPosts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

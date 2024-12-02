@@ -126,7 +126,7 @@ const UpdateAuthorityDecision = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = id
-        ? await fetch(`${apiUrl}/authorityDecisions/authorityDecisions/${id}`, {
+        ? await fetch(`${apiUrl}/authorityDecisions/${id}`, {
             method: "PUT", 
             headers: {
               "Content-Type": "application/json",
@@ -189,7 +189,7 @@ const UpdateAuthorityDecision = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <div>
                 <Input

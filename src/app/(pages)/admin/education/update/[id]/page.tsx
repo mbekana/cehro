@@ -15,6 +15,8 @@ type EducationFormData = {
 };
 
 const UpdateEducationForm = () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);  
   const { id } = useParams(); 
   const [formData, setFormData] = useState<EducationFormData>({
     name: "",
@@ -55,8 +57,10 @@ const UpdateEducationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
     try {
-      const response = await fetch(`/admin/api/education/${id}`, {
+      const response = await fetch(`${apiUrl}/educations`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -65,15 +69,21 @@ const UpdateEducationForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update education data");
+        throw new Error("Failed to create education");
       }
 
-      const updatedEducation = await response.json();
-      console.log("Updated education:", updatedEducation);
+      setSuccessMessage("Education created successfully");
+
+      setFormData({ name: "", remark: "" });
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     } catch (error) {
-      console.error("Error updating education:", error);
+      setError(`Error: ${error}`);
     }
   };
+
 
 
   return (
@@ -127,7 +137,14 @@ const UpdateEducationForm = () => {
           </form>
         </Card>
       </BoxWrapper>
+      {successMessage && (
+        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      )}
 
+      {/* Display error message */}
+      {error && (
+        <div className="mt-4 text-center text-red-500">{error}</div>
+      )}
       <div className="flex justify-end mt-4 mr-24 space-x-4">
         <Button
           color="primary"

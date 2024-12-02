@@ -309,5 +309,73 @@
       "lat": 48.8566,
       "long": 2.3522
     }
+  ],
+  "roles":[{"id":"1", "name":"DATA_OFFICER", "remark":"This role is for data officers"}, {"id":"1", "name":"DATA_MANAGER", "remark":"This role is for data officers"}],
+  "sources":[
+    {
+      "id": 1,
+      "name": "I observed the incident my self",
+      "remark": "I observed the incidence my self."
+    },
+    {
+      "id": 2,
+      "name": "Social Media",
+      "remark": "I get the information from social media"
+    },
+    {
+      "id": 3,
+      "name": "Victims of the incidence",
+      "remark": "Victims Report the incidence."
+    },
+    {
+      "id": 4,
+      "name": "Police Report",
+      "remark": "The police reports the incidence."
+    },
+    {
+      "id": 5,
+      "name": "Community Residents",
+      "remark": "Community Residents"
+    },
+    {
+      "id": 6,
+      "name": "New Website",
+      "remark": "News Media like BBC,CNN website"
+    },
+    {
+      "id": 7,
+      "name": "Television Program",
+      "remark": "On Television Program."
+    },
+    {
+      "id": 8,
+      "name": "Others",
+      "remark": "Other sources."
+    }
+  ],
+  "users": [],
+  "metrics":[
+    {
+      "id": 1,
+      "name": "Sales Growth",
+      "remark": "This metric tracks the percentage increase in sales year-over-year."
+    },
+    {
+      "id": 2,
+      "name": "Customer Satisfaction",
+      "remark": "This metric measures how satisfied customers are with our service."
+    },
+    {
+      "id": 3,
+      "name": "Website Traffic",
+      "remark": "This metric tracks the number of visitors to our website each month."
+    },
+    {
+      "id": 4,
+      "name": "Employee Retention",
+      "remark": "This metric measures the percentage of employees staying with the company."
+    }
   ]
+  
+  
 }

@@ -11,6 +11,8 @@ import { useParams } from "next/navigation";
 
 
 const UpdateOccupationForm = () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);  
   const { id } = useParams(); 
   const [formData, setFormData] = useState<any>({
     name: "",
@@ -18,7 +20,6 @@ const UpdateOccupationForm = () => {
   });
 
 
-  // Fetch the existing occupation data when the component is mounted
   useEffect(() => {
     const fetchOccupationData = async () => {
       try {
@@ -54,7 +55,8 @@ const UpdateOccupationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/occupations/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/occupations/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -65,6 +67,13 @@ const UpdateOccupationForm = () => {
       if (!response.ok) {
         throw new Error("Failed to update occupation data");
       }
+      setSuccessMessage("Education created successfully");
+      setError(error);
+      setFormData({ name: "", remark: "" });
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
 
       const updatedOccupation = await response.json();
       console.log("Updated occupation:", updatedOccupation);
@@ -127,7 +136,11 @@ const UpdateOccupationForm = () => {
           </form>
         </Card>
       </BoxWrapper>
+      {successMessage && (
+        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      )}
 
+      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
       <div className="flex justify-end mt-4 mr-24 space-x-4">
         <Button
           color="primary"

@@ -30,7 +30,9 @@ const Regions = () => {
   const fetchRegions = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/admin/api/region', { method: 'GET' });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/regions`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         setRegions(data);
@@ -80,10 +82,9 @@ const Regions = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/admin/api/region/${id}`, {
-        method: 'DELETE',
-      });
-
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/regions/${id}`, {method:'DELETE'});
+  
       if (!response.ok) {
         throw new Error('Failed to delete the region');
       }
@@ -119,7 +120,12 @@ const Regions = () => {
           />
         </Link>
       </div>
-      <Table columns={columns} data={filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
+
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+     <Table columns={columns} data={filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
       <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
@@ -127,6 +133,9 @@ const Regions = () => {
           onPageChange={handlePageChange}
         />
       </div>
+        </>
+      )}
+    
     </BoxWrapper>
   );
 };

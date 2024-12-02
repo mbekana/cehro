@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar'; 
 import LogoWithText from '../UI/LogoWithText';
 import Button from '@/app/components/UI/Button'; 
-import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle, FaEdit, FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag } from 'react-icons/fa';
+import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle, FaEdit, FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire } from 'react-icons/fa';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
@@ -65,6 +65,17 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       label: "User Roles",
       href: "/admin/role/history",
       icon: <FaUserShield />, 
+    },
+    {
+      label: "Metrics",
+      href: "/admin/metrics/history",
+      icon: <FaChartBar />, 
+    },
+
+    {
+      label: "Impact Levels",
+      href: "/admin/impact/history",
+      icon: <FaFire />, 
     },
     {
       label: "Source",

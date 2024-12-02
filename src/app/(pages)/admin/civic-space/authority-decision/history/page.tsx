@@ -68,7 +68,9 @@ const AuthorityDecisionList = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/admin/api/civic-space/authority-decision/${id}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'DELETE'});
 
       if (!response.ok) {
         throw new Error("Failed to delete the incident");
