@@ -19,6 +19,7 @@ const CategoryDetailsPage = () => {
   const [loading, setLoading] = useState<boolean>(true); 
 
   useEffect(() => {
+    console.log("ID: ", id)
     if (id) {
       const fetchCategoryData = async () => {
         try {

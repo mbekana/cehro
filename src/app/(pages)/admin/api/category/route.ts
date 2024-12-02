@@ -44,7 +44,9 @@ export async function POST(req: Request) {
 // Function to fetch all categories
 async function fetchAllCategories() {
   try {
-    const response = await fetch("http://localhost:5000/categories");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/categories`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -58,7 +60,9 @@ async function fetchAllCategories() {
 // Function to create a new category
 async function createCategory(newCategory: any) {
   try {
-    const response = await fetch("http://localhost:5000/categories", {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/categories`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

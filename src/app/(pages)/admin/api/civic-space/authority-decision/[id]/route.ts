@@ -75,9 +75,9 @@ export async function PATCH(req: Request) {
 
 async function fetchAuthorityDecision(id: string) {
   try {
-    const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/authorityDecisions/${id}`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -91,12 +91,11 @@ async function fetchAuthorityDecision(id: string) {
 
 async function deleteAuthorityDecision(id: string) {
   try {
-    const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
+      method: "DELETE",
+    });
 
     if (!response.ok) {
       throw new Error("Failed to delete authority decision");
@@ -109,16 +108,15 @@ async function deleteAuthorityDecision(id: string) {
 
 async function updateAuthorityDecision(id: string, updatedData: any) {
   try {
-    const response = await fetch(
-      `http://localhost:5000/authorityDecisions/${id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      }
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to update authority decision");

@@ -89,7 +89,9 @@ export async function PATCH(req: Request) {
 
 async function fetchIncident(id: string) {
   try {
-    const response = await fetch(`http://localhost:5000/incidents/${id}`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/incidents/${id}`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -103,7 +105,9 @@ async function fetchIncident(id: string) {
 
 async function deleteIncident(id: string) {
   try {
-    const response = await fetch(`http://localhost:5000/incidents/${id}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/incidents/${id}`, {
       method: "DELETE",
     });
 
@@ -118,7 +122,9 @@ async function deleteIncident(id: string) {
 
 async function updateIncident(id: string, updatedData: any) {
   try {
-    const response = await fetch(`http://localhost:5000/incidents/${id}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/incidents/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

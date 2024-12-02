@@ -49,7 +49,9 @@ export async function POST(req: Request) {
 // Function to fetch all authority decisions
 async function fetchAllAuthorityDecisions() {
   try {
-    const response = await fetch("http://localhost:5000/authorityDecisions");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/authorityDecisions`);
     if (!response.ok) {
       throw new Error("Failed to fetch data from the server");
     }
@@ -63,7 +65,9 @@ async function fetchAllAuthorityDecisions() {
 // Function to create a new authority decision
 async function createAuthorityDecision(newAuthorityDecision: any) {
   try {
-    const response = await fetch("http://localhost:5000/authorityDecisions", {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const response = await fetch(`${apiUrl}/authorityDecisions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
