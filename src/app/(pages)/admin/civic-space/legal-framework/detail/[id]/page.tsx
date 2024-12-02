@@ -32,7 +32,9 @@ const LegalFrameworkDetail = () => {
     const fetchLegalFrameworkData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/admin/api/civic-space/legal-framework/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
         if (response.ok) {
           const data: LegalFrameworkData = await response.json();
           setLegalFramework(data);

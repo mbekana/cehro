@@ -63,7 +63,9 @@ const UpdateRegionForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/admin/api/region/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/regions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +112,7 @@ const UpdateRegionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input

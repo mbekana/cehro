@@ -29,7 +29,8 @@ const Categories = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/category`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/categories`, {method:'GET'});
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -74,8 +75,8 @@ const Categories = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/admin/api/category/${id}`);
-
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/categories/${id}`, {method:'DELETE'});
       if (!response.ok) {
         throw new Error("Failed to delete the incident");
       }

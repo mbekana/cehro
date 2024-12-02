@@ -47,7 +47,9 @@ const LegalFrameworkForm = () => {
     if (id) {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/legalFrameworks/${id}`);
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+          const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
           const data = await response.json();
           setFormData({
             assesementCategory: data.assesementCategory,

@@ -124,7 +124,7 @@ const IncidentForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -278,6 +278,7 @@ const IncidentForm = () => {
                 text="Save Incident"
                 size="large"
                 elevation={4}
+                onClick={handleSubmit}
               />
             </div>
           </form>

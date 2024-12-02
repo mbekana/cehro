@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 
-// Handles GET requests to fetch a category by ID from the URL path
 export async function GET(req: Request) {
   try {
-    // Extract the ID directly from the URL path
     const { pathname } = new URL(req.url);
-    const segments = pathname.split("/"); // Split the path into segments
-    const id = segments[segments.length - 1]; // The last segment is the ID
+    const segments = pathname.split("/");
+    const id = segments[segments.length - 1];
     console.log("ID from URL path: ", id);
 
     const category = await fetchCategory(id);
@@ -19,10 +17,8 @@ export async function GET(req: Request) {
   }
 }
 
-// Handles DELETE requests to delete a category by ID from the URL path
 export async function DELETE(req: Request) {
   try {
-    // Extract the ID from the URL path in the same way
     const { pathname } = new URL(req.url);
     const segments = pathname.split("/");
     const id = segments[segments.length - 1];
@@ -51,10 +47,8 @@ export async function DELETE(req: Request) {
   }
 }
 
-// Handles PATCH requests to update a category by ID from the URL path
 export async function PATCH(req: Request) {
   try {
-    // Extract the ID from the URL path
     const { pathname } = new URL(req.url);
     const segments = pathname.split("/");
     const id = segments[segments.length - 1];

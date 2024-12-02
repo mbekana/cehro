@@ -19,7 +19,9 @@ const EducationDetailsPage = () => {
     if (id) {
       const fetchEducationData = async () => {
         try {
-          const response = await fetch(`/admin/api/education/${id}`, {method:'GET'});
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+          const response = await fetch(`${apiUrl}/educations/${id}`, {method:'GET'});
           if (response.ok) {
             const data = await response.json();
             console.log("Data: ", data)

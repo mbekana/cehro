@@ -4,35 +4,36 @@ import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";  // You can use a different icon for the Role if preferred
 import { useParams } from "next/navigation"; 
-import { Region } from "@/app/model/RegionModel"; 
 
-const RegionDetailsPage = () => {
+const RoleDetailsPage = () => {
   const { id } = useParams(); 
-  const [region, setRegion] = useState<Region | null>(null); 
+  const [role, setRole] = useState<any | null>(null); 
   const [loading, setLoading] = useState<boolean>(true); 
 
   useEffect(() => {
     if (id) {
-      const fetchRegionData = async () => {
+      const fetchRoleData = async () => {
         try {
-          const response = await fetch(`/admin/api/region/${id}`, { method: 'GET' }); 
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+          const response = await fetch(`${apiUrl}/roles/${id}`, { method: 'GET' }); 
           if (response.ok) {
             const data = await response.json();
-            console.log("Region Data: ", data);
-            setRegion(data);
+            console.log("Role Data: ", data);
+            setRole(data);
           } else {
-            console.error("Region not found");
+            console.error("Role not found");
           }
         } catch (error) {
-          console.error("Error fetching region data", error);
+          console.error("Error fetching role data", error);
         } finally {
           setLoading(false); 
         }
       };
 
-      fetchRegionData();
+      fetchRoleData();
     }
   }, [id]);
 
@@ -40,20 +41,20 @@ const RegionDetailsPage = () => {
     return <div>Loading...</div>;
   }
 
-  if (!region) {
-    return <div>Region not found</div>;
+  if (!role) {
+    return <div>Role not found</div>;
   }
 
   return (
     <div className="bg-white">
       <BoxWrapper
-        icon={<FaMapMarkerAlt />}
-        title="Region Details"
+        icon={<FaUsers />}
+        title="Role Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
       >
         <Card
-          title="Region Information"
+          title="Role Information"
           borderColor="border-primary"
           borderThickness="border-1"
           bgColor="bg-white"
@@ -67,20 +68,16 @@ const RegionDetailsPage = () => {
           
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Region Name</h3>
-              <p className="text-gray-600">{region.name}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">Role ID</h3>
+              <p className="text-gray-600">{role.id}</p> 
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">City</h3>
-              <p className="text-gray-600">{region.city}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">Role Name</h3>
+              <p className="text-gray-600">{role.name}</p> 
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Latitude</h3>
-              <p className="text-gray-600">{region.lat}</p> 
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700">Longitude</h3>
-              <p className="text-gray-600">{region.long}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">Remark</h3>
+              <p className="text-gray-600">{role.remark}</p> 
             </div>
           </div>
         </Card>
@@ -89,4 +86,4 @@ const RegionDetailsPage = () => {
   );
 };
 
-export default RegionDetailsPage;
+export default RoleDetailsPage;

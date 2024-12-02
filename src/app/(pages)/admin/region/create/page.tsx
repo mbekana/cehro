@@ -18,6 +18,8 @@ type RegionFormData = {
 };
 
 const RegionForm = () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);  
   const [formData, setFormData] = useState<RegionFormData>({
     regionName: "",
     location: { lat: 0, long: 0 },
@@ -34,9 +36,35 @@ const RegionForm = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    try {
+      const response = await fetch(`${apiUrl}/regions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create region");
+      }
+
+      setSuccessMessage("Region created successfully");
+
+      setFormData({  regionName: "",
+        location: { lat: 0, long: 0 },
+        main_city: "", });
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+    } catch (error) {
+      setError(`Error: ${error}`);
+    }
   };
 
   return (
@@ -110,9 +138,15 @@ const RegionForm = () => {
           </form>
         </Card>
       </BoxWrapper>
+      {successMessage && (
+        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      )}
 
+      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
       <div className="flex justify-end mt-4 mr-24">
-        <Button color="primary" text="Save Incident" size="large" elevation={4} />
+        <Button color="primary" text="Save Incident" size="large" elevation={4} 
+        onClick={handleSubmit}
+        />
       </div>
     </div>
   );

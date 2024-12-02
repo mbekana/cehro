@@ -14,6 +14,8 @@ type OccupationFormData = {
 };
 
 const OccupationForm = () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);  
     const [formData, setFormData] = useState<OccupationFormData>({
         name: "",
         remark: "",
@@ -29,9 +31,33 @@ const OccupationForm = () => {
         }));
       };
     
-      const handleSubmit = (e: React.FormEvent) => {
+      const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(formData);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    
+        try {
+          const response = await fetch(`${apiUrl}/occupations`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+    
+          if (!response.ok) {
+            throw new Error("Failed to create occupation");
+          }
+    
+          setSuccessMessage("Occupation created successfully");
+    
+          setFormData({ name: "", remark: "" });
+    
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
+        } catch (error) {
+          setError(`Error: ${error}`);
+        }
       };
     
       return (
@@ -55,7 +81,7 @@ const OccupationForm = () => {
                 marginBottom="mb-6"
               />
     
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form className="space-y-6">
                 <div className="flex flex-col space-y-4">
                   <div>
                     <Input
@@ -85,7 +111,11 @@ const OccupationForm = () => {
               </form>
             </Card>
           </BoxWrapper>
-    
+          {successMessage && (
+        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      )}
+
+      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
           <div className="flex justify-end mt-4 mr-24">
             <Button
               color="primary"
@@ -93,6 +123,7 @@ const OccupationForm = () => {
               size="large"
               elevation={4}
               borderRadius={3} 
+              onClick={handleSubmit}
             />
           </div>
         </div>

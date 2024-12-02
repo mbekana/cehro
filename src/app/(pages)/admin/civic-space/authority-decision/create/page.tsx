@@ -74,7 +74,7 @@ const AuthorityDecisionForm = () => {
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();  // Safely handle event if it's passed
+    e?.preventDefault(); 
 
     const formPayload = {
       ...formData,
@@ -140,7 +140,7 @@ const AuthorityDecisionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <div>
                 <Input

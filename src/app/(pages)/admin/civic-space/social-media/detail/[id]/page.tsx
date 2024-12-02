@@ -32,7 +32,9 @@ const SocialMediaPostDetail = () => {
     const fetchSocialMediaPostData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/admin/api/civic-space/social-media/${id}`, {method:'GET'});
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        const response = await fetch(`${apiUrl}/socialMediaPosts/${id}`, {method:'GET'});
         if (response.ok) {
           const data: SocialMediaPostData = await response.json();
           setSocialMediaPost(data);

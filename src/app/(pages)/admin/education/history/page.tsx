@@ -30,7 +30,9 @@ const Educations = () => {
   const fetchEducations = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/admin/api/education', { method: 'GET' });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/educations`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         setEducation(data);
@@ -79,10 +81,9 @@ const Educations = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/admin/api/education/${id}`, {
-        method: 'DELETE',
-      });
-
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/educations/${id}`, {method:'DELETE'});
+  
       if (!response.ok) {
         throw new Error('Failed to delete the education');
       }
@@ -118,7 +119,11 @@ const Educations = () => {
           />
         </Link>
       </div>
-      <Table columns={columns} data={filteredEducation.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
+      {loading ? (
+        <div>Loading...</div> 
+      ) : (
+        <>
+  <Table columns={columns} data={filteredEducation.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
       <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
@@ -126,6 +131,9 @@ const Educations = () => {
           onPageChange={handlePageChange}
         />
       </div>
+        </>
+      )}
+    
     </BoxWrapper>
   );
 };
