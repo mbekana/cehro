@@ -1,17 +1,17 @@
 "use client";
 
 import React from 'react';
-import ActionDropdown from './ActionDropdown';  // Import the custom dropdown component
+import ActionDropdown from './ActionDropdown';  
 
 interface TableProps {
   columns: string[];
   data: Record<string, any>[]; 
-  onAction: (action: string, row: Record<string, any>) => void;  // Added handler for actions
+  onAction: (action: string, row: Record<string, any>) => void;  
 }
 
 const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
   return (
-    <div className="overflow-x-auto bg-white rounded-sm w-full">
+    <div className="bg-white rounded-sm w-full">
       <div className="hidden md:block">
         <table className="min-w-full table-auto">
           <thead>
@@ -21,11 +21,11 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
                   {col}
                 </th>
               ))}
-              <th className="p-2 text-left text-xs md:text-sm lg:text-base">Actions</th> {/* Actions column */}
+              <th className="p-2 text-left text-xs md:text-sm lg:text-base">Actions</th> 
             </tr>
           </thead>
-          <tbody>
-            {data.map((row, rowIndex) => (
+          <tbody className="overflow-x-auto">
+          {data.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t hover:bg-gray-50">
                 {columns.map((col, colIndex) => (
                   <td key={colIndex} className="p-2 text-gray-700 text-xs md:text-sm lg:text-base">
@@ -35,13 +35,12 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
                         <div>{row[col]?.zone}</div>
                       </>
                     ) : (
-                      // Directly render the value of the column
                       row[col]
                     )}
                   </td>
                 ))}
                 <td className="p-2">
-                  <ActionDropdown onAction={(action) => onAction(action, row)} /> {/* Custom dropdown for actions */}
+                 <ActionDropdown onAction={(action) => onAction(action, row)} />
                 </td>
               </tr>
             ))}
@@ -61,7 +60,6 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
                     <div>{row[col]?.zone}</div>
                   </div>
                 ) : (
-                  // Directly render the value of the column
                   <span className="text-gray-700">{row[col]}</span>
                 )}
               </div>

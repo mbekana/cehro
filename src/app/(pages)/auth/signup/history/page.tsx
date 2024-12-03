@@ -1,28 +1,30 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FaUsers } from "react-icons/fa";
+import { FaPlus, FaUsers } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Button from "@/app/components/UI/Button";
 type User = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
-  gender: string;
-  role: string;
-  status: string;
-  lastLogin: string;
+  phoneNumber: string;
 };
 
 const columns: (keyof User)[] = [
   "id",
-  "name",
+  "firstName",
+  "lastName",
+  "username",
   "email",
-  "gender",
-  "role",
+  "phoneNumber"
 ];
 
 const UserList = () => {
@@ -99,7 +101,7 @@ const UserList = () => {
         router.push(`/auth/signup/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id); // Delete action
+        handleDelete(row.id);
         break;
       default:
         break;
@@ -118,13 +120,24 @@ const UserList = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="m-2 w-full">
-        <Search
-          onSearch={handleSearch}
-          placeholder="Search Users..."
-          buttonText="Search Users"
-        />
-      </div>
+        <div className="flex flex-1 items-center justify-between m-2 w-full">
+          <Search
+            onSearch={handleSearch}
+            placeholder="Search Educations..."
+            buttonText="Search Educations"
+          />
+          <Link href="/auth/signup/create">
+            <Button
+              color="primary"
+              text="Create User"
+              icon={<FaPlus />}
+              className="ml-auto mr-2"
+              size="large"
+              borderRadius={5}
+              
+            />
+          </Link>
+        </div>
 
       {loading ? (
         <div>Loading...</div>

@@ -16,7 +16,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       icon: <FaUsersCog />, 
       submenu: [
         { label: "Users", href: "/auth/signup/history", icon: <FaUsers /> },
-        { label: "Add User", href: "/auth/signup/create", icon: <FaEdit /> },
+        // { label: "Add User", href: "/auth/signup/create", icon: <FaEdit /> },
       ],
     },
     {
@@ -40,7 +40,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           icon: <FaHashtag />, 
         },
         {
-          label: "Auth Decision",
+          label: "Authority Decision",
           href: "/admin/civic-space/authority-decision/history",
           icon: <FaUserShield />,
         },

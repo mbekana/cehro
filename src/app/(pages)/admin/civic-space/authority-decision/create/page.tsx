@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
+import Toast from "@/app/components/UI/Toast";
+import { Impact } from "@/app/model/Impact";
 
 type AuthorityDecisionFormData = {
-  decisionCategory: string;
   decisionArea: string;
   decisionRegion: string;
   sourceOfDecision: string;
@@ -17,13 +18,20 @@ type AuthorityDecisionFormData = {
   media: File | null;
   mediaType: string;
   decisionMetrics: string;
-  decisionRemark: string;
+  insight: string;
   decisionImpact: string;
 };
 
 const AuthorityDecisionForm = () => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [impacts, setImpacts] = useState<Impact[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [sources, setSources] = useState<any[]>([]);
+
   const [formData, setFormData] = useState<AuthorityDecisionFormData>({
-    decisionCategory: "",
     decisionArea: "",
     decisionRegion: "",
     sourceOfDecision: "",
@@ -31,12 +39,85 @@ const AuthorityDecisionForm = () => {
     media: null,
     mediaType: "",
     decisionMetrics: "",
-    decisionRemark: "",
+    insight: "",
     decisionImpact: "",
   });
 
+  useEffect(() => {
+    fetchMetrics();
+    fetchImpacts();
+    fetchRegions();
+    fetchSources();
+  }, []);
+
+  const fetchMetrics = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setMetrics(data);
+        console.log("Metrics: ", metrics);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
+
+  const fetchSources = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setSources(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchImpacts = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setImpacts(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
+
+  const fetchRegions = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setRegions(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -45,7 +126,10 @@ const AuthorityDecisionForm = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'decisionFile' | 'media') => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "decisionFile" | "media"
+  ) => {
     const file = e.target.files ? e.target.files[0] : null;
     setFormData((prevData) => ({
       ...prevData,
@@ -53,28 +137,28 @@ const AuthorityDecisionForm = () => {
     }));
 
     if (file) {
-      const extension = file.name.split('.').pop()?.toLowerCase();
-      if (extension === 'jpg' || extension === 'png' || extension === 'jpeg') {
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      if (extension === "jpg" || extension === "png" || extension === "jpeg") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: 'image',
+          mediaType: "image",
         }));
-      } else if (extension === 'mp4' || extension === 'avi') {
+      } else if (extension === "mp4" || extension === "avi") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: 'video',
+          mediaType: "video",
         }));
-      } else if (extension === 'pdf') {
+      } else if (extension === "pdf") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: 'pdf',
+          mediaType: "pdf",
         }));
       }
     }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault(); 
+    e?.preventDefault();
 
     const formPayload = {
       ...formData,
@@ -82,6 +166,7 @@ const AuthorityDecisionForm = () => {
       media: formData.media ? formData.media.name : null,
     };
 
+    setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -97,7 +182,6 @@ const AuthorityDecisionForm = () => {
         const result = await response.json();
         console.log("Data saved successfully:", result);
         setFormData({
-          decisionCategory: "",
           decisionArea: "",
           decisionRegion: "",
           sourceOfDecision: "",
@@ -105,27 +189,32 @@ const AuthorityDecisionForm = () => {
           media: null,
           mediaType: "",
           decisionMetrics: "",
-          decisionRemark: "",
+          insight: "",
           decisionImpact: "",
         });
-        alert("Authority Decision Saved Successfully!");
+        setLoading(false);
+        setSuccess("Authority Decision Saved Successfully!");
+        setError(null);
       } else {
-        console.error("Error saving data", response);
-        alert("There was an error saving the authority decision.");
+        setLoading(false);
+        setSuccess(null);
+        setError("There was an error saving the authority decision.");
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred while saving the data.");
+      setLoading(false);
+      setSuccess(null);
+      setError(error);
     }
   };
 
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
+        icon={<FaArrowLeft />}
         title="Authority Decision Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Authority Decision Form"
@@ -140,24 +229,13 @@ const AuthorityDecisionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form  className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <div>
-                <Input
-                  type="text"
-                  label="Decision Category"
-                  placeholder="Enter decision category"
-                  value={formData.decisionCategory}
-                  onChange={handleChange}
-                  name="decisionCategory"
-                />
-              </div>
-
+          <form className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
                   type="text"
                   label="Decision Area"
-                  placeholder="Enter decision area"
+                  placeholder=" decision area"
                   value={formData.decisionArea}
                   onChange={handleChange}
                   name="decisionArea"
@@ -166,28 +244,80 @@ const AuthorityDecisionForm = () => {
 
               <div>
                 <Input
-                  type="text"
+                  type="select"
                   label="Decision Region"
-                  placeholder="Enter decision region"
+                  placeholder="Decision Region"
                   value={formData.decisionRegion}
                   onChange={handleChange}
                   name="decisionRegion"
-                />
+                >
+                  <option value="">Select Region</option>
+                  {regions.map((region, index) => (
+                    <option key={index} value={region.id}>
+                      {region.name}
+                    </option>
+                  ))}
+                </Input>
               </div>
 
               <div>
                 <Input
-                  type="text"
+                  type="select"
                   label="Source of Decision"
-                  placeholder="Enter source of decision"
+                  placeholder="Source of decision"
                   value={formData.sourceOfDecision}
                   onChange={handleChange}
                   name="sourceOfDecision"
-                />
+                >
+                  <option value="">Select Source</option>
+                  {sources.map((source, index) => (
+                    <option key={index} value={source.id}>
+                      {source.name}
+                    </option>
+                  ))}
+                </Input>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">File Upload</label>
+                <Input
+                  type="select"
+                  label="Decision Impact"
+                  placeholder="Decision Impact"
+                  value={formData.decisionImpact}
+                  onChange={handleChange}
+                  name="decisionImpact"
+                >
+                  <option value="">Select Impact</option>
+
+                  {impacts.map((impact, index) => (
+                    <option key={index} value={impact.id}>
+                      {impact.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+
+              <div>
+                <Input
+                  type="select"
+                  label="Decision Metrics"
+                  placeholder=" decision metrics"
+                  value={formData.decisionMetrics}
+                  onChange={handleChange}
+                  name="decisionMetrics"
+                >
+                  <option value="">Select Metrics</option>
+                  {metrics.map((metric, index) => (
+                    <option key={index} value={metric.id}>
+                      {metric.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  File Upload
+                </label>
                 <div className="mt-1">
                   <label
                     htmlFor="decisionFile"
@@ -198,15 +328,21 @@ const AuthorityDecisionForm = () => {
                   <input
                     id="decisionFile"
                     type="file"
-                    onChange={(e) => handleFileChange(e, 'decisionFile')}
+                    onChange={(e) => handleFileChange(e, "decisionFile")}
                     className="hidden"
                   />
-                  {formData.decisionFile && <span className="text-sm text-gray-600 ml-2">{formData.decisionFile.name}</span>}
+                  {formData.decisionFile && (
+                    <span className="text-sm text-gray-600 ml-2">
+                      {formData.decisionFile.name}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Media Upload</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Media Upload
+                </label>
                 <div className="mt-1">
                   <label
                     htmlFor="media"
@@ -217,60 +353,55 @@ const AuthorityDecisionForm = () => {
                   <input
                     id="media"
                     type="file"
-                    onChange={(e) => handleFileChange(e, 'media')}
+                    onChange={(e) => handleFileChange(e, "media")}
                     className="hidden"
                   />
-                  {formData.media && <span className="text-sm text-gray-600 ml-2">{formData.media.name}</span>}
+                  {formData.media && (
+                    <span className="text-sm text-gray-600 ml-2">
+                      {formData.media.name}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div>
                 <Input
-                  type="text"
-                  label="Decision Metrics"
-                  placeholder="Enter decision metrics"
-                  value={formData.decisionMetrics}
-                  onChange={handleChange}
-                  name="decisionMetrics"
-                />
-              </div>
-
-              <div>
-                <Input
                   type="textarea"
-                  label="Remark"
-                  placeholder="Enter remark"
-                  value={formData.decisionRemark}
+                  label="CEHRO's Insight "
+                  placeholder="CEHRO's Insight "
+                  value={formData.insight}
                   onChange={handleChange}
-                  name="decisionRemark"
+                  name="insight"
                 />
-              </div>
-
-              <div>
-                <Input
-                  type="select"
-                  label="Impact"
-                  value={formData.decisionImpact}
-                  onChange={handleChange}
-                  name="decisionImpact"
-                >
-                  <option value="">Select Impact</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </Input>
               </div>
             </div>
 
             <div className="mt-4">
               <Button
                 color="primary"
-                text="Save Authority Decision"
-                onClick={handleSubmit}  
+                text={loading ? "Saving... " : "Authority Decision"}
+                onClick={handleSubmit}
                 icon={<FaPlus />}
                 size="large"
               />
             </div>
+            {success && (
+              <Toast
+                message={success}
+                type="success"
+                position="top-right"
+                onClose={() => setSuccess(null)}
+              />
+            )}
+
+            {error && (
+              <Toast
+                message={error}
+                type="error"
+                position="top-right"
+                onClose={() => setError(null)}
+              />
+            )}
           </form>
         </Card>
       </BoxWrapper>

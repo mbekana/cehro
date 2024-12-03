@@ -14,7 +14,7 @@ interface SidebarProps {
   onClose: () => void; 
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ links, onClose }) => {
   const [openSubmenu, setOpenSubmenu] = useState<{ [key: string]: boolean }>({});
 
   const toggleSubmenu = (submenuKey: string) => {
@@ -37,7 +37,6 @@ const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
             className="flex items-center py-2 px-4 text-white rounded-md transition-colors duration-200"
           />
 
-          {/* If this submenu has nested submenus, render them recursively */}
           {submenuItem.submenu && openSubmenu[submenuKey] && (
             <div className="pl-6 mt-2">{renderSubmenu(submenuItem.submenu, submenuKey)}</div>
           )}
@@ -47,16 +46,13 @@ const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
   };
 
   return (
-    // <div
-    //   className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform ${
-    //     isOpen ? "translate-x-0" : "-translate-x-full"
-    //   }`}
-    // >
-         <div
-      className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform `}
+    <div
+      className={`fixed inset-0 lg:relative bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform`}
+      style={{ width: 'fit-content' }} 
     >
-      
-      {/* Close Button for Mobile Devices */}
+
+     {/* <div  className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform ${isOpen ? "translate-x-0" : "-translate-x-full"}`}> */}
+
       <div className="absolute top-4 right-4 lg:hidden">
         <button onClick={onClose} className="text-white">
           <FaChevronDown size={24} />
@@ -74,7 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
         <ul>
           {links.map((link, index) => (
             <div key={index}>
-              {/* Main Link Item */}
               <li>
                 <LinkItem
                   href={link.href}
@@ -99,7 +94,6 @@ const Sidebar: React.FC<SidebarProps> = ({ links,  onClose }) => {
                 />
               </li>
 
-              {/* Render the submenu if it's open */}
               {link.submenu && openSubmenu[link.label] && (
                 <div className="pl-6 mt-2">{renderSubmenu(link.submenu, link.label)}</div>
               )}

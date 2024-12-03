@@ -44,7 +44,7 @@ const Button: React.FC<ButtonProps> = ({ color, text, onClick, disabled = false,
   const sizeClasses = {
     small: "w-24",  
     medium: "w-32", 
-    large: "w-[300px]"   
+    large: "w-[200px]"   
   };
 
   return (

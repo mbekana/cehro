@@ -6,8 +6,9 @@ import { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaUserEdit } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import { useParams } from "next/navigation";
+import Toast from "@/app/components/UI/Toast";
 
 
 
@@ -30,7 +31,6 @@ const UpdateUserPage = () => {
           const response = await fetch(`${apiUrl}/users/${id}`);
           const data = await response.json();
           if (response.ok) {
-            // Directly set form values after data is fetched
             setFirstName(data.firstName);
             setLastName(data.lastName);
             setUsername(data.username);
@@ -93,7 +93,6 @@ const UpdateUserPage = () => {
 
       if (response.ok) {
         setSuccess("User updated successfully!");
-        // Reset fields after successful update
         setFirstName("");
         setLastName("");
         setUsername("");
@@ -112,10 +111,11 @@ const UpdateUserPage = () => {
   return (
     <div className="bg-gray-100">
       <BoxWrapper
-        icon={<FaUserEdit />}
+        icon={<FaArrowLeft />}
         title="Update User"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Update Your Account Information"
@@ -172,16 +172,33 @@ const UpdateUserPage = () => {
 
             <div className="mt-4 flex justify-between">
               <Button
+                icon={<FaPlus/>}
                 color="primary"
                 text={loading ? "Updating..." : "Update User"}
                 elevation={3}
                 onClick={handleUpdate}
                 disabled={loading}
+                size="large"
               />
             </div>
 
-            {error && <div className="mt-4 text-red-500">{error}</div>}
-            {success && <div className="mt-4 text-green-500">{success}</div>}
+            {success && (
+              <Toast
+                message={success}
+                type="success"
+                position="top-right"
+                onClose={() => setSuccess(null)}
+              />
+            )}
+
+            {error && (
+              <Toast
+                message={error}
+                type="error"
+                position="top-right"
+                onClose={() => setError(null)}
+              />
+            )}
           </form>
         </Card>
       </BoxWrapper>

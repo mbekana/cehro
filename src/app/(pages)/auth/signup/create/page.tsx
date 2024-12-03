@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
@@ -6,7 +6,8 @@ import { useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaUserPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import Toast from "@/app/components/UI/Toast";
 
 const SignupPage: React.FC = () => {
   const [firstName, setFirstName] = useState("");
@@ -50,19 +51,56 @@ const SignupPage: React.FC = () => {
   };
 
   const handleSignup = async () => {
+    setError(null);
+    setSuccess(null);
+
+    if (
+      !firstName ||
+      !lastName ||
+      !username ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !phoneNumber
+    ) {
+      setError("All fields are required.");
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // const passwordStrengthRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    // if (!passwordStrengthRegex.test(password)) {
+    //   setError(
+    //     "Password must be at least 8 characters long, with at least 1 uppercase letter and 1 number."
+    //   );
+    //   return;
+    // }
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
     setLoading(true);
-    setError(null);
-    setSuccess(null);
 
-    const userData = { firstName, lastName, username, email, password, phoneNumber };
+    const userData = {
+      firstName,
+      lastName,
+      username,
+      email,
+      password,
+      phoneNumber,
+    };
 
     try {
-      const response = await fetch("/api/signup", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,12 +130,13 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100">
+    <div>
       <BoxWrapper
-        icon={<FaUserPlus />}
+        icon={<FaArrowLeft/>}
         title="User Signup"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Create Your Account"
@@ -116,35 +155,44 @@ const SignupPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <Input
                 type="text"
-                placeholder="Enter your first name"
+                placeholder="First Name"
                 value={firstName}
                 name="firstName"
                 onChange={handleInputChange}
               />
               <Input
                 type="text"
-                placeholder="Enter your last name"
+                placeholder="Last Name"
                 value={lastName}
                 name="lastName"
                 onChange={handleInputChange}
               />
               <Input
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Username"
                 value={username}
                 name="username"
                 onChange={handleInputChange}
               />
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Email"
                 value={email}
                 name="email"
                 onChange={handleInputChange}
               />
+
+              <Input
+                type="text"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                name="phoneNumber"
+                onChange={handleInputChange}
+                borderRadius={1}
+              />
               <Input
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Passowrd"
                 value={password}
                 name="password"
                 onChange={handleInputChange}
@@ -156,14 +204,6 @@ const SignupPage: React.FC = () => {
                 name="confirmPassword"
                 onChange={handleInputChange}
               />
-              <Input
-                type="text"
-                placeholder="Enter your phone number"
-                value={phoneNumber}
-                name="phoneNumber"
-                onChange={handleInputChange}
-                borderRadius={1}
-              />
             </div>
 
             <div className="mt-4 flex justify-between">
@@ -171,13 +211,29 @@ const SignupPage: React.FC = () => {
                 color="primary"
                 text={loading ? "Creating..." : "Create User"}
                 elevation={3}
+                icon={<FaPlus />}
                 onClick={handleSignup}
                 disabled={loading}
+                size="large"
               />
             </div>
+            {success && (
+              <Toast
+                message={success}
+                type="success"
+                position="top-right"
+                onClose={() => setSuccess(null)}
+              />
+            )}
 
-            {error && <div className="mt-4 text-red-500">{error}</div>}
-            {success && <div className="mt-4 text-green-500">{success}</div>}
+            {error && (
+              <Toast
+                message={error}
+                type="error"
+                position="top-right"
+                onClose={() => setError(null)}
+              />
+            )}
           </form>
         </Card>
       </BoxWrapper>

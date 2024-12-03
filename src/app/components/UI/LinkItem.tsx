@@ -24,15 +24,15 @@ const LinkItem: React.FC<LinkItemProps> = ({ href, label, icon, className = '', 
     <Link href={href} passHref legacyBehavior>
       <a
         className={`flex items-center justify-between py-2 px-4 font-medium transition-colors duration-200 rounded-md ${
-          isActive ? ' text-white' : 'text-gray-200 '
-        } ${className}`}
+          isActive ? 'text-white font-bolder ' : 'text-gray-200'
+          } ${className}`}
         onClick={handleClick}
       >
         <div className="flex items-center">
           {icon && <span className="mr-3">{icon}</span>}
           {label}
         </div>
-        {trailingIcon && <span className="ml-auto">{trailingIcon}</span>}
+        {trailingIcon && <span className="ml-auto px-4">{trailingIcon}</span>}
       </a>
     </Link>
   );
