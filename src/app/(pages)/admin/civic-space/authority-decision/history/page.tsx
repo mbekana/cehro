@@ -10,14 +10,16 @@ import Button from "@/app/components/UI/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LegalFramework } from "@/app/model/LegalFramework";
+import { DecisionAuthority } from "@/app/model/DecisionAuthority";
 
-const columns: (keyof LegalFramework)[] = [
-  "assesementCategory",
-  "affectedArea",
-  "city",
-  "region",
-  "metrics",
-  "impact",
+const columns: (keyof DecisionAuthority)[] = [
+
+  "decisionImpact",
+  "decisionMetrics",
+  "decisionRegion",
+  "id",
+  "insight",
+  "sourceOfDecision"
 ];
 
 const AuthorityDecisionList = () => {
@@ -69,7 +71,6 @@ const AuthorityDecisionList = () => {
   const handleDelete = async (id: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'DELETE'});
 
       if (!response.ok) {

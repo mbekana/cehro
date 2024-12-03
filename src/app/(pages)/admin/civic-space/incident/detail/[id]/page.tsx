@@ -5,12 +5,14 @@ import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Button from "@/app/components/UI/Button";
 import { FaArrowLeft, FaCheck, FaTimes } from "react-icons/fa";
 import { useParams } from "next/navigation";
+import Toast from "@/app/components/UI/Toast";
 
 const IncidentDetail = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState<boolean>(false);
   const [incident, setIncident] = useState<any>();
-
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   useEffect(() => {
     if (id) {
       fetchIncident(Array.isArray(id) ? id[0] : id);
@@ -21,10 +23,12 @@ const IncidentDetail = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents${id}`, {method:'GET'});
+      const response = await fetch(`${apiUrl}/incidents/${id}`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        console.log("DATA: ", data)
+        console.log("DATA: ", data);
         setIncident(data);
       } else {
         console.error("Failed to fetch data");
@@ -36,12 +40,100 @@ const IncidentDetail = () => {
     }
   };
 
-  const handleApprove = () => {
-    console.log("Incident Approved");
+  const handleApprove = async () => {
+    setLoading(true);
+
+    try {
+      const updatedIncident = {
+        ...incident,
+        status: "APPROVED",
+      };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/incidents/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedIncident),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("DATA: ", data);
+        setIncident(data);
+        setError(null);
+        setSuccess("You have successfully approved incident.");
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      setSuccess(null);
+      setError(error);
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = () => {
-    console.log("Incident Rejected");
+  const handleReject = async () => {
+    setLoading(true);
+    try {
+      const updatedIncident = {
+        ...incident,
+        status: "REJECTED",
+      };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/incidents/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedIncident),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("DATA: ", data);
+        setIncident(data);
+        setError(null);
+        setSuccess("You have successfully rejected incident.");
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      setError(error);
+      setSuccess(null);
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStatusTag = (status: string) => {
+    let tagColor = "";
+    let tagText = "";
+
+    switch (status) {
+      case "PENDING":
+        tagColor = "bg-yellow-500 text-white";
+        tagText = "Pending";
+        break;
+      case "APPROVED":
+        tagColor = "bg-green-500 text-white";
+        tagText = "Approved";
+        break;
+      case "REJECTED":
+        tagColor = "bg-red-500 text-white";
+        tagText = "Rejected";
+        break;
+      default:
+        tagColor = "bg-gray-500 text-white";
+        tagText = "Unknown";
+    }
+
+    return (
+      <span className={`inline px-4 py-2 rounded-md ${tagColor}`}>
+        {tagText}
+      </span>
+    );
   };
 
   if (loading) {
@@ -56,6 +148,7 @@ const IncidentDetail = () => {
       borderThickness="border-b-4"
     >
       <div className="space-y-4">
+        {/* Incident Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -63,7 +156,9 @@ const IncidentDetail = () => {
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Residence:</h4>
-            <p className="text-sm sm:text-base">{incident?.respondent_residence}</p>
+            <p className="text-sm sm:text-base">
+              {incident?.respondent_residence}
+            </p>
           </div>
         </div>
 
@@ -102,6 +197,7 @@ const IncidentDetail = () => {
           </div>
         </div>
 
+        {/* Incident Details */}
         <div className="space-y-2">
           <h4 className="font-semibold text-sm sm:text-base">
             Incident Details:
@@ -118,21 +214,45 @@ const IncidentDetail = () => {
           </p>
         </div>
 
-        <div className="mt-6 flex gap-4">
+        <div className="mt-10">
+          <h4 className="font-semibold text-sm sm:text-base">
+            Status: {renderStatusTag(incident?.status)}
+          </h4>
+        </div>
+
+        <div className="mt-10 pt-5 flex gap-4 ">
           <Button
             color="success"
-            text="Approve"
+            text={loading ? "Approving..." : "Approve"}
             onClick={handleApprove}
             icon={<FaCheck />}
           />
           <Button
             color="danger"
-            text="Reject"
+            text={loading ? "Rejecting..." : "Reject"}
             onClick={handleReject}
             icon={<FaTimes />}
           />
         </div>
       </div>
+
+      {success && (
+        <Toast
+          message={success}
+          type="success"
+          position="top-right"
+          onClose={() => setSuccess(null)}
+        />
+      )}
+
+      {error && (
+        <Toast
+          message={error}
+          type="error"
+          position="top-right"
+          onClose={() => setError(null)}
+        />
+      )}
     </BoxWrapper>
   );
 };
