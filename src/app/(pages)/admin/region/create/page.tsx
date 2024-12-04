@@ -68,7 +68,7 @@ const RegionForm = () => {
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className=" pb-5">
       <BoxWrapper
         icon={<FaCalendar />}
         title="Region Maintenance"
@@ -88,7 +88,7 @@ const RegionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form  className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
               <div>

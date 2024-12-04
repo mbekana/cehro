@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar'; 
 import LogoWithText from '../UI/LogoWithText';
 import Button from '@/app/components/UI/Button'; 
-import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle, FaEdit, FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire } from 'react-icons/fa';
+import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle,  FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire } from 'react-icons/fa';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
@@ -46,47 +46,42 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         },
       ],
     },
-    {
-      label: "Regions",
-      href: "/admin/region/history",
-      icon: <FaGlobe />,
-    },
-    {
-      label: "Categories",
-      href: "/admin/category/history",
-      icon: <FaFolder />, 
-    },
-    {
-      label: "Educations",
-      href: "/admin/education/history",
-      icon: <FaGraduationCap />, 
-    },
-    {
-      label: "User Roles",
-      href: "/admin/role/history",
-      icon: <FaUserShield />, 
-    },
-    {
-      label: "Source",
-      href: "/admin/source/history",
-      icon: <FaInfoCircle />, 
-    },
-    {
-      label: "Occupations",
-      href: "/admin/occupation/history",
-      icon: <FaUserTie />, 
-    },
+    
     {
       label: "Settings",
       href: "/settings",
       icon: <FaCog />,
       submenu: [
-        { label: "Region", href: "/admin/region/create", icon: <FaEdit /> },
-        { label: "Category", href: "/admin/category/create", icon: <FaEdit /> },
-        { label: "Education", href: "/admin/education/create", icon: <FaEdit /> },
-        { label: "User Role", href: "/admin/role/create", icon: <FaEdit /> },
-        { label: "Source", href: "/admin/source/create", icon: <FaEdit /> },
-        { label: "Occupations", href: "/admin/occupation/create", icon: <FaEdit /> },
+        {
+          label: "Regions",
+          href: "/admin/region/history",
+          icon: <FaGlobe />,
+        },
+        {
+          label: "Categories",
+          href: "/admin/category/history",
+          icon: <FaFolder />, 
+        },
+        {
+          label: "Educations",
+          href: "/admin/education/history",
+          icon: <FaGraduationCap />, 
+        },
+        {
+          label: "User Roles",
+          href: "/admin/role/history",
+          icon: <FaUserShield />, 
+        },
+        {
+          label: "Source",
+          href: "/admin/source/history",
+          icon: <FaInfoCircle />, 
+        },
+        {
+          label: "Occupations",
+          href: "/admin/occupation/history",
+          icon: <FaUserTie />, 
+        },
         {
           label: "Metrics",
           href: "/admin/metrics/history",
@@ -102,7 +97,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     },
   ];
 
-  // Toggle Sidebar visibility
+ 
   const toggleSidebar = () => setIsSidebarOpen(isSidebarOpen => !isSidebarOpen);
 
   return (

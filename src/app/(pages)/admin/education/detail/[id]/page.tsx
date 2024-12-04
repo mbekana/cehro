@@ -1,19 +1,17 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaBookOpen } from "react-icons/fa"; // Change the icon to represent education
-import { useParams } from "next/navigation"; 
+import { FaArrowLeft } from "react-icons/fa"; 
+import { useParams } from "next/navigation";
 import { Education } from "@/app/model/EducationModel";
 
-
-
 const EducationDetailsPage = () => {
-  const { id } = useParams(); 
-  const [education, setEducation] = useState<Education | null>(null); 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const { id } = useParams();
+  const [education, setEducation] = useState<Education | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (id) {
@@ -21,10 +19,12 @@ const EducationDetailsPage = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/educations/${id}`, {method:'GET'});
+          const response = await fetch(`${apiUrl}/educations/${id}`, {
+            method: "GET",
+          });
           if (response.ok) {
             const data = await response.json();
-            console.log("Data: ", data)
+            console.log("Data: ", data);
             setEducation(data);
           } else {
             console.error("Education not found");
@@ -32,7 +32,7 @@ const EducationDetailsPage = () => {
         } catch (error) {
           console.error("Error fetching education data", error);
         } finally {
-          setLoading(false); 
+          setLoading(false);
         }
       };
 
@@ -40,21 +40,18 @@ const EducationDetailsPage = () => {
     }
   }, [id]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!education) {
+  if (!loading && !education) {
     return <div>Education not found</div>;
   }
 
   return (
-    <div className="bg-gray-100">
+    <div>
       <BoxWrapper
-        icon={<FaBookOpen />} // Change the icon to something related to education
+        icon={<FaArrowLeft />}
         title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Education Information"
@@ -68,22 +65,34 @@ const EducationDetailsPage = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700">Course Title</h3>
-              <p className="text-gray-600">{education.id}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700">Description</h3>
-              <p className="text-gray-600">{education.name}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700">Instructor</h3>
-              <p className="text-gray-600">{education.remark}</p>
-            </div>
-        
-          </div>
+
+          {loading ? (
+            <div className="ml-2 text-red-500">Loading...</div>
+          ) : (
+            <>
+              {" "}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    Course Title
+                  </h3>
+                  <p className="text-gray-600">{education.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    Description
+                  </h3>
+                  <p className="text-gray-600">{education.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    Instructor
+                  </h3>
+                  <p className="text-gray-600">{education.remark}</p>
+                </div>
+              </div>
+            </>
+          )}
         </Card>
       </BoxWrapper>
     </div>

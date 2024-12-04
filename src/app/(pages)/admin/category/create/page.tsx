@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
+import Toast from "@/app/components/UI/Toast";
 
 type RegionFormData = {
   name: string;
@@ -20,7 +21,8 @@ const CategoryForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -35,10 +37,10 @@ const CategoryForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setResponseMessage(null);
+    // setResponseMessage(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
       const response = await fetch(`${apiUrl}/categories`, {
         method: "POST",
@@ -53,27 +55,28 @@ const CategoryForm = () => {
       }
 
       const result = await response.json();
-      setResponseMessage(`Category created successfully: ${result.name}`);
-
-      // Reset form after successful submission
+      setSuccess(`Category created successfully: ${result.name}`);
+      setError(null);
       setFormData({
         name: "",
         remark: "",
       });
     } catch (error: any) {
-      setResponseMessage(`Error: ${error.message}`);
+      setSuccess(null);
+      setError(`${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
+        icon={<FaArrowLeft />}
         title="Category Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Category Form"
@@ -88,7 +91,7 @@ const CategoryForm = () => {
             marginBottom="mb-6"
           />
 
-          <form  className="space-y-6">
+          <form className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
@@ -119,12 +122,22 @@ const CategoryForm = () => {
         </Card>
       </BoxWrapper>
 
-      {responseMessage && (
-        <div className="mt-4 text-center">
-          <p className={responseMessage.startsWith("Error") ? "text-red-500" : "text-green-500"}>
-            {responseMessage}
-          </p>
-        </div>
+      {success && (
+        <Toast
+          type="success"
+          message={success}
+          onClose={() => {}}
+          position={"top-right"}
+        />
+      )}
+
+      {error && (
+        <Toast
+          type="error"
+          message={error}
+          onClose={() => {}}
+          position={"top-right"}
+        />
       )}
 
       <div className="flex justify-end mt-4 mr-24">
@@ -135,6 +148,7 @@ const CategoryForm = () => {
           elevation={4}
           disabled={isSubmitting}
           onClick={handleSubmit}
+          icon={<FaPlus />}
         />
       </div>
     </div>

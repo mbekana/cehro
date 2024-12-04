@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
+import { FaPlus, FaSchool } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
@@ -39,7 +39,7 @@ const Educations = () => {
       if (response.ok) {
         const data = await response.json();
         setEducation(data);
-        setFilteredEducation(data); 
+        setFilteredEducation(data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -62,7 +62,7 @@ const Educations = () => {
       edu.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredEducation(filtered);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -75,7 +75,7 @@ const Educations = () => {
         router.push(`/admin/education/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id); 
+        handleDelete(row.id);
         break;
       default:
         break;
@@ -102,14 +102,10 @@ const Educations = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <>
       <BoxWrapper
-        icon={<FaExclamationTriangle />}
+        icon={<FaSchool />}
         title="Educations"
         borderColor="border-primary"
         borderThickness="border-b-4"
@@ -132,7 +128,7 @@ const Educations = () => {
           </Link>
         </div>
         {loading ? (
-          <div>Loading...</div>
+          <div className="ml-2 text-red-500">Loading...</div>
         ) : (
           <>
             <Table

@@ -12,4 +12,5 @@ export interface LegalFramework {
   impact: string;
   createdAt: string;
   updatedAt: string;
+  status?: string;
 }

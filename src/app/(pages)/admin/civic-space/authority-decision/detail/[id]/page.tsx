@@ -5,20 +5,21 @@ import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
+import Toast from "@/app/components/UI/Toast";
 
-// Define the structure of the fetched data (you can modify this to match your API response structure)
 type AuthorityDecisionData = {
-  assesementCategory: string;
   affectedArea: string;
   city: string;
   region: string;
   source: string;
-  file: string; // File URL (PDF)
-  media: string; // Media URL (image, video, etc.)
+  file: string; 
+  media: string; 
   metrics: string;
-  remark: string;
+  insight: string;
   impact: string;
-  decision: string; // New field for decision
+  decision: string; 
+  status?:string;
 };
 
 const AuthorityDecisionDetail = () => {
@@ -27,8 +28,9 @@ const AuthorityDecisionDetail = () => {
   const [authorityDecision, setAuthorityDecision] = useState<AuthorityDecisionData | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  // Fetch the data when the component mounts
   useEffect(() => {
     const fetchAuthorityDecisionData = async () => {
       setLoading(true);
@@ -51,7 +53,6 @@ const AuthorityDecisionDetail = () => {
     fetchAuthorityDecisionData();
   }, [id]);
 
-  // Determine the media type (image, video, pdf)
   useEffect(() => {
     if (authorityDecision?.media) {
       const mediaUrl = authorityDecision.media;
@@ -67,18 +68,101 @@ const AuthorityDecisionDetail = () => {
     }
   }, [authorityDecision]);
 
-  // Handle Approve and Reject actions
-  const handleApprove = () => {
-    console.log("Approved");
-    // Add approval logic here
+  const handleApprove = async () => {
+    setLoading(true);
+
+    try {
+      const updatedIncident = {
+        ...authorityDecision,
+        status: "APPROVED",
+      };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedIncident),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("DATA: ", data);
+        setAuthorityDecision(data);
+        setError(null);
+        setSuccess("You have successfully approved incident.");
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      setSuccess(null);
+      setError(error);
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = () => {
-    console.log("Rejected");
-    // Add rejection logic here
+  const handleReject = async () => {
+    setLoading(true);
+    try {
+      const updatedIncident = {
+        ...authorityDecision,
+        status: "REJECTED",
+      };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedIncident),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("DATA: ", data);
+        setAuthorityDecision(data);
+        setError(null);
+        setSuccess("You have successfully rejected authority decision.");
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      setError(error);
+      setSuccess(null);
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Display loading state while fetching data
+  const renderStatusTag = (status: string) => {
+    let tagColor = "";
+    let tagText = "";
+
+    switch (status) {
+      case "PENDING":
+        tagColor = "bg-yellow-500 text-white";
+        tagText = "Pending";
+        break;
+      case "APPROVED":
+        tagColor = "bg-green-500 text-white";
+        tagText = "Approved";
+        break;
+      case "REJECTED":
+        tagColor = "bg-red-500 text-white";
+        tagText = "Rejected";
+        break;
+      default:
+        tagColor = "bg-gray-500 text-white";
+        tagText = "PENDING";
+    }
+
+    return (
+      <span className={`inline px-4 py-2 rounded-md ${tagColor}`}>
+        {tagText}
+      </span>
+    );
+  };
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -93,14 +177,10 @@ const AuthorityDecisionDetail = () => {
       title={`Authority Decision Detail: ${authorityDecision.region}`}
       borderColor="border-primary"
       borderThickness="border-b-4"
+      shouldGoBack={true}
     >
       <div className="space-y-6">
-        {/* Basic Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold text-sm sm:text-base">Assessment Category:</h4>
-            <p className="text-sm sm:text-base">{authorityDecision.assesementCategory}</p>
-          </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Affected Area:</h4>
             <p className="text-sm sm:text-base">{authorityDecision.affectedArea}</p>
@@ -127,6 +207,11 @@ const AuthorityDecisionDetail = () => {
             <h4 className="font-semibold text-sm sm:text-base">Metrics:</h4>
             <p className="text-sm sm:text-base">{authorityDecision.metrics}</p>
           </div>
+          <div>
+          <h4 className="font-semibold text-sm sm:text-base">
+            Status: {renderStatusTag(authorityDecision?.status)}
+          </h4>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -136,26 +221,23 @@ const AuthorityDecisionDetail = () => {
           </div>
         </div>
 
-        {/* Remarks */}
         <div className="space-y-2">
-          <h4 className="font-semibold text-sm sm:text-base">Remarks:</h4>
-          <p className="text-sm sm:text-base">{authorityDecision.remark}</p>
+        <h4 className="font-semibold text-sm sm:text-base">CEHRO&apos;s Insight:</h4>
+        <p className="text-sm sm:text-base">{authorityDecision.insight}</p>
         </div>
 
-        {/* Decision */}
         <div className="space-y-2">
           <h4 className="font-semibold text-sm sm:text-base">Decision:</h4>
           <p className="text-sm sm:text-base">{authorityDecision.decision}</p>
         </div>
 
-        {/* File and Media Section */}
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">File:</h4>
             <Button
               color="primary"
               text="Open File"
-              onClick={() => window.open(authorityDecision.file, "_blank")} // Opens the file in a new tab
+              onClick={() => window.open(authorityDecision.file, "_blank")} 
               icon={<FaExternalLinkAlt />}
               size="large"
             />
@@ -163,12 +245,13 @@ const AuthorityDecisionDetail = () => {
 
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
-            {/* Render appropriate media based on mediaType */}
             {mediaType === "image" && (
-              <img
+              <Image
                 src={authorityDecision.media}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
+                height={100}
+                width={100}
               />
             )}
 
@@ -214,6 +297,23 @@ const AuthorityDecisionDetail = () => {
           />
         </div>
       </div>
+      {success && (
+        <Toast
+          message={success}
+          type="success"
+          position="top-right"
+          onClose={() => setSuccess(null)}
+        />
+      )}
+
+      {error && (
+        <Toast
+          message={error}
+          type="error"
+          position="top-right"
+          onClose={() => setError(null)}
+        />
+      )}
     </BoxWrapper>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
+import {  FaPlus, FaUserShield } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import { useEffect, useState } from "react";
@@ -13,13 +13,11 @@ import { LegalFramework } from "@/app/model/LegalFramework";
 import { DecisionAuthority } from "@/app/model/DecisionAuthority";
 
 const columns: (keyof DecisionAuthority)[] = [
-
-  "decisionImpact",
-  "decisionMetrics",
-  "decisionRegion",
   "id",
+  "region",
+  "source",
   "insight",
-  "sourceOfDecision"
+  "status"
 ];
 
 const AuthorityDecisionList = () => {
@@ -94,7 +92,7 @@ const AuthorityDecisionList = () => {
         router.push(`/admin/civic-space/authority-decision/update/${row.id}`); 
         break;
       case "delete":
-        handleDelete(row.id); // Delete action
+        handleDelete(row.id); 
         break;
       default:
         break;
@@ -103,7 +101,7 @@ const AuthorityDecisionList = () => {
 
   return (
     <BoxWrapper
-      icon={<FaExclamationTriangle />}
+      icon={<FaUserShield />}
       title="Authority Decision "
       borderColor="border-primary"
       borderThickness="border-b-4"

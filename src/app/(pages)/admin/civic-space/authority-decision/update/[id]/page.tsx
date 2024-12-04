@@ -11,17 +11,18 @@ import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import { Impact } from "@/app/model/Impact";
 
-// Type definition for the Authority Decision form data
-type AuthorityDecisionFormData = {
-  decisionArea: string;
-  decisionRegion: string;
-  sourceOfDecision: string;
-  decisionFile: any;
-  decisionMedia: any;
-  mediaType: string;
-  decisionMetrics: string;
+
+type AuthorityDecisionData = {
+  affectedArea: string;
+  city: string;
+  region: string;
+  source: string;
+  file: File;
+  media: File;
+  mediaType?: string;
+  metrics: string;
   insight: string;
-  decisionImpact: string;
+  impact: string;
 };
 
 const UpdateAuthorityDecision = () => {
@@ -34,16 +35,17 @@ const UpdateAuthorityDecision = () => {
   const [regions, setRegions] = useState<any[]>([]);
   const [sources, setSources] = useState<any[]>([]);
 
-  const [formData, setFormData] = useState<AuthorityDecisionFormData>({
-    decisionArea: "",
-    decisionRegion: "",
-    sourceOfDecision: "",
-    decisionFile: null,
-    decisionMedia: null,
+  const [formData, setFormData] = useState<AuthorityDecisionData>({
+    affectedArea: "",
+    region: "",
+    source: "",
+    file: null,
+    media: null,
     mediaType: "",
-    decisionMetrics: "",
+    metrics: "",
     insight: "",
-    decisionImpact: "",
+    impact: "",
+    city: "",
   });
 
   useEffect(() => {
@@ -59,16 +61,16 @@ const UpdateAuthorityDecision = () => {
           const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'GET'});
           const data = await response.json();
           setFormData({
-            decisionArea: data.decisionArea,
-            // decisionCity: data.decisionCity,
-            decisionRegion: data.decisionRegion,
-            sourceOfDecision: data.source,
-            decisionFile:  getFileNameFromPath(data.decisionFile),
-            decisionMedia: data.decisionMedia ? { name: getFileNameFromPath(data.decisionMedia) } : null,
+            affectedArea: data.affectedArea,
+            city:data.city,
+            region: data.region,
+            source: data.source,
+            file: data.file,
+            media: data.media,
             mediaType: data.mediaType,
-            decisionMetrics: data.metrics,
+            metrics: data.metrics,
             insight: data.insight,
-            decisionImpact: data.decisionImpact,
+            impact: data.impact,
           });
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -144,10 +146,10 @@ const UpdateAuthorityDecision = () => {
     }
   };
 
-  const getFileNameFromPath = (filePath: string, maxLength: number = 20): string => {
-    const fileName = filePath.split('/').pop()?.split('\\').pop() || '';
-    return fileName.length > maxLength ? fileName.slice(0, maxLength) + '...' : fileName;
-  };
+  // const getFileNameFromPath = (filePath: string, maxLength: number = 20): string => {
+  //   const fileName = filePath.split('/').pop()?.split('\\').pop() || '';
+  //   return fileName.length > maxLength ? fileName.slice(0, maxLength) + '...' : fileName;
+  // };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -157,7 +159,7 @@ const UpdateAuthorityDecision = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'decisionFile' | 'decisionMedia') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'file' | 'media') => {
     const file = e.target.files ? e.target.files[0] : null;
     setFormData((prevData) => ({
       ...prevData,
@@ -190,8 +192,8 @@ const UpdateAuthorityDecision = () => {
     setLoading(true);
     const formPayload = {
       ...formData,
-      decisionFile: formData?.decisionFile ? formData.decisionFile.name : null,
-      decisionMedia: formData.decisionMedia ? formData.decisionMedia.name : null,
+      decisionFile: formData?.file ? formData.file.name : null,
+      decisionMedia: formData.media ? formData.media.name : null,
     };
 
     try {
@@ -216,15 +218,16 @@ const UpdateAuthorityDecision = () => {
         const result = await response.json();
         console.log("Data saved successfully:", result);
         setFormData({
-          decisionArea: "",
-          decisionRegion: "",
-          sourceOfDecision: "",
-          decisionFile: null,
-          decisionMedia: null,
+          affectedArea: "",
+          region: "",
+          source: "",
+          file: null,
+          media: null,
           mediaType: "",
-          decisionMetrics: "",
+          metrics: "",
           insight: "",
-          decisionImpact: "",
+          impact: "",
+          city: "",
         });
         setLoading(false)
         setSuccess("Authority Decision Updated Successfully");
@@ -241,7 +244,8 @@ const UpdateAuthorityDecision = () => {
       setError(error);
     }
   };
-  return (
+
+ return (
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
@@ -268,22 +272,22 @@ const UpdateAuthorityDecision = () => {
               <div>
                 <Input
                   type="text"
-                  label="Decision Area"
-                  placeholder=" decision area"
-                  value={formData.decisionArea}
+                  label="Affected Area"
+                  placeholder="Affected Area"
+                  value={formData.affectedArea}
                   onChange={handleChange}
-                  name="decisionArea"
+                  name="affectedArea"
                 />
               </div>
 
               <div>
                 <Input
                   type="select"
-                  label="Decision Region"
-                  placeholder="Decision Region"
-                  value={formData.decisionRegion}
+                  label="Region"
+                  placeholder="Region"
+                  value={formData.region}
                   onChange={handleChange}
-                  name="decisionRegion"
+                  name="region"
                 >
                   <option value="">Select Region</option>
                   {regions.map((region, index) => (
@@ -293,15 +297,24 @@ const UpdateAuthorityDecision = () => {
                   ))}
                 </Input>
               </div>
-
+              <div>
+                <Input
+                  type="text"
+                  label="City"
+                  placeholder="City"
+                  value={formData.city}
+                  onChange={handleChange}
+                  name="city"
+                />
+              </div>
               <div>
                 <Input
                   type="select"
                   label="Source of Decision"
                   placeholder="Source of decision"
-                  value={formData.sourceOfDecision}
+                  value={formData.source}
                   onChange={handleChange}
-                  name="sourceOfDecision"
+                  name="source"
                 >
                   <option value="">Select Source</option>
                   {sources.map((source, index) => (
@@ -311,14 +324,34 @@ const UpdateAuthorityDecision = () => {
                   ))}
                 </Input>
               </div>
+
               <div>
                 <Input
                   type="select"
-                  label="Decision Metrics"
-                  placeholder=" decision metrics"
-                  value={formData.decisionMetrics}
+                  label="Impact"
+                  placeholder="Impact"
+                  value={formData.impact}
                   onChange={handleChange}
-                  name="decisionMetrics"
+                  name="impact"
+                >
+                  <option value="">Select Impact</option>
+
+                  {impacts.map((impact, index) => (
+                    <option key={index} value={impact.id}>
+                      {impact.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+
+              <div>
+                <Input
+                  type="select"
+                  label="Metrics"
+                  placeholder=" Metrics"
+                  value={formData.metrics}
+                  onChange={handleChange}
+                  name="metrics"
                 >
                   <option value="">Select Metrics</option>
                   {metrics.map((metric, index) => (
@@ -329,43 +362,25 @@ const UpdateAuthorityDecision = () => {
                 </Input>
               </div>
               <div>
-              <Input
-                type="select"
-                label="Decision Impact"
-                placeholder="Decision Impact"
-                value={formData.decisionImpact}
-                onChange={handleChange}
-                name="decisionImpact"
-              >
-                <option value="">Select Impact</option>
-
-                {impacts.map((impact, index) => (
-                  <option key={index} value={impact.id}>
-                    {impact.name}
-                  </option>
-                ))}
-              </Input>
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700">
                   File Upload
                 </label>
                 <div className="mt-1">
                   <label
-                    htmlFor="decisionFile"
+                    htmlFor="file"
                     className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
                   >
                     Select File
                   </label>
                   <input
-                    id="decisionFile"
+                    id="file"
                     type="file"
-                    onChange={(e) => handleFileChange(e, "decisionFile")}
+                    onChange={(e) => handleFileChange(e, "file")}
                     className="hidden"
                   />
-                  {formData.decisionFile && (
+                  {formData.file && (
                     <span className="text-sm text-gray-600 ml-2">
-                      {formData.decisionFile.name}
+                      {formData.file?.name}
                     </span>
                   )}
                 </div>
@@ -385,18 +400,16 @@ const UpdateAuthorityDecision = () => {
                   <input
                     id="media"
                     type="file"
-                    onChange={(e) => handleFileChange(e, "decisionMedia")}
+                    onChange={(e) => handleFileChange(e, "media")}
                     className="hidden"
                   />
-                  {formData.decisionMedia && (
+                  {formData.media && (
                     <span className="text-sm text-gray-600 ml-2">
-                      {formData.decisionMedia.name}
+                      {formData.media.name}
                     </span>
                   )}
                 </div>
               </div>
-
-           
 
               <div>
                 <Input
@@ -408,7 +421,6 @@ const UpdateAuthorityDecision = () => {
                   name="insight"
                 />
               </div>
-        
             </div>
 
             <div className="mt-4">
@@ -443,6 +455,5 @@ const UpdateAuthorityDecision = () => {
     </div>
   );
 };
-
 
 export default UpdateAuthorityDecision;

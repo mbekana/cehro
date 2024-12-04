@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
@@ -41,7 +41,7 @@ const EducationForm = () => {
       return;
     }
 
-    setError(null); // Clear any previous errors
+    setError(null); 
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -60,7 +60,6 @@ const EducationForm = () => {
 
       setSuccessMessage("Education created successfully");
 
-      // Reset form data
       setFormData({ name: "", remark: "" });
 
       setTimeout(() => {
@@ -74,10 +73,11 @@ const EducationForm = () => {
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
+        icon={<FaArrowLeft />}
         title="Education Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Education Form"

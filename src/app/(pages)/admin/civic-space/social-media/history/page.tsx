@@ -12,12 +12,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const columns: (keyof LegalFramework)[] = [
-  "assesementCategory",
+  "id",
   "affectedArea",
   "city",
   "region",
   "metrics",
-  "impact",
+  "status",
 ];
 
 const SocialMediaList = () => {
@@ -34,7 +34,13 @@ const SocialMediaList = () => {
   const fetchIncidents = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/civic-space/social-media`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/socialMediaPosts`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setSocialMediaPosts(data);
