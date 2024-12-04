@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React from 'react';
 
 type LogoWithTextProps = {
@@ -39,11 +40,11 @@ const LogoWithText: React.FC<LogoWithTextProps> = ({
 
   return (
     <div className="flex items-center space-x-4 p-3 px-[80px]  rounded-md ">
-      {/* Replace with Image later */}
-      <img
+      <Image
         src={logoSrc}
         alt={altText}
-        
+        height="100"
+        width="100"
         className={`${logoSizeClasses[size]} object-contain`}
       />
       {text && <p className={`${textSizeClasses[textSize]} text-gray-800 font-bold w-[230px] font-crimso`}>{text}</p>} 

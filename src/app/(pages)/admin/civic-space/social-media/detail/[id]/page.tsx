@@ -6,6 +6,7 @@ import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
+import Image from "next/image";
 
 type SocialMediaPostData = {
   id?:string;
@@ -182,7 +183,6 @@ const SocialMediaPostDetail = () => {
       borderThickness="border-b-4"
     >
       <div className="space-y-6">
-        {/* Basic Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Id:</h4>
@@ -247,10 +247,12 @@ const SocialMediaPostDetail = () => {
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
             {/* Render appropriate media based on mediaType */}
             {mediaType === "image" && (
-              <img
+              <Image
                 src={socialMediaPost.media}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
+                height="100"
+                width="100"
               />
             )}
 

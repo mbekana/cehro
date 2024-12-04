@@ -6,6 +6,7 @@ import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
+import Image from "next/image";
 
 type LegalFrameworkData = {
   assesementCategory: string;
@@ -53,7 +54,6 @@ const LegalFrameworkDetail = () => {
     fetchLegalFrameworkData();
   }, [id]);
 
-  // Determine the media type (image, video, pdf)
   useEffect(() => {
     if (legalFramework?.media) {
       const mediaUrl = legalFramework.media;
@@ -69,7 +69,6 @@ const LegalFrameworkDetail = () => {
     }
   }, [legalFramework]);
 
-  // Handle Approve and Reject actions
   const handleApprove = async() => {
     setLoading(true);
 
@@ -138,7 +137,6 @@ const LegalFrameworkDetail = () => {
     }
   };
 
-  // Display loading state while fetching data
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -243,7 +241,7 @@ const LegalFrameworkDetail = () => {
             <Button
               color="primary"
               text="Open File"
-              onClick={() => window.open(legalFramework.file, "_blank")} // Opens the file in a new tab
+              onClick={() => window.open(legalFramework.file, "_blank")}
               icon={<FaExternalLinkAlt />}
               size="large"
             />
@@ -256,8 +254,8 @@ const LegalFrameworkDetail = () => {
                 src={legalFramework.media}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
-                height={100}
-                width={100}
+                height="100"
+                width="100"
               />
             )}
 
