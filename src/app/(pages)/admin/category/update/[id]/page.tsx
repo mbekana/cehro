@@ -4,10 +4,11 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaCalendar, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
+import Toast from "@/app/components/UI/Toast";
 
 type RegionFormData = {
   name: string;
@@ -16,13 +17,15 @@ type RegionFormData = {
 
 const UpdateCategory = () => {
   const { id } = useParams();
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<RegionFormData>({
     name: "",
     remark: "",
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+ 
 
   useEffect(() => {
     if (id) {
@@ -39,6 +42,7 @@ const UpdateCategory = () => {
             name: data.name,
             remark: data.remark,
           });
+          
         } catch (error) {
           setError(`${error}`);
         } finally {
@@ -62,6 +66,7 @@ const UpdateCategory = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${apiUrl}/categories/${id}`, {
@@ -71,26 +76,25 @@ const UpdateCategory = () => {
         },
         body: JSON.stringify(formData),
       });
+      setFormData({
+        name: "",
+        remark: "",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update category");
       }
 
-      // Success - Set success message
-      setSuccessMessage("Category updated successfully");
-
-      // Clear the success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setSuccess("Category updated successfully");
+      setError(null);
+      setLoading(false)    
     } catch (error) {
       setError(`${error}`);
+      setSuccess(null);
+      setLoading(false)
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   if (error) {
     return <div>{error}</div>;
@@ -148,23 +152,32 @@ const UpdateCategory = () => {
         </Card>
       </BoxWrapper>
 
-      {/* Display success message */}
-      {successMessage && (
-        <div className="mt-4 text-center text-green-500">{successMessage}</div>
+      {success && (
+        <Toast
+          type="success"
+          message={success}
+          onClose={() => {}}
+          position={"top-right"}
+        />
       )}
 
-      {/* Display error message */}
       {error && (
-        <div className="mt-4 text-center text-red-500">{error}</div>
+        <Toast
+          type="error"
+          message={error}
+          onClose={() => {}}
+          position={"top-right"}
+        />
       )}
 
       <div className="flex justify-end mt-4 mr-24">
         <Button
           color="primary"
-          text="Update Category"
+          text={loading ? "Saving...":"Update Category"}
           size="large"
           elevation={4}
           onClick={handleSubmit}
+          icon={<FaPlus/>}
         />
       </div>
     </div>

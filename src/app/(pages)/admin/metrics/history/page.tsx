@@ -124,7 +124,7 @@ const Metricses = () => {
       </div>
 
       {loading ? (
-        <div>Loading...</div>
+        <div className='ml-2 text-red-500'>Loading...</div>
       ) : (
         <>
           <Table

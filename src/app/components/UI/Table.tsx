@@ -1,15 +1,17 @@
 "use client";
 
 import React from 'react';
+import Tag from './Tag';  
 import ActionDropdown from './ActionDropdown';  
 
 interface TableProps {
   columns: string[];
   data: Record<string, any>[]; 
   onAction: (action: string, row: Record<string, any>) => void;  
+  customTagProps?: Record<string, any>; 
 }
 
-const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
+const Table: React.FC<TableProps> = ({ columns, data, onAction, customTagProps }) => {
   return (
     <div className="bg-white rounded-sm w-full">
       <div className="hidden md:block">
@@ -25,11 +27,17 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
             </tr>
           </thead>
           <tbody className="overflow-x-auto">
-          {data.map((row, rowIndex) => (
+            {data.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t hover:bg-gray-50">
                 {columns.map((col, colIndex) => (
                   <td key={colIndex} className="p-2 text-gray-700 text-xs md:text-sm lg:text-base">
-                    {col === 'incident_happened' ? (
+                    {col === 'status' ? (  
+                      <Tag 
+                        status={row[col]}  
+                        customText={customTagProps?.customText || ''}  
+                        customColor={customTagProps?.customColor || ''}  
+                      />
+                    ) : col === 'incident_happened' ? (
                       <>
                         <div>{row[col]?.woreda}</div>
                         <div>{row[col]?.zone}</div>
@@ -40,7 +48,7 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
                   </td>
                 ))}
                 <td className="p-2">
-                 <ActionDropdown onAction={(action) => onAction(action, row)} />
+                  <ActionDropdown onAction={(action) => onAction(action, row)} />
                 </td>
               </tr>
             ))}
@@ -54,7 +62,13 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
             {columns.map((col, colIndex) => (
               <div key={colIndex} className="mb-2">
                 <strong className="block text-sm text-gray-600">{col}:</strong>
-                {col === 'incident_happened' ? (
+                {col === 'status' ? (
+                  <Tag 
+                    status={row[col]}  
+                    customText={customTagProps?.customText || ''} 
+                    customColor={customTagProps?.customColor || ''}  
+                  />
+                ) : col === 'incident_happened' ? (
                   <div>
                     <div>{row[col]?.woreda}</div>
                     <div>{row[col]?.zone}</div>
@@ -64,7 +78,7 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction }) => {
                 )}
               </div>
             ))}
-            <div className="mt-4 ">
+            <div className="mt-4">
               <ActionDropdown onAction={(action) => onAction(action, row)} /> 
             </div>
           </div>

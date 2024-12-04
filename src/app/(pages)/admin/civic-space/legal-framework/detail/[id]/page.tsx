@@ -187,7 +187,6 @@ const LegalFrameworkDetail = () => {
       shouldGoBack={true}
     >
       <div className="space-y-6">
-        {/* Basic Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Assessment Category:</h4>
@@ -252,12 +251,13 @@ const LegalFrameworkDetail = () => {
 
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
-            {/* Render appropriate media based on mediaType */}
             {mediaType === "image" && (
-              <img
+              <Image
                 src={legalFramework.media}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
+                height={100}
+                width={100}
               />
             )}
 

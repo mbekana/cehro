@@ -24,7 +24,7 @@ const LinkItem: React.FC<LinkItemProps> = ({ href, label, icon, className = '', 
     <Link href={href} passHref legacyBehavior>
       <a
         className={`flex items-center justify-between py-2 px-4 font-medium transition-colors duration-200 rounded-md ${
-          isActive ? 'text-white font-bolder ' : 'text-gray-200'
+          isActive ? 'text-white font-bolder ' : 'text-blue-200'
           } ${className}`}
         onClick={handleClick}
       >

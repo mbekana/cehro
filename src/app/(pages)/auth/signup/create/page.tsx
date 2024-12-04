@@ -2,7 +2,7 @@
 
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -20,6 +20,34 @@ const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [role, setRole] = useState<string>("");
+
+
+  useEffect(()=>{
+    fetchRoles()
+  }, [])
+
+  const fetchRoles = async() =>{
+    try{
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/roles`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+  
+      const data = await response.json();
+      if(data != null){
+        setRoles(data)
+        setError(null)
+      }
+    }catch(error){
+      setError(error)
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,6 +73,8 @@ const SignupPage: React.FC = () => {
       case "phoneNumber":
         setPhoneNumber(value);
         break;
+      case "role":
+        setRole(value);
       default:
         break;
     }
@@ -61,7 +91,8 @@ const SignupPage: React.FC = () => {
       !email ||
       !password ||
       !confirmPassword ||
-      !phoneNumber
+      !phoneNumber ||
+      !role
     ) {
       setError("All fields are required.");
       return;
@@ -95,6 +126,7 @@ const SignupPage: React.FC = () => {
       email,
       password,
       phoneNumber,
+      role
     };
 
     try {
@@ -119,6 +151,7 @@ const SignupPage: React.FC = () => {
         setPassword("");
         setConfirmPassword("");
         setPhoneNumber("");
+        setRole("");
       } else {
         setError(data.message || "An error occurred during signup.");
       }
@@ -132,7 +165,7 @@ const SignupPage: React.FC = () => {
   return (
     <div>
       <BoxWrapper
-        icon={<FaArrowLeft/>}
+        icon={<FaArrowLeft />}
         title="User Signup"
         borderColor="border-primary"
         borderThickness="border-b-4"
@@ -152,7 +185,7 @@ const SignupPage: React.FC = () => {
           />
 
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 type="text"
                 placeholder="First Name"
@@ -190,9 +223,21 @@ const SignupPage: React.FC = () => {
                 onChange={handleInputChange}
                 borderRadius={1}
               />
+
+              <Input
+                type="select"
+                placeholder="Role"
+                value={role}
+                name="role"
+                onChange={handleInputChange}
+                borderRadius={1}
+              >
+                <option value="">Select Role</option>
+                {roles.map((role, index)=>(<option key={index} value={role.id}>{role.name}</option>))}
+                </Input>
               <Input
                 type="password"
-                placeholder="Passowrd"
+                placeholder="Password"
                 value={password}
                 name="password"
                 onChange={handleInputChange}
@@ -217,6 +262,7 @@ const SignupPage: React.FC = () => {
                 size="large"
               />
             </div>
+
             {success && (
               <Toast
                 message={success}

@@ -1,12 +1,13 @@
 export class DecisionAuthority {
-  decisionArea: string;
-  decisionFile: string;
-  decisionImpact: string;
-  decisionMetrics: string;
-  decisionRegion: string;
+  affectedArea: string;
+  file: string;
+  impact: string;
+  metrics: string;
+  region: string;
   id: string;
   insight: string;
   media: string;
   mediaType: string;
-  sourceOfDecision: string;
+  source: string;
+  status?: string;
 }

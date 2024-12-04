@@ -115,6 +115,10 @@ const Impacts = () => {
           />
         </div>
       </div>
+      {loading ? (
+        <div>Loading...</div> 
+      ) : (
+        <>
       <Table columns={columns} data={currentData} onAction={handleAction} />
       <div className="flex justify-end mt-4">
         <Pagination
@@ -123,6 +127,8 @@ const Impacts = () => {
           onPageChange={handlePageChange}
         />
       </div>
+      </>
+      )}
     </BoxWrapper>
   );
 };

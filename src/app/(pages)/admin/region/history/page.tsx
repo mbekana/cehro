@@ -96,9 +96,7 @@ const Regions = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+ 
 
   return (
     <BoxWrapper
@@ -122,7 +120,7 @@ const Regions = () => {
       </div>
 
       {loading ? (
-        <div>Loading...</div>
+        <div className='ml-2 text-red-500'>Loading...</div>
       ) : (
         <>
      <Table columns={columns} data={filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />

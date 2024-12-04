@@ -5,9 +5,11 @@ import { useParams } from "next/navigation";  // Import useParams
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar, FaPlus } from "react-icons/fa";
+import {  FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
+import Toast from "@/app/components/UI/Toast";
+import { Impact } from "@/app/model/Impact";
 
 type SocialMediaFormData = {
   assesementCategory: string;
@@ -19,12 +21,17 @@ type SocialMediaFormData = {
   media: File | null;
   mediaType: string;
   metrics: string;
-  remark: string;
+  insight: string;
   impact: string;
 };
 
 const SocialMediaEdit = () => {
-  const { id } = useParams();  // Unwrap params using useParams hook
+  const { id } = useParams();  
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [impacts, setImpacts] = useState<Impact[]>([]);
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
   const [formData, setFormData] = useState<SocialMediaFormData>({
     assesementCategory: "",
     affectedArea: "",
@@ -35,18 +42,70 @@ const SocialMediaEdit = () => {
     media: null,
     mediaType: "",
     metrics: "",
-    remark: "",
+    insight: "",
     impact: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [routerLoaded, setRouterLoaded] = useState<boolean>(false); 
 
   useEffect(() => {
+    fetchMetrics();
+    fetchImpacts();
+    fetchRegions();
     if (id) {
       setRouterLoaded(true);
       fetchSocialMediaData(Array.isArray(id) ? id[0] : id);  
     }
-  }, [id]);  // Depend on `id`
+  }, [id]);  
+
+  const fetchMetrics = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setMetrics(data);
+        console.log("Metrics: ", metrics);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
+
+  const fetchImpacts = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setImpacts(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
+
+  const fetchRegions = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setRegions(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+    }
+  };
 
   const fetchSocialMediaData = async (id: string) => {
     setLoading(true);
@@ -67,7 +126,7 @@ const SocialMediaEdit = () => {
           media: null,
           mediaType: data.mediaType || "",
           metrics: data.metrics || "",
-          remark: data.remark || "",
+          insight: data.insight || "",
           impact: data.impact || "",
         });
       } else {
@@ -157,15 +216,16 @@ const SocialMediaEdit = () => {
   }
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Edit Social Media"
+        icon={<FaArrowLeft />}
+        title="Social Media Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
-          title="Edit Social Media Form"
+          title="Social Media Form"
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -178,23 +238,12 @@ const SocialMediaEdit = () => {
           />
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <div>
-                <Input
-                  type="text"
-                  label="Assessment Category"
-                  placeholder="Enter assessment category"
-                  value={formData.assesementCategory}
-                  onChange={handleChange}
-                  name="assesementCategory"
-                />
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
                   type="text"
                   label="Affected Area"
-                  placeholder="Enter affected area"
+                  placeholder=" affected area"
                   value={formData.affectedArea}
                   onChange={handleChange}
                   name="affectedArea"
@@ -205,7 +254,7 @@ const SocialMediaEdit = () => {
                 <Input
                   type="text"
                   label="City"
-                  placeholder="Enter city"
+                  placeholder=" city"
                   value={formData.city}
                   onChange={handleChange}
                   name="city"
@@ -213,29 +262,9 @@ const SocialMediaEdit = () => {
               </div>
 
               <div>
-                <Input
-                  type="text"
-                  label="Region"
-                  placeholder="Enter region"
-                  value={formData.region}
-                  onChange={handleChange}
-                  name="region"
-                />
-              </div>
-
-              <div>
-                <Input
-                  type="text"
-                  label="Source"
-                  placeholder="Enter source"
-                  value={formData.source}
-                  onChange={handleChange}
-                  name="source"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">File Upload</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  File Upload
+                </label>
                 <div className="mt-1">
                   <label
                     htmlFor="file"
@@ -246,15 +275,21 @@ const SocialMediaEdit = () => {
                   <input
                     id="file"
                     type="file"
-                    onChange={(e) => handleFileChange(e, 'file')}
+                    onChange={(e) => handleFileChange(e, "file")}
                     className="hidden"
                   />
-                  {formData.file && <span className="text-sm text-gray-600 ml-2">{formData.file.name}</span>}
+                  {formData.file && (
+                    <span className="text-sm text-gray-600 ml-2">
+                      {formData.file.name}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Media Upload</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Media Upload
+                </label>
                 <div className="mt-1">
                   <label
                     htmlFor="media"
@@ -265,32 +300,61 @@ const SocialMediaEdit = () => {
                   <input
                     id="media"
                     type="file"
-                    onChange={(e) => handleFileChange(e, 'media')}
+                    onChange={(e) => handleFileChange(e, "media")}
                     className="hidden"
                   />
-                  {formData.media && <span className="text-sm text-gray-600 ml-2">{formData.media.name}</span>}
+                  {formData.media && (
+                    <span className="text-sm text-gray-600 ml-2">
+                      {formData.media.name}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div>
                 <Input
-                  type="text"
+                  type="select"
                   label="Metrics"
-                  placeholder="Enter metrics"
+                  placeholder=" metrics"
                   value={formData.metrics}
                   onChange={handleChange}
                   name="metrics"
-                />
+                >
+                  <option value="">Select Metrics</option>
+                  {metrics.map((metric, index) => (
+                    <option key={index} value={metric.id}>
+                      {metric.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+
+              <div>
+                <Input
+                  type="select"
+                  label="Region"
+                  placeholder=" region"
+                  value={formData.region}
+                  onChange={handleChange}
+                  name="region"
+                >
+                  <option value="">Select Region</option>
+                  {regions.map((region, index) => (
+                    <option key={index} value={region.id}>
+                      {region.name}
+                    </option>
+                  ))}
+                </Input>
               </div>
 
               <div>
                 <Input
                   type="textarea"
-                  label="Remark"
-                  placeholder="Enter remark"
-                  value={formData.remark}
+                  label="CEHOR's insight"
+                  placeholder="CEHOR's insight"
+                  value={formData.insight}
                   onChange={handleChange}
-                  name="remark"
+                  name="insight"
                 />
               </div>
 
@@ -303,9 +367,11 @@ const SocialMediaEdit = () => {
                   name="impact"
                 >
                   <option value="">Select Impact</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  {impacts.map((impact, index) => (
+                    <option key={index} value={impact.id}>
+                      {impact.name}
+                    </option>
+                  ))}
                 </Input>
               </div>
             </div>
@@ -313,17 +379,35 @@ const SocialMediaEdit = () => {
             <div className="mt-4">
               <Button
                 color="primary"
-                text="Update Social Media"
-                onClick={(e) => handleSubmit(e!)}
+                text={loading ?  'Saving...' : "Social Media"}
+                onClick={handleSubmit}
                 icon={<FaPlus />}
                 size="large"
               />
             </div>
+            {success && (
+              <Toast
+                message={success}
+                type="success"
+                position="top-right"
+                onClose={() => setSuccess(null)}
+              />
+            )}
+
+            {error && (
+              <Toast
+                message={error}
+                type="error"
+                position="top-right"
+                onClose={() => setError(null)}
+              />
+            )}
           </form>
         </Card>
       </BoxWrapper>
     </div>
   );
 };
+
 
 export default SocialMediaEdit;
