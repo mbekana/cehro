@@ -22,6 +22,7 @@ type LegalFrameworkData = {
   status:string;
 };
 
+// Legal Frameworks
 const LegalFrameworkDetail = () => {
     const { id } = useParams();
 
