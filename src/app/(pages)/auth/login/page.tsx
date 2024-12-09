@@ -5,6 +5,7 @@ import { useUserContext } from "@/app/context/UserContext"; // Import the contex
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
 import LogoWithText from "@/app/components/UI/LogoWithText";
+import { FaSignInAlt } from "react-icons/fa";
 
 const LoginPage = () => {
   const { setLogin, setRole } = useUserContext(); // Access context values and setters
@@ -111,7 +112,7 @@ const LoginPage = () => {
             text="Login"
             elevation={3}
             onClick={handleLogin}
-            className="sm:w-auto"
+            icon={<FaSignInAlt/>}
             size="large"
           />
           {/* <Link href="/pages/auth/signup">
