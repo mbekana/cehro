@@ -152,7 +152,6 @@ const SocialMediaForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       const response = await fetch(`${apiUrl}/socialMediaPosts`, {
         method: "POST",
         headers: {
