@@ -1,8 +1,15 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 import Legend from "@/app/components/shared/Legend";
 import legendItems from "@/app/components/shared/LegendItems";
-import IncidentMap from "@/app/components/shared/Map";
 import { regionsData } from "@/app/data/regions";
+import dynamic from "next/dynamic";
+
+const IncidentMap = dynamic(() => import('@/app/components/shared/Map'), {
+  ssr: false, 
+});
+
 
 const UserMapFeed = () => {
   const [regions, setRegions] = useState<any>(null);
