@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 import Legend from "@/app/components/shared/Legend";
 import legendItems from "@/app/components/shared/LegendItems";
