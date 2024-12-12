@@ -29,8 +29,8 @@ const IncidentMap = ({ regionsData }: { regionsData: any }) => {
 
   return (
     <Map
-      style={{ height: "90vh", width: "100%" }}
-      zoom={6}
+      style={{ height: "100px !important", width: "100%" }}
+      zoom={5}
       center={[9.145, 40.4897]} 
       scrollWheelZoom={true}
     >
@@ -39,7 +39,6 @@ const IncidentMap = ({ regionsData }: { regionsData: any }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-
 
       <GeoJSON
         data={regionsData} 
