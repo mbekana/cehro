@@ -1,7 +1,7 @@
 "use-client"
 
 type ButtonProps = {
-  color: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'default' | 'danger';
+  color: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'default' | 'danger' | 'text';
   text: string;
   onClick?: (e?: React.FormEvent) => void;
   disabled?: boolean;
@@ -22,7 +22,8 @@ const Button: React.FC<ButtonProps> = ({ color, text, onClick, disabled = false,
     error: "bg-error text-white hover:bg-red-700",
     warning: "bg-warning text-white hover:bg-yellow-700",
     default: "bg-white text-[#1110EE] border border-[#1110EE] hover:bg-[#1110EE] hover:text-[#FFFFFF]",
-    danger: "bg-white text-red-700 border border-red-700"
+    danger: "bg-white text-red-700 border border-red-700",
+    text:"bg-white"
   };
 
   // Elevation classes based on the elevation prop

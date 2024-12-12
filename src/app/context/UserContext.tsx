@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 interface UserContextType {
   login: boolean;
   role: 'admin' | 'user' | null;
@@ -14,6 +14,16 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [login, setLogin] = useState(false);
   const [role, setRole] = useState<'admin' | 'user' | null>(null);
+
+  const router = useRouter(); // Initialize the useRouter hook
+
+  // Using useEffect to navigate to the admin page when logged in as admin
+  useEffect(() => {
+    if (login && role === 'admin') {
+      router.replace('/');
+    }
+  }, [login, role, router]); 
+
 
   return (
     <UserContext.Provider value={{ login, role, setLogin, setRole }}>

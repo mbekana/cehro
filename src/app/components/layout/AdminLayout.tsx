@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar'; 
 import LogoWithText from '../UI/LogoWithText';
 import Button from '@/app/components/UI/Button'; 
 import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle,  FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire } from 'react-icons/fa';
+import { useUserContext } from '@/app/context/UserContext';
+
+import { useRouter } from 'next/navigation';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
+  const { login } = useUserContext(); 
+  const router = useRouter()
+  useEffect(()=>{
+    if(!login){
+      router.push("/")
+    // }else if(isLoggingIn){
+      router.push("/auth/login")
 
+    }
+  }, [])
   const sidebarLinks = [
     {
       label: "Users",
@@ -101,8 +113,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const toggleSidebar = () => setIsSidebarOpen(isSidebarOpen => !isSidebarOpen);
 
   return (
+    
     <div className="h-screen flex flex-col shadow-lg">
-      <header className="bg-white border border-1 shadow-lg flex justify-between items-center px-4 sm:px-6 md:px-8">
+       {login? (<header className="bg-white border border-1 shadow-lg flex justify-between items-center px-4 sm:px-6 md:px-8">
       <button
           className="lg:hidden text-gray-700"
           onClick={toggleSidebar}
@@ -121,12 +134,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <span className="mr-4 hidden md:block">
         <Button color="danger" text="Logout" onClick={() => console.log('Logout')} icon={<FaSignOutAlt />} size="medium" />
         </span>
-      </header>
+      </header>) : null}
 
-      <div className="flex flex-1">
-        <Sidebar links={sidebarLinks} isOpen={isSidebarOpen} onClose={toggleSidebar} />
-        <main className="flex-1 p-6 bg-gray-50 sm:p-4 md:p-6 lg:p-8">
-          {children}
+      <div className="flex flex-1 bg-red-200" >
+        {login ? (<Sidebar links={sidebarLinks} isOpen={isSidebarOpen} onClose={toggleSidebar} />):null}
+        <main className={`flex-1 bg-gray-50 ${login ? 'p-6 sm:p-4 md:p-6 lg:p-8' : ''}`}>
+        {children}
         </main>
       </div>
     </div>
