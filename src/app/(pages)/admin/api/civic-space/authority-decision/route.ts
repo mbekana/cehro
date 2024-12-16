@@ -46,7 +46,6 @@ export async function POST(req: Request) {
   }
 }
 
-// Function to fetch all authority decisions
 async function fetchAllAuthorityDecisions() {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -62,7 +61,6 @@ async function fetchAllAuthorityDecisions() {
   }
 }
 
-// Function to create a new authority decision
 async function createAuthorityDecision(newAuthorityDecision: any) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
