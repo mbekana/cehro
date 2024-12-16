@@ -47,10 +47,10 @@ const AuthorityDecisionForm = () => {
     fetchSources();
     fetchImpacts();
     fetchThematicCategories();
-    if(id){
+    if (id && (typeof id === 'string' || typeof id === 'number')) {
       fetchDataForEdit(id);
     }
-
+    
     const origs = [
       { id: 1, name: "New" },
       { id: 2, name: "Revised" },
