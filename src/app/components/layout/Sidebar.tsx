@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ links, onClose }) => {
 
       <div className="py-2 px-4">
         <div className="flex items-center justify-left space-x-3">
-          <p className="text-white">John Doe</p>
+          <p className="text-white">Mahder	Wondowsen</p>
         </div>
       </div>
       <div className="my-1 border-t border-gray-300" />

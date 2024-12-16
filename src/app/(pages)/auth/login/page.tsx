@@ -6,6 +6,7 @@ import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
 import LogoWithText from "@/app/components/UI/LogoWithText";
 import { FaSignInAlt } from "react-icons/fa";
+import Link from "next/link";
 
 const LoginPage = () => {
   const { setLogin, setRole } = useUserContext(); // Access context values and setters
@@ -53,7 +54,7 @@ const LoginPage = () => {
 
         <div className="mb-10">
           <h2 className="text-2xl sm:text-2xl md:text-2xl font-semibold text-blue-800 mb-3 w-full sm:w-[400px]">
-            Consortium of Ethiopian Human Rights Organization
+            Consortium of Ethiopian Human Rights Organizations
           </h2>
           <p className="text-gray-500 font-normal">
             Welcome back! Please login to your account.
@@ -97,12 +98,12 @@ const LoginPage = () => {
             </label>
           </div>
           <div>
-            <a
-              href="/create-account"
+            <Link
+              href="/auth/password-reset"
               className="text-sm text-gray-700 hover:underline"
             >
               Forgot Password?
-            </a>
+            </Link>
           </div>
         </div>
 

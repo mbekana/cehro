@@ -12,8 +12,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const columns: (keyof LegalFramework)[] = [
-  "assesementCategory",
-  "affectedArea",
+  "title",
+  "source",
   "city",
   "region",
   "metrics",

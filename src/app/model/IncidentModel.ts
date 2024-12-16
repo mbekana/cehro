@@ -3,10 +3,10 @@ export interface Incident {
   region: string;
   residence: string;
   gender: string;
-  age_group: string;
+  age: string;
   education: string;
   occupation: string;
-  date: string;
+  date_of_incidence: string;
   location?: string;
   incident_happened: {
     woreda: string;

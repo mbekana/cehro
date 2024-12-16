@@ -15,9 +15,9 @@ const columns: (keyof Incident)[] = [
   "region",
   // "residence",
   "gender",
-  "age_group",
+  "age",
   "education",
-  "date",
+  "date_of_incidence",
   "occupation",
   "category",
 ];
@@ -104,7 +104,7 @@ const IncidentsList = () => {
   return (
     <BoxWrapper
       icon={<FaExclamationTriangle />}
-      title="Incidents"
+      title="Incidents Managemenet"
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
