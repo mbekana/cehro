@@ -1,6 +1,11 @@
 "use client";
 
-import { FaArrowLeft, FaCheck, FaExternalLinkAlt, FaTimes } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaCheck,
+  FaExternalLinkAlt,
+  FaTimes,
+} from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
@@ -8,25 +13,11 @@ import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import Image from "next/image";
 
-type LegalFrameworkData = {
-  assesementCategory: string;
-  affectedArea: string;
-  city: string;
-  region: string;
-  source: string;
-  file: string; 
-  media: string;
-  metrics: string;
-  insignt: string;
-  impact: string;
-  status:string;
-};
-
 // Legal Frameworks
 const LegalFrameworkDetail = () => {
-    const { id } = useParams();
+  const { id } = useParams();
 
-  const [legalFramework, setLegalFramework] = useState<LegalFrameworkData | null>(null);
+  const [legalFramework, setLegalFramework] = useState<any | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
@@ -40,7 +31,7 @@ const LegalFrameworkDetail = () => {
 
         const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
         if (response.ok) {
-          const data: LegalFrameworkData = await response.json();
+          const data: any = await response.json();
           setLegalFramework(data);
         } else {
           console.error("Failed to fetch legal framework data");
@@ -58,19 +49,28 @@ const LegalFrameworkDetail = () => {
   useEffect(() => {
     if (legalFramework?.media) {
       const mediaUrl = legalFramework.media;
-      if (mediaUrl.endsWith(".jpg") || mediaUrl.endsWith(".png") || mediaUrl.endsWith(".jpeg")) {
+      if (
+        mediaUrl.endsWith(".jpg") ||
+        mediaUrl.endsWith(".png") ||
+        mediaUrl.endsWith(".jpeg")
+      ) {
         setMediaType("image");
-      } else if (mediaUrl.includes("youtube.com") || mediaUrl.includes("youtu.be")) {
+      } else if (
+        mediaUrl.includes("youtube.com") ||
+        mediaUrl.includes("youtu.be")
+      ) {
         setMediaType("video");
       } else if (mediaUrl.endsWith(".pdf")) {
         setMediaType("pdf");
       } else {
         setMediaType("none");
       }
+    } else {
+      setMediaType("none");
     }
   }, [legalFramework]);
 
-  const handleApprove = async() => {
+  const handleApprove = async () => {
     setLoading(true);
 
     try {
@@ -104,7 +104,7 @@ const LegalFrameworkDetail = () => {
     }
   };
 
-  const handleReject = async() => {
+  const handleReject = async () => {
     setLoading(true);
 
     try {
@@ -173,9 +173,7 @@ const LegalFrameworkDetail = () => {
         {tagText}
       </span>
     );
-
-  }
-
+  };
 
   return (
     <BoxWrapper
@@ -187,13 +185,13 @@ const LegalFrameworkDetail = () => {
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          {/* <div>
             <h4 className="font-semibold text-sm sm:text-base">Assessment Category:</h4>
             <p className="text-sm sm:text-base">{legalFramework.assesementCategory}</p>
-          </div>
+          </div> */}
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">Affected Area:</h4>
-            <p className="text-sm sm:text-base">{legalFramework.affectedArea}</p>
+            <h4 className="font-semibold text-sm sm:text-base">Title:</h4>
+            <p className="text-sm sm:text-base">{legalFramework.title}</p>
           </div>
         </div>
 
@@ -218,9 +216,9 @@ const LegalFrameworkDetail = () => {
             <p className="text-sm sm:text-base">{legalFramework.metrics}</p>
           </div>
           <div>
-          <h4 className="font-semibold text-sm sm:text-base">
-            Status: {renderStatusTag(legalFramework?.status)}
-          </h4>
+            <h4 className="font-semibold text-sm sm:text-base">
+              Status: {renderStatusTag(legalFramework?.status)}
+            </h4>
           </div>
         </div>
 
@@ -252,11 +250,15 @@ const LegalFrameworkDetail = () => {
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
             {mediaType === "image" && (
               <Image
-                src={legalFramework.media}
+                src={
+                  legalFramework.media.startsWith("/")
+                    ? legalFramework.media
+                    : `/${legalFramework.media}`
+                }
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
-                height="100"
-                width="100"
+                height={100}
+                width={100}
               />
             )}
 

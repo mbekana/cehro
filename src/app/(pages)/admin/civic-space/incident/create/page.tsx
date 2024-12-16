@@ -15,7 +15,7 @@ type IncidentFormData = {
   region: string;
   respondent_residence: string;
   gender: string;
-  age_group: string;
+  age: string;
   education: string;
   occupation: string;
   date_of_incidence: string;
@@ -26,7 +26,7 @@ type IncidentFormData = {
   };
   metrics: string;
   source_of_information: string;
-  insite: string;
+  insight: string;
   impact: string;
 };
 
@@ -39,11 +39,12 @@ const IncidentForm = () => {
   const [impacts, setImpacts] = useState<Impact[]>([]);
   const [regions, setRegions] = useState<any[]>([]);
   const [occupation, setOccupation] = useState<Education[]>([]);
+  const [sources, setSources] = useState<any[]>([]);
   const [formData, setFormData] = useState<IncidentFormData>({
     region: "",
     respondent_residence: "",
     gender: "",
-    age_group: "",
+    age: "",
     education: "",
     occupation: "",
     date_of_incidence: "",
@@ -51,7 +52,7 @@ const IncidentForm = () => {
     incident_happened: { woreda: "", zone: "" },
     metrics: "",
     source_of_information: "",
-    insite: "",
+    insight: "",
     impact: "",
   });
 
@@ -61,6 +62,7 @@ const IncidentForm = () => {
     fetchImpacts();
     fetchRegions();
     fetchOccupations()
+    fetchSources()
   }, []);
 
   const fetchOccupations = async () => {
@@ -82,6 +84,28 @@ const IncidentForm = () => {
       setLoading(false);
     }
   };
+
+
+  const fetchSources = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setSources(data);
+      } else {
+        throw new Error("Failed to fetch sources");
+      }
+    } catch (error: any) {
+      setError("Error fetching sources: " + error.message);
+      console.error("Error fetching sources:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const fetchMetrics = async () => {
     try {
@@ -196,7 +220,7 @@ const IncidentForm = () => {
         region: "",
         respondent_residence: "",
         gender: "",
-        age_group: "",
+        age: "",
         education: "",
         occupation: "",
         date_of_incidence: "",
@@ -204,7 +228,7 @@ const IncidentForm = () => {
         incident_happened: { woreda: "", zone: "" },
         metrics: "",
         source_of_information: "",
-        insite: "",
+        insight: "",
         impact: "",
       });
       setSuccess("Incident saved successfully!");
@@ -223,7 +247,7 @@ const IncidentForm = () => {
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Incident Maintenance"
+        title="Incident Registration"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}
@@ -290,11 +314,11 @@ const IncidentForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="Age Group"
-                  placeholder=" age group"
-                  value={formData.age_group}
+                  label="Age"
+                  placeholder="Age"
+                  value={formData.age}
                   onChange={handleChange}
-                  name="age_group"
+                  name="age"
                 />
               </div>
 
@@ -374,8 +398,8 @@ const IncidentForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="Woreda"
-                  placeholder=" woreda"
+                  label="Woreda/Kebele"
+                  placeholder="Woreda/Kebele"
                   value={formData.incident_happened.woreda}
                   onChange={handleChange}
                   name="incident_happened.woreda"
@@ -385,8 +409,8 @@ const IncidentForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="Zone"
-                  placeholder=" zone"
+                  label="Zone/Subcity"
+                  placeholder="Zone/Subcity"
                   value={formData.incident_happened.zone}
                   onChange={handleChange}
                   name="incident_happened.zone"
@@ -413,21 +437,27 @@ const IncidentForm = () => {
 
               <div>
                 <Input
-                  type="textarea"
+                  type="select"
                   label="Source of Information"
                   value={formData.source_of_information}
                   onChange={handleChange}
                   name="source_of_information"
-                />
+                >
+                  <option value="">Select Source</option>
+                  {sources.map((source, index) => (
+                    <option key={index} value={source.id}>
+                      {source.name}
+                    </option>
+                  ))}                </Input>
               </div>
               <div>
                 <Input
                   type="textarea"
-                  label="CEHOR's insite"
-                  placeholder="Insite"
-                  value={formData.source_of_information}
+                  label="CEHOR's Insight"
+                  placeholder="Insight"
+                  value={formData.insight}
                   onChange={handleChange}
-                  name="insite"
+                  name="insight"
                 />
               </div>
             </div>

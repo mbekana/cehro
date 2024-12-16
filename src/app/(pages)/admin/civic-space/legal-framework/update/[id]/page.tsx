@@ -12,8 +12,7 @@ import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
 
 type LegalFrameworkFormData = {
-  assesementCategory: string;
-  affectedArea: string;
+  title: string;
   city: string;
   region: string;
   source: string;
@@ -23,11 +22,12 @@ type LegalFrameworkFormData = {
   metrics: string;
   insight: string;
   impact: string;
+  origin: string;
+  date: string;
+  geographicScope: string;
+  thematicCategory: string;
+  summary: string;
 };
-
-// type LegalFrameworkFormProps = {
-//   id?: string; // Optional ID to edit existing data
-// };
 
 const LegalFrameworkForm = () => {
   const { id } = useParams();
@@ -38,18 +38,25 @@ const LegalFrameworkForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [origins, setOrigins] = useState<any[]>([]);
+  const [geographicScopes, setGeographicsScopes] = useState<any[]>([]);
+  const [thematicCategories, setThematicCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState<LegalFrameworkFormData>({
-    assesementCategory: "",
-    affectedArea: "",
+    title: "",
     city: "",
     region: "",
     source: "",
-    file: "",
-    media: "",
+    file: null,
+    media: null,
     mediaType: "",
     metrics: "",
     insight: "",
     impact: "",
+    origin: "",
+    date: "",
+    geographicScope: "",
+    thematicCategory: "",
+    summary: "",
   });
 
   useEffect(() => {
@@ -57,27 +64,42 @@ const LegalFrameworkForm = () => {
     fetchRegions();
     fetchSources();
     fetchImpacts();
+    fetchThematicCategories();
+    const origs = [
+      { id: 1, name: "New" },
+      { id: 2, name: "Revised" },
+    ];
+
+    const geographicScope = [
+      { id: 1, name: "National" },
+      { id: 2, name: "Regional" },
+    ];
+
+    setOrigins(origs);
+    setGeographicsScopes(geographicScope)
+    setThematicCategories(thematicCategories)
     if (id) {
       const fetchData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
           const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
           const data = await response.json();
           setFormData({
-            assesementCategory: data.assesementCategory,
-            affectedArea: data.affectedArea,
+            title: data.title,
             city: data.city,
             region: data.region,
             source: data.source,
             file: data.file ? { name: getFileNameFromPath(data.file) } : null,
-            media: data.media
-              ? { name: getFileNameFromPath(data.media) }
-              : null,
+            media: data.media ? { name: getFileNameFromPath(data.media) } : null,
             mediaType: data.mediaType,
             metrics: data.metrics,
             insight: data.remark,
             impact: data.impact,
+            origin: data.origin,
+            date: data.date,
+            geographicScope: data.geographicScope,
+            thematicCategory: data.thematicCategory,
+            summary: data.summary,
           });
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -87,6 +109,24 @@ const LegalFrameworkForm = () => {
       fetchData();
     }
   }, [id]);
+
+  const fetchThematicCategories = async () => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/thematicCategories`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setThematicCategories(data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchMetrics = async () => {
     try {
@@ -236,8 +276,7 @@ const LegalFrameworkForm = () => {
         const result = await response.json();
         console.log("Data saved successfully:", result);
         setFormData({
-          assesementCategory: "",
-          affectedArea: "",
+          title: "",
           city: "",
           region: "",
           source: "",
@@ -247,6 +286,11 @@ const LegalFrameworkForm = () => {
           metrics: "",
           insight: "",
           impact: "",
+          origin: "",
+          date: "",
+          geographicScope: "",
+          thematicCategory: "",
+          summary: "",
         });
         setSuccess("Legal Framework Saved Successfully!");
         setError(null);
@@ -268,13 +312,13 @@ const LegalFrameworkForm = () => {
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title={id ? "Edit Legal Framework" : "Legal Framework Maintenance"}
+        title="Legal Framework Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}
       >
         <Card
-          title={id ? "Edit Legal Framework" : "Legal Framework Form"}
+          title="Legal Framework Form"
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -285,19 +329,73 @@ const LegalFrameworkForm = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
+
           <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
                   type="text"
-                  label="Affected Area"
-                  placeholder=" affected area"
-                  value={formData.affectedArea}
+                  label="Title of Legal Framework"
+                  placeholder="Title of Legal Framework"
+                  value={formData.title}
                   onChange={handleChange}
-                  name="affectedArea"
+                  name="title"
                 />
               </div>
+              <div>
+                <Input
+                  type="select"
+                  label="Geographic Scope"
+                  placeholder="Geographic Scope"
+                  value={formData.geographicScope}
+                  onChange={handleChange}
+                  name="geographicScope"
+                >
+                  <option value="">Select Geographic Scope</option>
+                  {geographicScopes && geographicScopes.length > 0 ? (
+                    geographicScopes.map((geographicScope, index) => (
+                      <option key={index} value={geographicScope.id}>
+                        {geographicScope.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">No origins available</option>
+                  )}
+                </Input>
+              </div>
+              <div>
+                <Input
+                  type="select"
+                  label="Origin of the Legal Framework"
+                  placeholder="Origin of the Legal Framework"
+                  value={formData.origin}
+                  onChange={handleChange}
+                  name="origin"
+                >
+                  <option value="">Select Origin of Legal Framework</option>
+                  {origins && origins.length > 0 ? (
+                    origins.map((origin, index) => (
+                      <option key={index} value={origin.id}>
+                        {origin.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">No origins available</option>
+                  )}
+                </Input>
+              </div>
 
+
+              <div>
+                <Input
+                  type="date"
+                  label="Date"
+                  placeholder="Select date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  name="date"
+                />
+              </div>
               <div>
                 <Input
                   type="text"
@@ -308,25 +406,6 @@ const LegalFrameworkForm = () => {
                   name="city"
                 />
               </div>
-
-              <div>
-                <Input
-                  type="select"
-                  label="Region"
-                  placeholder="Region"
-                  value={formData.region}
-                  onChange={handleChange}
-                  name="region"
-                >
-                  <option value="">Select Regions</option>
-                  {regions.map((region, index) => (
-                    <option key={index} value={region.id}>
-                      {region.name}
-                    </option>
-                  ))}
-                </Input>
-              </div>
-
               <div>
                 <Input
                   type="select"
@@ -345,6 +424,7 @@ const LegalFrameworkForm = () => {
                 </Input>
               </div>
 
+          
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   File Upload
@@ -394,7 +474,25 @@ const LegalFrameworkForm = () => {
                   )}
                 </div>
               </div>
+              <div>
+                <Input
+                  type="select"
+                  label="Region"
+                  placeholder="Region"
+                  value={formData.region}
+                  onChange={handleChange}
+                  name="region"
+                >
+                  <option value="">Select Regions</option>
+                  {regions.map((region, index) => (
+                    <option key={index} value={region.id}>
+                      {region.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
 
+           
               <div>
                 <Input
                   type="select"
@@ -428,6 +526,34 @@ const LegalFrameworkForm = () => {
                   ))}
                 </Input>
               </div>
+
+              <div>
+                <Input
+                  type="select"
+                  label="Thematic Category"
+                  placeholder="Thematic Category"
+                  value={formData.thematicCategory}
+                  onChange={handleChange}
+                  name="thematicCategory"
+                >
+                  <option value="">Select Thematic Category</option>
+                  {thematicCategories.map((thematicCategory, index) => (
+                    <option key={index} value={thematicCategory.id}>
+                      {thematicCategory.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+              <div>
+                <Input
+                  type="textarea"
+                  label="Summary of Legal Framerwork"
+                  placeholder="Summary of Legal Framerwork"
+                  value={formData.summary}
+                  onChange={handleChange}
+                  name="summary"
+                />
+              </div>
               <div>
                 <Input
                   type="textarea"
@@ -438,8 +564,6 @@ const LegalFrameworkForm = () => {
                   name="insight"
                 />
               </div>
-
-      
             </div>
 
             <div className="mt-4">
@@ -468,7 +592,7 @@ const LegalFrameworkForm = () => {
                 onClose={() => setError(null)}
               />
             )}
-          </form>{" "}
+          </form>
         </Card>
       </BoxWrapper>
     </div>
@@ -476,3 +600,4 @@ const LegalFrameworkForm = () => {
 };
 
 export default LegalFrameworkForm;
+

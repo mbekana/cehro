@@ -3,14 +3,14 @@ import LegendItem from "./LengendItem";
 const legendItems: LegendItem[] = [
   // High Incidents
   new LegendItem(
-    "40 - 50 incidents",
+    "Legal and Regulatory Frameworks",
     "#741f1f",
     (incidents) => incidents >= 40,
     "white"
   ),
 
   new LegendItem(
-    "30 - 39 incidents",
+    "Access and Participation",
     "#9c2929",
     (incidents) => incidents >= 30 && incidents < 40,
     "white"
@@ -18,7 +18,7 @@ const legendItems: LegendItem[] = [
 
   // Medium Incidents
   new LegendItem(
-    "20 - 29 incidents",
+    "Safety for HRDs",
     "#c57f7f",
     (incidents) => incidents >= 20 && incidents < 30,
     "black"
@@ -26,7 +26,7 @@ const legendItems: LegendItem[] = [
 
   // Low Incidents
   new LegendItem(
-    "10 - 19 incidents",
+    "Funding and Support",
     "#d8aaaa",
     (incidents) => incidents >= 10 && incidents < 20,
     "black"
@@ -34,7 +34,7 @@ const legendItems: LegendItem[] = [
 
   // No Data or Low Incidents
   new LegendItem(
-    "No Data / 0 incidents",
+    "Freedom of Expression",
     "#ffffff",
     (incidents) => incidents === 0,
     "black"

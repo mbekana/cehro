@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar'; 
 import LogoWithText from '../UI/LogoWithText';
 import Button from '@/app/components/UI/Button'; 
-import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle,  FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire } from 'react-icons/fa';
+import { FaCalendarAlt, FaExclamationTriangle, FaFolder, FaUserTie, FaCog, FaInfoCircle,  FaUserShield, FaGlobe, FaSignOutAlt, FaUsers, FaUsersCog, FaGraduationCap, FaBars,  FaBalanceScale, FaHashtag, FaChartBar, FaFire, FaRegFolder } from 'react-icons/fa';
 import { useUserContext } from '@/app/context/UserContext';
 
 import { useRouter } from 'next/navigation';
+import { FaFolderMinus } from 'react-icons/fa6';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
@@ -23,7 +24,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [])
   const sidebarLinks = [
     {
-      label: "Users",
+      label: "User Management",
       href: "/admin/auth/signup/history",
       icon: <FaUsersCog />, 
       submenu: [
@@ -105,6 +106,11 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           href: "/admin/impact/history",
           icon: <FaFire />, 
         },
+        {
+          label:'Thematic Category',
+          href:"/admin/thematic-category/history",
+          icon:<FaFolderMinus/>
+        }
       ],
     },
   ];
@@ -126,7 +132,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <LogoWithText
             logoSrc="/logo.jpg"
             altText="Admin Logo"
-            text="Consortium of Ethiopian Human Right Organization"
+            text="Consortium of Ethiopian Human Right Organizations"
             size="medium"
             textSize="base"
           />

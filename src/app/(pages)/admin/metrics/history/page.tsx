@@ -11,7 +11,7 @@ import { Metrics } from "@/app/model/Metrics";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
 
-const columns: (keyof Metrics)[] = ["id", "name", "remark"];
+const columns: (keyof Metrics)[] = ["name", "remark"];
 
 const Metricses = () => {
   const [metrics, setMetrics] = useState<Metrics[]>([]);

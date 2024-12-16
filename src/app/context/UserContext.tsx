@@ -15,9 +15,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [login, setLogin] = useState(false);
   const [role, setRole] = useState<'admin' | 'user' | null>(null);
 
-  const router = useRouter(); // Initialize the useRouter hook
+  const router = useRouter(); 
 
-  // Using useEffect to navigate to the admin page when logged in as admin
   useEffect(() => {
     if (login && role === 'admin') {
       router.replace('/');
