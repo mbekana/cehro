@@ -9,9 +9,10 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
-// import { LegalFramework } from "@/app/model/LegalFramework";
+import { useParams } from "next/navigation";
 
-const AuthorityDecisionForm = ({ decisionId }: { decisionId: string }) => {
+const AuthorityDecisionForm = () => {
+  const { id } = useParams();
   const [metrics, setMetrics] = useState<any[]>([]);
   const [regions, setRegions] = useState<Impact[]>([]);
   const [sources, setSources] = useState<any[]>([]);
@@ -46,7 +47,9 @@ const AuthorityDecisionForm = ({ decisionId }: { decisionId: string }) => {
     fetchSources();
     fetchImpacts();
     fetchThematicCategories();
-    fetchDataForEdit(decisionId);
+    if(id){
+      fetchDataForEdit(id);
+    }
 
     const origs = [
       { id: 1, name: "New" },
@@ -61,15 +64,16 @@ const AuthorityDecisionForm = ({ decisionId }: { decisionId: string }) => {
     setOrigins(origs);
     setGeographicsScopes(geographicScope);
     setThematicCategories(thematicCategories);
-  }, [decisionId]);
+  }, [id]);
 
   const fetchDataForEdit = async (id: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setFormData(data); // Pre-fill form with existing data
+        console.log("DATA: ", data)
+        setFormData(data); 
       } else {
         console.error("Failed to fetch data for edit");
       }
@@ -229,8 +233,7 @@ const AuthorityDecisionForm = ({ decisionId }: { decisionId: string }) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/legalFrameworks/${decisionId}`, {
+      const response = await fetch(`${apiUrl}/authorityDecisions/${decisionId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -13,7 +13,6 @@ import { LegalFramework } from "@/app/model/LegalFramework";
 import { DecisionAuthority } from "@/app/model/DecisionAuthority";
 
 const columns: (keyof DecisionAuthority)[] = [
-  "id",
   "region",
   "source",
   "insight",

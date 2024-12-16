@@ -224,7 +224,7 @@ const AuthorityDecisionForm = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/legalFrameworks`, {
+      const response = await fetch(`${apiUrl}/authorityDecisions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
