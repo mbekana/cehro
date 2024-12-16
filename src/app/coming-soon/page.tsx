@@ -8,7 +8,7 @@ export default function UnderConstruction() {
           🚧 Page Under Construction 🚧
         </h1>
         <p className="text-xl md:text-2xl text-gray-300 mb-6 animate-bounce">
-          We're working hard to bring this page to life!
+          We&apos;re working hard to bring this page to life!
         </p>
         <p className="text-gray-400 mb-6">
           Please check back soon or explore other parts of the site.
