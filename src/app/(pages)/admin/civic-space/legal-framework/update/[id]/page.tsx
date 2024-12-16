@@ -255,7 +255,6 @@ const LegalFrameworkForm = () => {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       const response = id
         ? await fetch(`${apiUrl}/legalFrameworks/${id}`, {
             method: "PUT",

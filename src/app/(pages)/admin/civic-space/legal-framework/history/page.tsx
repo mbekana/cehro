@@ -69,7 +69,8 @@ const LegalFrameworksList = () => {
 
   const handleDelete = async(id: number) => {
     try{
-      const response = await fetch(`/admin/api/civic-space/legal-framework/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
         method: 'DELETE',
       });      if (response.ok) {
         fetchLegalFrameworks()
