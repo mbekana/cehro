@@ -233,7 +233,7 @@ const AuthorityDecisionForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${decisionId}`, {
+      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
