@@ -3,7 +3,6 @@
 import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
-import { LegalFramework } from "@/app/model/LegalFramework"; 
 import { useEffect, useState } from "react";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
@@ -11,7 +10,16 @@ import Button from "@/app/components/UI/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const columns: (keyof LegalFramework)[] = [
+type SocialMedia = {
+  id: any; 
+  affectedArea: string;
+  city: string;
+  region: string;
+  metrics: string;
+  status: any
+};
+
+const columns: (keyof SocialMedia)[] = [
   "id",
   "affectedArea",
   "city",
