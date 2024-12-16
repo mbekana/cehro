@@ -46,7 +46,7 @@ const PasswordResetPage = () => {
             Consortium of Ethiopian Human Rights Organizations
           </h2>
           <p className="text-gray-500 font-normal">
-            Forgot your password? No worries, let's help you reset it.
+            Forgot your password? No worries, let&apos;s help you reset it.
           </p>
         </div>
 
