@@ -25,7 +25,7 @@ const Impacts = () => {
     fetchImpacts();
   }, []);
 
-  const fetchImpacts = async (searchQuery: string = '') => {
+  const fetchImpacts = async (searchQuery?: string) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL; // Assuming impacts API URL

@@ -190,7 +190,7 @@ const LegalFrameworkForm = () => {
 
   const getFileNameFromPath = (
     filePath: string,
-    maxLength: number = 20
+    maxLength = 20
   ): string => {
     const fileName = filePath.split("/").pop()?.split("\\").pop() || "";
 

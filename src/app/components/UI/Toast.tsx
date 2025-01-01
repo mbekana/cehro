@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 type ToastProps = {
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
-  onClose: () => void;
+  onClose?: () => void;
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'; 
 };
 
