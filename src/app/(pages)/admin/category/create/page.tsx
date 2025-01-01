@@ -126,7 +126,6 @@ const CategoryForm = () => {
         <Toast
           type="success"
           message={success}
-          onClose={() => {}}
           position={"top-right"}
         />
       )}
@@ -135,7 +134,6 @@ const CategoryForm = () => {
         <Toast
           type="error"
           message={error}
-          onClose={() => {}}
           position={"top-right"}
         />
       )}

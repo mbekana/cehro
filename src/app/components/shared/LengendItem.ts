@@ -8,7 +8,7 @@ class LegendItem {
     label: string,
     color: string,
     testFunction: (incidents: number) => boolean,
-    textColor: string = "black"
+    textColor: string
   ) {
     this.label = label;
     this.color = color;
