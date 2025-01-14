@@ -4,7 +4,7 @@ import React from 'react';
 const NewsCard = () => {
   return (
     <>
-      <UserLayout children={''} />
+      <UserLayout />
       <div className="flex w-full h-screen bg-white  justify-center  ">
         <div className="flex w-[1000px] h-[600px] bg-black  justify-center items-center pr-4 pl-4">
           <div className="w-1/3 h-full bg-black flex justify-center items-center ">

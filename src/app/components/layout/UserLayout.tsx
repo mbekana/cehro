@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { FaSubscript } from "react-icons/fa6";
 
-const UserLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [loggedIn, setLoggedIn] = useState(true);
 
   useEffect(() => {
