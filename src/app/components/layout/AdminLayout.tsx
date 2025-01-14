@@ -15,12 +15,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { login } = useUserContext(); 
   const router = useRouter()
   useEffect(()=>{
-    if(!login){
-      router.push("/")
-    // }else if(isLoggingIn){
-      router.push("/auth/login")
+    // if(!login){
+    //   router.push("/")
+    // // }else if(isLoggingIn){
+    //   router.push("/auth/login")
 
-    }
+    // }
   }, [])
   const sidebarLinks = [
     {
@@ -38,22 +38,22 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       icon: <FaExclamationTriangle />,
       submenu :[
         {
-          label: "Incidents",
+          label: "Incident Register",
           href: "/admin/civic-space/incident/history",
           icon: <FaCalendarAlt />,
         },
         {
-          label: "Legal Framework",
+          label: "Legal Framework Register",
           href: "/admin/civic-space/legal-framework/history",
           icon: <FaBalanceScale />, 
         },
         {
-          label: "Social Media",
+          label: "Social Media Register",
           href: "/admin/civic-space/social-media/history",
           icon: <FaHashtag />, 
         },
         {
-          label: "Authority Decision",
+          label: "Authority Decision Assesment",
           href: "/admin/civic-space/authority-decision/history",
           icon: <FaUserShield />,
         },

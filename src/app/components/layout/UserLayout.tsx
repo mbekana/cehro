@@ -29,12 +29,12 @@ const UserLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { label: "About", href: "/coming-soon" },
     {
       label: "Data",
-      href: "/coming-soon",
+      href: "/user/data",
       hasDropdown: true,
       icon: <FaChevronDown />,
       openIcon: <FaChevronUp />,
       dropdownLinks: [
-        { label: "Data", href: "/coming-soon" },
+        { label: "Data", href: "/user/data" },
         {
           label: "Forecasts with summary",
           href: "/coming-soon",

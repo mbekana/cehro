@@ -137,12 +137,11 @@ const ThematicCategoryForm = () => {
       <div className="flex justify-end mt-4 mr-24">
         <Button
           color="primary"
-          text={isSubmitting ? "Submitting..." : "Thematic Category"}
+          text={isSubmitting ? "Submitting..." : "Save Thematic Category"}
           size="large"
           elevation={4}
           disabled={isSubmitting}
           onClick={handleSubmit}
-          icon={<FaPlus />}
         />
       </div>
     </div>

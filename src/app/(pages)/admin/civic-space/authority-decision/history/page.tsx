@@ -71,13 +71,13 @@ const AuthorityDecisionList = () => {
       const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'DELETE'});
 
       if (!response.ok) {
-        throw new Error("Failed to delete the incident");
+        throw new Error("Failed to delete the Authority Decision");
       }
 
-      console.log(`Incident with id ${id} deleted successfully`);
+      console.log(`Authority Decision with id ${id} deleted successfully`);
       fetchAuthorityDecision(); 
     } catch (error) {
-      console.error("Error deleting the incident: ", error);
+      console.error("Error deleting the Authority Decision: ", error);
     }
   };
 
@@ -108,15 +108,15 @@ const AuthorityDecisionList = () => {
       <div className="flex flex-1 items-center justify-between m-2 w-full">
         <Search
           onSearch={handleSearch}
-          placeholder="Search Incidents..."
-          buttonText="Search Incidents"
+          placeholder="Search ..."
+          buttonText="Search "
         />
 
         <div className="mr-2">
           <Link href="/admin/civic-space/authority-decision/create">
             <Button
               color="primary"
-              text="Create Incident"
+              text="Authority Decision"
               onClick={() => { console.log("Hei"); }}
               icon={<FaPlus />}
               className="ml-auto"
