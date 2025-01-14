@@ -123,8 +123,8 @@ const UserList = () => {
         <div className="flex flex-1 items-center justify-between m-2 w-full">
           <Search
             onSearch={handleSearch}
-            placeholder="Search Educations..."
-            buttonText="Search Educations"
+            placeholder="Search User..."
+            buttonText="Search User"
           />
           <Link href="/auth/signup/create">
             <Button

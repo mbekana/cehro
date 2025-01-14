@@ -16,7 +16,6 @@ class LegendItem {
     this.textColor = textColor;
   }
 
-  // Method to check if a number of incidents fits the condition
   isFor(incidents: number): boolean {
     return this.testFunction(incidents);
   }

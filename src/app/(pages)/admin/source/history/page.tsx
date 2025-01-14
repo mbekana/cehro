@@ -1,15 +1,17 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
-import BoxWrapper from '@/app/components/UI/BoxWrapper';
-import Table from '@/app/components/UI/Table';
-import Pagination from '@/app/components/UI/Pagination';
-import Search from '@/app/components/UI/Search';
-import { Education } from '@/app/model/EducationModel';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
+import BoxWrapper from "@/app/components/UI/BoxWrapper";
+import Table from "@/app/components/UI/Table";
+import Pagination from "@/app/components/UI/Pagination";
+import Search from "@/app/components/UI/Search";
+import { Education } from "@/app/model/EducationModel";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Button from "@/app/components/UI/Button";
 
-const columns: (keyof Education)[] = ['id','name', 'remark'];
+const columns: (keyof Education)[] = ["id", "name", "remark"];
 
 const SourceOfInformation = () => {
   const router = useRouter();
@@ -96,30 +98,45 @@ const SourceOfInformation = () => {
 
   return (
     <BoxWrapper
-      icon={<FaExclamationTriangle />}  
-      title="Source Of Information"  
-      borderColor="border-primary"  
-      borderThickness="border-b-4"  
+      icon={<FaExclamationTriangle />}
+      title="Source Of Information"
+      borderColor="border-primary"
+      borderThickness="border-b-4"
     >
-      <div className="m-2 w-full">
-        <Search onSearch={handleSearch} placeholder="Search Source..." buttonText="Search Source" />
+      <div className="flex flex-1 items-center justify-between m-2 w-full">
+        <Search
+          onSearch={handleSearch}
+          placeholder="Search Source..."
+          buttonText="Search Source"
+        />
+
+        <Link href="/admin/source/create">
+          <Button
+            color="primary"
+            text="Create Source"
+            icon={<FaPlus />}
+            className="ml-auto"
+            size="large"
+            borderRadius={5}
+          />
+        </Link>
       </div>
+      <div className="m-2 w-full"></div>
 
       {loading ? (
         <div>Loading...</div>
       ) : (
         <>
-         <Table columns={columns} data={currentData} onAction={handleAction} />
-      <div className="flex justify-end mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <div className="flex justify-end mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
-  
     </BoxWrapper>
   );
 };

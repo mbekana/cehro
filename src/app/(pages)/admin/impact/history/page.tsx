@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaPlus } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Table from '@/app/components/UI/Table';
 import Pagination from '@/app/components/UI/Pagination';
 import Search from '@/app/components/UI/Search';
 import { useRouter } from "next/navigation";
 import { Impact } from '@/app/model/Impact';
+import Link from 'next/link';
+import Button from '@/app/components/UI/Button';
 
 
 
@@ -107,13 +109,22 @@ const Impacts = () => {
       borderThickness="border-b-4"
     >
       <div className="flex flex-1 items-center justify-between m-2 w-full">
-        <div className="m-2 w-full">
-          <Search
+      <Search
             onSearch={handleSearch}
             placeholder="Search Impacts..."
             buttonText="Search Impacts"
+          />        
+          <Link href="/admin/source/create">
+          <Button
+            color="primary"
+            text="Create Impacts"
+            icon={<FaPlus />}
+            className="ml-auto"
+            size="large"
+            borderRadius={5}
           />
-        </div>
+        </Link>
+      
       </div>
       {loading ? (
         <div>Loading...</div> 

@@ -145,7 +145,6 @@ const getRandomColor = () => {
   return `hsl(${hue}, 100%, ${lightness}%)`;
 };
 
-
 const AdminDashboard = () => {
   const { regionData, monthData } = getIncidentsByRegionAndMonth();
   const categoryData = getCategoryDistribution();
@@ -191,18 +190,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-6 space-y-6 mt-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Total Regions</h3>
-          <p className="text-4xl">{getTotalCount("region")}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Total Categories</h3>
-          <p className="text-4xl">{getTotalCount("category")}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold">Total Incidents</h3>
           <p className="text-4xl">{incidentsData.length}</p>
         </div>
@@ -211,20 +200,34 @@ const AdminDashboard = () => {
           <h3 className="text-xl font-semibold">Total Users</h3>
           <p className="text-4xl">5</p>
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold">Total Legal Frameworks</h3>
+          <p className="text-4xl">3</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold">Total Social Media Data</h3>
+          <p className="text-4xl">10</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold">Total Authority Decisions</h3>
+          <p className="text-4xl">7</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
         <div className="col-span-2 md:col-span-1 bg-white p-6 rounded-lg shadow-md h-[500px]">
           <h3 className="text-xl font-semibold">Incidents by Region/Month</h3>
           <div className="h-[400px]">
-          <Line data={lineChartData} options={{ responsive: true }} />
+            <Line data={lineChartData} options={{ responsive: true }} />
           </div>
         </div>
         <div className="col-span-2 md:col-span-1 bg-white p-6 rounded-lg shadow-md h-[500px]">
           <h3 className="text-xl font-semibold">Incidents by Category</h3>
           <div className="h-[400px]">
-
-          <PolarArea data={polarChartData} options={{ responsive: true, maintainAspectRatio: false }}  style={{ height: '400px', width: '100%' }} />
+            <PolarArea data={polarChartData} options={{ responsive: true, maintainAspectRatio: false }}  style={{ height: '400px', width: '100%' }} />
           </div>
         </div>
       </div>
