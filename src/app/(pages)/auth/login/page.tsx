@@ -29,13 +29,15 @@ const LoginPage = () => {
   };
 
   const handleLogin = () => {
-    if (email === "admin@admin.com" && password === "password") {
+    if (email === "supper@admin.com" && password === "root@123") {
       setLogin(true);
       setRole("admin");
-    } else if (email === "user@user.com" && password === "password") {
-      setLogin(true);
-      setRole("user");
-    } else {
+    }
+    //  else if (email === "user@user.com" && password === "password") {
+    //   setLogin(true);
+    //   setRole("user");
+    // } 
+    else {
       setError("Invalid credentials");
     }
   };
