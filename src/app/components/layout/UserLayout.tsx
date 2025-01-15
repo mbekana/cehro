@@ -49,7 +49,7 @@ const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               icon: <FaChevronDown />,
               openIcon: <FaChevronUp />,
               subDropdownLinks: [
-                { label: "Graph 1", href: "/coming-soon/graphs/1" },
+                { label: "Graph 1", href: "/user/forecast-summary" },
                 { label: "Graph 2", href: "/coming-soon/graphs/2" },
               ],
             },
