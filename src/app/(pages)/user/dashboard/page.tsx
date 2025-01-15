@@ -25,25 +25,25 @@ const UserMapFeed = () => {
     labels: ["2020", "2021", "2022", "2023", "2024"],
     datasets: [
       {
-        label: "Sales Growth",
+        label: "Incident register",
         data: [5, 10, 15, 20, 25],
         borderColor: "rgb(75, 192, 192)",
         tension: 0.1,
       },
       {
-        label: "Customer Satisfaction",
+        label: "Social media register",
         data: [80, 85, 90, 92, 95],
         borderColor: "rgb(255, 99, 132)",
         tension: 0.1,
       },
       {
-        label: "Website Traffic",
+        label: "Legal framework register",
         data: [1000, 1500, 2000, 2500, 3000],
         borderColor: "rgb(53, 162, 235)",
         tension: 0.1,
       },
       {
-        label: "Employee Retention",
+        label: "Authority decision assessment",
         data: [70, 72, 75, 78, 80],
         borderColor: "rgb(255, 159, 64)",
         tension: 0.1,
@@ -54,16 +54,20 @@ const UserMapFeed = () => {
   // Modified metrics data
   const metrics = [
     {
-      name: "Sales Growth",
+      name: "Incident register",
       incidents: [12, 25, 30, 40], 
     },
     {
-      name: "Customer Satisfaction",
+      name: "Social media register",
       incidents: [80, 85, 90, 95],
     },
     {
-      name: "Website Traffic",
+      name: "Legal framework register",
       incidents: [20, 30, 40, 50],
+    },
+    {
+      name: "Authority decision assessment",
+      incidents: [15, 2, 12, 30],
     },
   ];
 
