@@ -1,22 +1,24 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
 import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
+import { useParams } from "next/navigation";
 
-type News = {
+type Post = {
+  id: number; // Add id to uniquely identify posts
   title: string;
   description: string;
   images: File | null;
 };
 
-const NewsForm = () => {
-  
-  const [formData, setFormData] = useState<News>({
+const PostForm = () => {
+  const [formData, setFormData] = useState<Post>({
+    id: 0,
     title: "",
     description: "",
     images: null,
@@ -24,10 +26,38 @@ const NewsForm = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const { id } = useParams();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+
+  // Load posts from localStorage when the component mounts
+  useEffect(() => {
+    const savedPosts = localStorage.getItem("posts");
+    if (savedPosts) {
+      setPosts(JSON.parse(savedPosts));
+    }
+  }, []);
+
+  // Find the post to edit based on the postId passed
+  useEffect(() => {
+    if (id && posts.length > 0) {
+      const postToEdit = posts.find((post) => post.id === Number(id));
+      if (postToEdit) {
+        setFormData(postToEdit); // Set the form with the post's data
+      } else {
+        setError("Post not found");
+      }
+    }
+  }, [id, posts]);
+
+  // Save the posts to localStorage whenever posts state changes
+  useEffect(() => {
+    if (posts.length > 0) {
+      localStorage.setItem("posts", JSON.stringify(posts));
+    }
+  }, [posts]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -35,40 +65,27 @@ const NewsForm = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Preparing form data to be sent
-    const formDataToSubmit = new FormData();
-    formDataToSubmit.append("title", formData.title);
-    formDataToSubmit.append("description", formData.description);
-    if (formData.images) formDataToSubmit.append("images", formData.images);
-
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      // Update the post with the matching id
+      const updatedPosts = posts.map((post) =>
+        post.id === formData.id ? { ...post, ...formData } : post
+      );
+      setPosts(updatedPosts); // Update the posts state
 
-      const response = await fetch(`${apiUrl}/news`, {
-        method: 'POST',
-        body: formDataToSubmit,
-      });
-
-      if (response.ok) {
-        // Handle successful response if necessary
-        alert("News submitted successfully!");
-      } else {
-        setError("Failed to save news");
-      }
+      setFormData({ id: 0, title: "", description: "", images: null }); // Reset form
+      setError(null);
     } catch (err) {
-      setError(`${err}`);
+      setError("Failed to save post");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
       const maxFileSize = 5 * 1024 * 1024; // 5 MB
@@ -87,9 +104,10 @@ const NewsForm = () => {
 
       setError(null);
 
+      // Update the form data with the selected file
       setFormData((prevData) => ({
         ...prevData,
-        images: file, // Store the selected image
+        images: file, 
       }));
     }
   };
@@ -98,12 +116,12 @@ const NewsForm = () => {
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaCalendar />}
-        title={"Create News"}
+        title={formData.id ? "Update Post" : "Create Post"}
         borderColor="border-primary"
         borderThickness="border-b-4"
       >
         <Card
-          title="News Form"
+          title={formData.id ? "Update Post Form" : "Create Post Form"}
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -122,7 +140,7 @@ const NewsForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="News Title"
+                  label="Post Title"
                   placeholder="Enter title"
                   value={formData.title}
                   onChange={handleChange}
@@ -159,7 +177,7 @@ const NewsForm = () => {
                     type="file"
                     onChange={handleFileChange}
                     className="hidden"
-                    accept="image/jpeg, image/png, image/jpg" // Restrict file type to images
+                    accept="image/jpeg, image/png, image/jpg"
                   />
                   {formData.images && (
                     <span className="text-sm text-gray-600 ml-2">
@@ -172,7 +190,7 @@ const NewsForm = () => {
             <div className="flex justify-end mt-4">
               <Button
                 color="primary"
-                text={loading ? "Saving..." : "Save News"}
+                text={loading ? "Saving..." : "Save Post"}
                 size="large"
                 elevation={4}
                 borderRadius={3}
@@ -186,4 +204,4 @@ const NewsForm = () => {
   );
 };
 
-export default NewsForm;
+export default PostForm;
