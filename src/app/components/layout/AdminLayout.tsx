@@ -58,8 +58,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           icon: <FaUserShield />,
         },
         {
-          label: "News",
-          href: "/admin/news/history",
+          label: "Posts",
+          href: "/admin/posts/history",
           icon: <FaNewspaper />,
         },
         {

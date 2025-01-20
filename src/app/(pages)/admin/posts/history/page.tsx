@@ -7,53 +7,67 @@ import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
 import { useRouter } from "next/navigation";
-
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
 
-type News = {
-  id:number,
+type Post = {
+  id: number;
   title: string;
   description: string;
   images: any;
 };
 
-const columns: (keyof News)[] = ["title", "description", "images"];  
+const columns: (keyof Post)[] = ["title", "description", "images"];
 
-const NewsList = () => {
-  const [news, setNews] = useState<News[]>([]);
+const PostList = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
   const rowsPerPage = 5;
 
+  const placeholderPosts: Post[] = [
+    { id: 1, title: "Placeholder Post 1", description: "This is a placeholder post.", images: null },
+    { id: 2, title: "Placeholder Post 2", description: "This is another placeholder post.", images: null },
+  ];
+
   useEffect(() => {
-    const fetchNews = async () => {
-      setLoading(true);
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/news`);
+    const savedPosts = localStorage.getItem("posts");
 
-        if (response.ok) {
-          const data = await response.json();
-          setNews(data);
-        } else {
-          console.error("Failed to fetch news");
-        }
-      } catch (error) {
-        console.error("Error fetching news:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
+    if (savedPosts) {
+      setPosts(JSON.parse(savedPosts));
+      setLoading(false);
+    } else {
+      setPosts(placeholderPosts);
+      localStorage.setItem("posts", JSON.stringify(placeholderPosts));
+      fetchPosts();
+    }
   }, []);
 
-  const totalPages = Math.ceil(news.length / rowsPerPage);
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/posts`);
 
-  const currentData = news.slice(
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data);
+        localStorage.setItem("posts", JSON.stringify(data));
+      } else {
+        console.error("Failed to fetch posts");
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalPages = Math.ceil(posts.length / rowsPerPage);
+
+  const currentData = posts.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -67,10 +81,10 @@ const NewsList = () => {
   const handleAction = (action: string, row: Record<string, any>) => {
     switch (action) {
       case "details":
-        router.push(`/admin/news/detail/${row.id}`);
+        router.push(`/admin/posts/detail/${row.id}`);
         break;
       case "update":
-        router.push(`/admin/news/update/${row.id}`);
+        router.push(`/admin/posts/update/${row.id}`);
         break;
       case "delete":
         handleDelete(row.id);
@@ -80,33 +94,20 @@ const NewsList = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/news/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setNews((prevNews) =>
-          prevNews.filter((newsItem) => newsItem.id !== id)
-        );
-      } else {
-        console.error("Failed to delete news");
-      }
-    } catch (error) {
-      console.error("Error deleting news:", error);
-    }
+  const handleDelete = (id: number) => {
+    const updatedPosts = posts.filter((postItem) => postItem.id !== id);
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
   };
 
   const handleSearch = () => {
-    console.log("Searching news");
+    console.log("Searching posts");
   };
 
   return (
     <BoxWrapper
       icon={<FaExclamationTriangle />}
-      title="News"
+      title="Posts"
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
@@ -114,13 +115,13 @@ const NewsList = () => {
         <div className="flex items-center space-x-4 w-full">
           <Search
             onSearch={handleSearch}
-            placeholder="Search News..."
-            buttonText="Search News"
+            placeholder="Search Posts..."
+            buttonText="Search Posts"
           />
-          <Link href="/admin/news/create">
+          <Link href="/admin/posts/create">
             <Button
               color="primary"
-              text="Create News"
+              text="Create Post"
               onClick={() => { console.log(""); }}
               icon={<FaPlus />}
               size="large"
@@ -131,7 +132,7 @@ const NewsList = () => {
       </div>
 
       {loading ? (
-        <div className='ml-2 text-red-500'>Loading...</div>
+        <div className="ml-2 text-red-500">Loading...</div>
       ) : (
         <>
           <Table
@@ -152,4 +153,4 @@ const NewsList = () => {
   );
 };
 
-export default NewsList;
+export default PostList;
