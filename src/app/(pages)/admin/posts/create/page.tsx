@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,109 +9,45 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 
 type Post = {
-  id: number; // Add ID to uniquely identify posts
-  title: string;
+  // id: number; 
   description: string;
-  images: any;
+  title: string;
+  image: string;
 };
 
 const PostForm = () => {
-  const [formData, setFormData] = useState<Post>({
-    id: 0, // Default ID, will be set after calculating the next available ID
-    title: "",
-    description: "",
-    images: null,
-  });
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [image, setImage] = useState<string | null>(null);
+  // const router = useRouter();
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    const savedPosts = localStorage.getItem("posts");
-    if (savedPosts) {
-      setPosts(JSON.parse(savedPosts));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (posts.length > 0) {
-      localStorage.setItem("posts", JSON.stringify(posts));
-    }
-  }, [posts]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Calculate the next ID based on existing posts
-      const newId = posts.length > 0 ? Math.max(...posts.map(post => post.id)) + 1 : 1;
-
-      // Create a new post object with the calculated ID
-      const newPost = { ...formData, id: newId };
-
-      // Update the posts array with the new post
-      setPosts((prevPosts) => {
-        const updatedPosts = [...prevPosts, newPost];
-        localStorage.setItem("posts", JSON.stringify(updatedPosts));
-        return updatedPosts;
-      });
-
-      // Reset the form data after successful submission
-      setFormData({ id: 0, title: "", description: "", images: null });
-      setError(null);
-    } catch (err) {
-      setError("Failed to save post");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: "file" | "media"
-  ) => {
-    const file = e.target.files ? e.target.files[0] : null;
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const maxFileSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxFileSize) {
-        setError("File size exceeds the maximum limit of 5 MB.");
-        return;
-      }
-
-      const extension = file.name.split(".").pop()?.toLowerCase();
-      const allowedImageExtensions = ["jpg", "png", "jpeg"];
-
-      if (field === "media" && !allowedImageExtensions.includes(extension)) {
-        setError("Invalid file type. Please upload a valid image.");
-        return;
-      }
-
-      setError(null);
-
-      // Set the image to formData
-      setFormData((prevData) => ({
-        ...prevData,
-        [field]: file,
-      }));
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result as string); // Store image as Base64
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // Generate image preview URL
-  const imagePreview = formData.images
-    ? URL.createObjectURL(formData.images)
-    : null;
+  const handlePost = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!title || !description || !image) {
+      alert("Please fill all fields and upload an image.");
+      return;
+    }
+
+    const newPost: Post = { title, description, image };
+    const savedPosts: Post[] = JSON.parse(localStorage.getItem("blogPosts") || "[]");
+    savedPosts.push(newPost);
+    localStorage.setItem("blogPosts", JSON.stringify(savedPosts));
+
+    alert("Blog post published!");
+  };
+
 
   return (
     <div className="bg-white pb-5">
@@ -134,17 +70,16 @@ const PostForm = () => {
             marginBottom="mb-6"
           />
 
-          {error && <div className="text-red-500 mb-4">{error}</div>}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handlePost}>
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
                   type="text"
                   label="Post Title"
                   placeholder="Enter title"
-                  value={formData.title}
-                  onChange={handleChange}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   name="title"
                   className="w-full"
                 />
@@ -155,8 +90,8 @@ const PostForm = () => {
                   type="textarea"
                   label="Description"
                   placeholder="Enter description"
-                  value={formData.description}
-                  onChange={handleChange}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   name="description"
                   borderRadius={3}
                   className="w-full"
@@ -168,9 +103,9 @@ const PostForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  {formData.images && (
+                  {image && (
                     <div className="text-sm text-gray-600 mb-2">
-                      <strong>Selected file:</strong> {formData.images.name}
+                      <strong>Selected file:</strong> 
                     </div>
                   )}
                   <label
@@ -182,7 +117,7 @@ const PostForm = () => {
                   <input
                     id="media"
                     type="file"
-                    onChange={(e) => handleFileChange(e, "media")}
+                    onChange={(e) => handleImageChange(e)}
                     className="hidden"
                   />
                 </div>
@@ -192,12 +127,12 @@ const PostForm = () => {
             <div className="flex justify-end mt-4">
               <Button
                 color="primary"
-                text={loading ? "Saving..." : "Save Post"}
+                text={"Save Post"}
                 size="large"
                 elevation={4}
                 borderRadius={3}
-                disabled={loading}
-                onClick={handleSubmit}
+                // disabled={loading}
+                // onClick={handleSubmit}
               />
             </div>
           </form>

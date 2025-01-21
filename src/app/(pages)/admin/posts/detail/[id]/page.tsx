@@ -23,7 +23,7 @@ const PostDetail = () => {
   useEffect(() => {
     if (id) {
       // Check if the post item is already in localStorage
-      const storedPosts = localStorage.getItem('posts');
+      const storedPosts = localStorage.getItem('blogPosts');
       if (storedPosts) {
         const posts = JSON.parse(storedPosts);
         const selectedPost = posts.find((post: Post) => post.id == id);

@@ -28,12 +28,12 @@ const PostList = () => {
   const rowsPerPage = 5;
 
   const placeholderPosts: Post[] = [
-    { id: 1, title: "Placeholder Post 1", description: "This is a placeholder post.", images: null },
-    { id: 2, title: "Placeholder Post 2", description: "This is another placeholder post.", images: null },
+    { id: 1, title: "Placeholder Post 1", description: "This is a placeholder post.", images: "" },
+    { id: 2, title: "Placeholder Post 2", description: "This is another placeholder post.", images: "" },
   ];
 
   useEffect(() => {
-    const savedPosts = localStorage.getItem("posts");
+    const savedPosts = localStorage.getItem("blogPosts");
 
     if (savedPosts) {
       setPosts(JSON.parse(savedPosts));
