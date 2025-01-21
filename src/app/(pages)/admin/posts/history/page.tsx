@@ -80,12 +80,12 @@ const PostList = () => {
 
   const handleAction = (action: string, row: Record<string, any>) => {
     switch (action) {
-      case "details":
-        router.push(`/admin/posts/detail/${row.id}`);
-        break;
-      case "update":
-        router.push(`/admin/posts/update/${row.id}`);
-        break;
+      // case "details":
+      //   router.push(`/admin/posts/detail/${row.id}`);
+      //   break;
+      // case "update":
+      //   router.push(`/admin/posts/update/${row.id}`);
+      //   break;
       case "delete":
         handleDelete(row.id);
         break;
@@ -97,7 +97,7 @@ const PostList = () => {
   const handleDelete = (id: number) => {
     const updatedPosts = posts.filter((postItem) => postItem.id !== id);
     setPosts(updatedPosts);
-    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+    localStorage.setItem("blogPosts", JSON.stringify(updatedPosts));
   };
 
   const handleSearch = () => {
