@@ -28,12 +28,12 @@ const PostList = () => {
   const rowsPerPage = 5;
 
   const placeholderPosts: Post[] = [
-    { id: 1, title: "Placeholder Post 1", description: "This is a placeholder post.", images: null },
-    { id: 2, title: "Placeholder Post 2", description: "This is another placeholder post.", images: null },
+    { id: 1, title: "Placeholder Post 1", description: "This is a placeholder post.", images: "" },
+    { id: 2, title: "Placeholder Post 2", description: "This is another placeholder post.", images: "" },
   ];
 
   useEffect(() => {
-    const savedPosts = localStorage.getItem("posts");
+    const savedPosts = localStorage.getItem("blogPosts");
 
     if (savedPosts) {
       setPosts(JSON.parse(savedPosts));
@@ -80,12 +80,12 @@ const PostList = () => {
 
   const handleAction = (action: string, row: Record<string, any>) => {
     switch (action) {
-      case "details":
-        router.push(`/admin/posts/detail/${row.id}`);
-        break;
-      case "update":
-        router.push(`/admin/posts/update/${row.id}`);
-        break;
+      // case "details":
+      //   router.push(`/admin/posts/detail/${row.id}`);
+      //   break;
+      // case "update":
+      //   router.push(`/admin/posts/update/${row.id}`);
+      //   break;
       case "delete":
         handleDelete(row.id);
         break;
@@ -97,7 +97,7 @@ const PostList = () => {
   const handleDelete = (id: number) => {
     const updatedPosts = posts.filter((postItem) => postItem.id !== id);
     setPosts(updatedPosts);
-    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+    localStorage.setItem("blogPosts", JSON.stringify(updatedPosts));
   };
 
   const handleSearch = () => {
