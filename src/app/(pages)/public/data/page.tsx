@@ -1,6 +1,5 @@
 'use client';
 
-import UserLayout from '@/app/components/layout/UserLayout';
 import React, { useEffect, useState } from 'react';
 
 // Define a type for the post structure
@@ -25,8 +24,7 @@ const NewsCard = () => {
 
   return (
     <>
-      <UserLayout />
-      <div className="flex flex-col w-full bg-white justify-center items-center py-8">
+      <div className="h-full flex flex-col w-full bg-white justify-center items-center py-8">
         {posts.length > 0 ? (
           posts.map((post, index) => (
             <div
@@ -60,7 +58,7 @@ const NewsCard = () => {
             </div>
           ))
         ) : (
-          <p className="text-white">No posts found.</p>
+          <p className="f-full text-white">No posts found.</p>
         )}
       </div>
     </>

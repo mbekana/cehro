@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LinkItem from "../UI/LinkItem";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import Cookies from "js-cookie"; // Import js-cookie
 
 interface SidebarProps {
   links: {
@@ -12,9 +13,10 @@ interface SidebarProps {
   }[];
   isOpen: boolean; 
   onClose: () => void; 
+  userData: any; // Accept userData as a prop
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ links, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ links, onClose, userData }) => {
   const [openSubmenu, setOpenSubmenu] = useState<{ [key: string]: boolean }>({});
 
   const toggleSubmenu = (submenuKey: string) => {
@@ -45,14 +47,13 @@ const Sidebar: React.FC<SidebarProps> = ({ links, onClose }) => {
     });
   };
 
+  const userAvatar = userData ? userData.firstName.charAt(0).toUpperCase() : ''; 
+
   return (
     <div
       className={`fixed inset-0 lg:relative bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform`}
       style={{ width: 'fit-content' }} 
     >
-
-     {/* <div  className={`fixed inset-0 lg:relative lg:w-64 bg-primary shadow-lg p-6 h-full flex flex-col transition-transform duration-300 ease-in-out transform ${isOpen ? "translate-x-0" : "-translate-x-full"}`}> */}
-
       <div className="absolute top-4 right-4 lg:hidden">
         <button onClick={onClose} className="text-white">
           <FaChevronDown size={24} />
@@ -61,7 +62,10 @@ const Sidebar: React.FC<SidebarProps> = ({ links, onClose }) => {
 
       <div className="py-2 px-4">
         <div className="flex items-center justify-left space-x-3">
-          <p className="text-white">Mahder	Wondowsen</p>
+          <div className="bg-white text-primary rounded-full w-10 h-10 flex items-center justify-center">
+            {userAvatar}
+          </div>
+          <p className="text-white">{userData ? userData.firstName : 'Guest'}</p>
         </div>
       </div>
       <div className="my-1 border-t border-gray-300" />

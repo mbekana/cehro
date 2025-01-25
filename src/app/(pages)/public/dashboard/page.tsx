@@ -128,7 +128,7 @@ const UserMapFeed = () => {
           </div>
         </div>
       ) : (
-        <div>Loading...</div>
+        <div className="h-screen flex items-center justify-center">Loading...</div>
       )}
     </div>
   );
