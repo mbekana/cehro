@@ -19,13 +19,13 @@ const EducationDetailsPage = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/educations/${id}`, {
+          const response = await fetch(`${apiUrl}/api/v1/educations/${id}`, {
             method: "GET",
           });
           if (response.ok) {
             const data = await response.json();
             console.log("Data: ", data);
-            setEducation(data);
+            setEducation(data.data);
           } else {
             console.error("Education not found");
           }
@@ -74,19 +74,19 @@ const EducationDetailsPage = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700">
-                    Course Title
+                    ID
                   </h3>
                   <p className="text-gray-600">{education.id}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700">
-                    Description
+                    Title
                   </h3>
-                  <p className="text-gray-600">{education.name}</p>
+                  <p className="text-gray-600">{education.education}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700">
-                    Instructor
+                    Remark
                   </h3>
                   <p className="text-gray-600">{education.remark}</p>
                 </div>

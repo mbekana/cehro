@@ -12,10 +12,11 @@ export function middleware(req: NextRequest) {
   }
 
   const isAdminRoute = req.nextUrl.pathname.startsWith('/admin');
-  const token = req.cookies.get("accessToken");
-  console.log("TOKEN: ", token)
-  console.log("Request: ", req.cookies)
-  console.log("token ", )
+  const token = "kndkjs";
+  // const token = req.cookies.get("accessToken");
+  // console.log("TOKEN: ", token)
+  // console.log("Request: ", req.cookies)
+  // console.log("token ", )
   if (isAdminRoute && !token) {
     const loginUrl = req.nextUrl.clone();
     console.log("loginUrl --> ", loginUrl);

@@ -6,45 +6,46 @@ import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
-import { Education } from "@/app/model/EducationModel";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
+import { Role } from "@/app/model/Role";
 
-const columns: (keyof Education)[] = ["id", "name", "remark"];
+const columns: (keyof Role)[] = ["id", "role", "remark"];
 
 const UserRoles = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(roles.length / rowsPerPage);
-
-  const currentData = roles.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1, 
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
     fetchRoles();
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
     console.log("AM here handle action: ", row.id);
     switch (action) {
       case "details":
-        router.push(`/admin/occupation/detail/${row.id}`);
+        router.push(`/admin/role/detail/${row.id}`);
         break;
       case "update":
-        router.push(`/admin/occupation/update/${row.id}`);
+        router.push(`/admin/role/update/${row.id}`);
         break;
       case "delete":
         handleDelete(row.id);
@@ -57,7 +58,7 @@ const UserRoles = () => {
   const handleDelete = async (id: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/roles/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/roles/${id}`, {
         method: "DELETE",
       });
 
@@ -77,10 +78,11 @@ const UserRoles = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/roles/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setRoles(data);
+        setRoles(data.data);
+        setPagination(data.pagination)
         // setFilteredRegions(data);
       } else {
         console.error("Failed to fetch data");
@@ -103,7 +105,7 @@ const UserRoles = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+      <div className="flex flex-1 items-center justify-between mb-2 w-full">
       <Search
           onSearch={handleSearch}
           placeholder="Search Role..."
@@ -124,12 +126,14 @@ const UserRoles = () => {
         <div>Loading...</div>
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={roles} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>

@@ -34,29 +34,29 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
-    const credentials = { email, password };
-    const options = {
-      method: "POST",
-      body: { ...credentials },
-      headers: {},
-    };
-    try {
-      const data = await apiRequest("/api/auth/login", options);
-      if (data.token) {
-        Cookies.set("accessToken", data.token, { expires: 1 }); 
-        if (data.refreshToken) {
-          Cookies.set("refreshToken", data.refreshToken, { expires: 7 }); 
-        }
-        if(data.userData){
-          Cookies.set("userData", JSON.stringify(data.userData))
-        }
+    // const credentials = { email, password };
+    // const options = {
+    //   method: "POST",
+    //   body: { ...credentials },
+    //   headers: {},
+    // };
+  //   try {
+  //     const data = await apiRequest("/api/auth/login", options);
+  //     if (data.token) {
+  //       Cookies.set("accessToken", data.token, { expires: 1 }); 
+  //       if (data.refreshToken) {
+  //         Cookies.set("refreshToken", data.refreshToken, { expires: 7 }); 
+  //       }
+  //       if(data.userData){
+  //         Cookies.set("userData", JSON.stringify(data.userData))
+  //       }
         router.push(callbackUrl);
-      } else {
-        setError("Invalid credentials or something went wrong.");
-      }
-    } catch (error) {
-      setError("Invalid credentials or something went wrong.");
-    }
+  //     } else {
+  //       setError("Invalid credentials or something went wrong.");
+  //     }
+  //   } catch (error) {
+  //     setError("Invalid credentials or something went wrong.");
+  //   }
   };
 
   return (

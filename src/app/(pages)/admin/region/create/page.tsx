@@ -7,24 +7,23 @@ import Divider from "@/app/components/UI/Divider";
 import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-
-type RegionFormData = {
-  regionName: string;
-  location: {
-    lat: number;
-    long: number;
-  };
-  main_city: string;
-};
+import { Region } from "@/app/model/RegionModel";
+import Toast from "@/app/components/UI/Toast";
 
 const RegionForm = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);  
-  const [formData, setFormData] = useState<RegionFormData>({
-    regionName: "",
-    location: { lat: 0, long: 0 },
-    main_city: "",
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Region>({
+    name: "",
+    lattitude: "",
+    longitude: "",
+    city: "",
   });
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null); // State to manage Toast
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -32,7 +31,7 @@ const RegionForm = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === "lat" || name === "long" ? Number(value) : value, 
+      [name]: name === "lattitude" || name === "longitude" ? value : value,
     }));
   };
 
@@ -41,7 +40,7 @@ const RegionForm = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const response = await fetch(`${apiUrl}/regions`, {
+      const response = await fetch(`${apiUrl}/api/v1/regions/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,17 +52,24 @@ const RegionForm = () => {
         throw new Error("Failed to create region");
       }
 
-      setSuccessMessage("Region created successfully");
+      setToast({
+        message: "Region updated successfully!",
+        type: "success",
+        position: "top-right",
+      });
 
-      setFormData({  regionName: "",
-        location: { lat: 0, long: 0 },
-        main_city: "", });
+      setFormData({ name: "", lattitude: "", longitude: "", city: "" });
 
       setTimeout(() => {
         setSuccessMessage(null);
       }, 3000);
     } catch (error) {
-      setError(`Error: ${error}`);
+      setError(`Error: ${error.message}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
@@ -88,39 +94,38 @@ const RegionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form  className="space-y-6">
+          <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
               <div>
                 <Input
-                  type="text" 
+                  type="text"
                   label="Region Name"
                   placeholder="Enter region name"
-                  value={formData.regionName}
+                  value={formData.name}
                   onChange={handleChange}
-                  name="regionName" 
+                  name="name"
                 />
               </div>
 
               <div>
                 <Input
-                  type="number"
+                  type="text"
                   label="Lat"
                   placeholder="Enter latitude"
-                  value={formData.location.lat.toString()} 
+                  value={formData.lattitude}
                   onChange={handleChange}
-                  name="lat"
+                  name="lattitude"
                 />
               </div>
 
               <div>
                 <Input
-                  type="number"
+                  type="text"
                   label="Long"
                   placeholder="Enter longitude"
-                  value={formData.location.long.toString()} 
+                  value={formData.longitude}
                   onChange={handleChange}
-                  name="long" 
+                  name="longitude"
                 />
               </div>
 
@@ -129,25 +134,32 @@ const RegionForm = () => {
                   type="text"
                   label="City Name"
                   placeholder="Enter city name"
-                  value={formData.main_city}
+                  value={formData.city}
                   onChange={handleChange}
-                  name="main_city" 
+                  name="city"
                 />
               </div>
             </div>
           </form>
         </Card>
       </BoxWrapper>
-      {successMessage && (
-        <div className="mt-4 text-center text-green-500">{successMessage}</div>
-      )}
-
-      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
       <div className="flex justify-end mt-4 mr-24">
-        <Button color="primary" text="Save Incident" size="large" elevation={4} 
-        onClick={handleSubmit}
+        <Button
+          color="primary"
+          text="Save Incident"
+          size="large"
+          elevation={4}
+          onClick={handleSubmit}
         />
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)} 
+        />
+      )}
     </div>
   );
 };

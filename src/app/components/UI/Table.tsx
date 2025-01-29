@@ -32,18 +32,28 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction, customTagProps }
                 {columns.map((col, colIndex) => (
                   <td key={colIndex} className="p-2 text-gray-700 text-xs md:text-sm lg:text-base">
                     {col === 'status' ? (  
-                      <Tag 
-                        status={row[col]}  
-                        customText={customTagProps?.customText || ''}  
-                        customColor={customTagProps?.customColor || ''}  
-                      />
+                      row[col] ? (
+                        <Tag 
+                          status={row[col]}  
+                          customText={customTagProps?.customText || ''}  
+                          customColor={customTagProps?.customColor || ''}  
+                        />
+                      ) : (
+                        <span className="text-gray-500">No Data</span>
+                      )
                     ) : col === 'incident_happened' ? (
-                      <>
-                        <div>{row[col]?.woreda}</div>
-                        <div>{row[col]?.zone}</div>
-                      </>
-                    ) : (
+                      row[col] ? (
+                        <>
+                          <div>{row[col]?.woreda || "No Data"}</div>
+                          <div>{row[col]?.zone || "No Data"}</div>
+                        </>
+                      ) : (
+                        <span className="text-gray-500">No Data</span>
+                      )
+                    ) : row[col] ? (
                       row[col]
+                    ) : (
+                      <span className="text-gray-500">No Data</span>
                     )}
                   </td>
                 ))}
@@ -63,23 +73,33 @@ const Table: React.FC<TableProps> = ({ columns, data, onAction, customTagProps }
               <div key={colIndex} className="mb-2">
                 <strong className="block text-sm text-gray-600">{col}:</strong>
                 {col === 'status' ? (
-                  <Tag 
-                    status={row[col]}  
-                    customText={customTagProps?.customText || ''} 
-                    customColor={customTagProps?.customColor || ''}  
-                  />
+                  row[col] ? (
+                    <Tag 
+                      status={row[col]}  
+                      customText={customTagProps?.customText || ''} 
+                      customColor={customTagProps?.customColor || ''}  
+                    />
+                  ) : (
+                    <span className="text-gray-500">No Data</span>
+                  )
                 ) : col === 'incident_happened' ? (
-                  <div>
-                    <div>{row[col]?.woreda}</div>
-                    <div>{row[col]?.zone}</div>
-                  </div>
-                ) : (
+                  row[col] ? (
+                    <div>
+                      <div>{row[col]?.woreda || "No Data"}</div>
+                      <div>{row[col]?.zone || "No Data"}</div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">No Data</span>
+                  )
+                ) : row[col] ? (
                   <span className="text-gray-700">{row[col]}</span>
+                ) : (
+                  <span className="text-gray-500">No Data</span>
                 )}
               </div>
             ))}
             <div className="mt-4">
-              <ActionDropdown onAction={(action) => onAction(action, row)} /> 
+              <ActionDropdown onAction={(action) => onAction(action, row)} />
             </div>
           </div>
         ))}

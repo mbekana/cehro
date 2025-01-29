@@ -39,9 +39,16 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const router = useRouter();
   useEffect(() => {
-    const user = Cookies.get("userData")
-      ? JSON.parse(Cookies.get("userData")!)
-      : null;
+    console.log("HI: ", Cookies.get("userData"));
+    // const user = Cookies.get("userData")
+    //   ? JSON.parse(Cookies.get("userData")!)
+    //   : null;
+    const user = {
+      id: "12345",
+      email: "user@example.com",
+      firstName: "John",
+      lastName: "Doe",
+    };
     setUserData(user);
   }, []);
 
@@ -73,10 +80,10 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const sidebarLinks = [
     {
       label: "User Management",
-      href: "/admin/signup/history",
+      href: "/admin/users/history",
       icon: <FaUsersCog />,
       submenu: [
-        { label: "Users", href: "/auth/signup/history", icon: <FaUsers /> },
+        { label: "Users", href: "/admin/users/history", icon: <FaUsers /> },
       ],
     },
     {
@@ -177,7 +184,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="h-screen flex flex-col shadow-lg">
-      <header className="w-screenbg-white border border-1 shadow-lg flex justify-between items-center px-4 sm:px-6 md:px-8">
+      <header className="bg-white border border-1 shadow-lg flex justify-between items-center px-4 sm:px-6 md:px-8">
         <button className="lg:hidden text-gray-700" onClick={toggleSidebar}>
           <FaBars size={24} />
         </button>
@@ -193,13 +200,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <span className="mr-4 hidden md:block relative">
           {userData ? (
             <div className="flex items-center space-x-2">
-              {/* Avatar Button */}
               <button
                 ref={avatarRef}
                 className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold focus:outline-none hover:bg-primary-dark transition-colors duration-200"
-                onClick={() => setDropdownOpen((prev) => !prev)} 
+                onClick={() => setDropdownOpen((prev) => !prev)}
               >
-                {userAvatar}{" "}
+                {userData.firstName.charAt(0)}{" "}
               </button>
 
               <span className="text-sm text-gray-700">
@@ -208,30 +214,30 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
               {dropdownOpen && (
                 <div
-                ref={dropdownRef}
-                className="absolute right-0 mt-12 w-48 bg-white border rounded-md shadow-lg z-10"
-              >
-                <ul className="py-1">
-                  <li>
-                    <button
-                      onClick={() => router.push("/profile")}
-                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
-                    >
-                      <FaUser className="inline-block mr-2" />
-                      Profile
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
-                    >
-                      <FaSignOutAlt className="inline-block mr-2" />
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              </div>
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-10 w-48 bg-white border rounded-md shadow-lg z-10"
+                >
+                  <ul className="py-1">
+                    <li>
+                      <button
+                        onClick={() => router.push("/profile")}
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
+                      >
+                        <FaUser className="inline-block mr-2" />
+                        Profile
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
+                      >
+                        <FaSignOutAlt className="inline-block mr-2" />
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               )}
             </div>
           ) : (

@@ -15,4 +15,6 @@ export interface LegalFramework {
   geographicScope: string;
   thematicCategory: string;
   summary: string;
+  filePreview?: null, 
+  mediaPreview?: null,
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaCalendar } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Card from '@/app/components/UI/Card';
 import Divider from '@/app/components/UI/Divider';
@@ -23,10 +23,10 @@ const MetricDetail = () => {
         setLoading(true);
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          const response = await fetch(`${apiUrl}/metrics/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/metrics/${id}`);
           if (response.ok) {
             const data = await response.json();
-            setMetric(data);  
+            setMetric(data.data);  
           } else {
             setError('Metric not found');
           }
@@ -50,10 +50,11 @@ const MetricDetail = () => {
 
   return (
     <BoxWrapper
-      icon={<FaCalendar />}
-      title="Metric Details"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
+        icon={<FaArrowLeft />}
+        title="Metrics Details"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+        shouldGoBack={true}
     >
       <Card
         title="Metric Information"
@@ -76,7 +77,7 @@ const MetricDetail = () => {
         </div>
         <div>
           <h3 className="text-lg font-semibold text-gray-700">Metrics Name</h3>
-          <p className="text-gray-600">{metric.name}</p>
+          <p className="text-gray-600">{metric.metrics}</p>
         </div>
         <div>
           <h3 className="text-lg font-semibold text-gray-700">Remark</h3>

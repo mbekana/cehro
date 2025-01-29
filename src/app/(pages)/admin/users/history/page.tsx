@@ -9,22 +9,15 @@ import Search from "@/app/components/UI/Search";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  phoneNumber: string;
-};
+import { User } from "@/app/model/user";
 
 const columns: (keyof User)[] = [
   "id",
   "firstName",
   "lastName",
-  "username",
-  "email",
-  "phoneNumber"
+  "middleName",
+  "userName",
+  "email"
 ];
 
 const UserList = () => {
@@ -43,10 +36,10 @@ const UserList = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/users`);
+      const response = await fetch(`${apiUrl}/api/v1/users/all`);
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        setUsers(data.data);
       } else {
         setError("Failed to fetch users");
       }
@@ -73,7 +66,7 @@ const UserList = () => {
     console.log("Searching for:", query);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -92,13 +85,14 @@ const UserList = () => {
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
+    console.log("ROW: ", row)
     console.log("AM here handle action: ", row.id);
     switch (action) {
       case "details":
-        router.push(`/auth/signup/detail/${row.id}`);
+        router.push(`/admin/users/detail/${row.id}`);
         break;
       case "update":
-        router.push(`/auth/signup/update/${row.id}`);
+        router.push(`/admin/users/update/${row.id}`);
         break;
       case "delete":
         handleDelete(row.id);
@@ -126,7 +120,7 @@ const UserList = () => {
             placeholder="Search User..."
             buttonText="Search User"
           />
-          <Link href="/auth/signup/create">
+          <Link href="/admin/users/create">
             <Button
               color="primary"
               text="Create User"

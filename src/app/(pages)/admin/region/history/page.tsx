@@ -11,32 +11,38 @@ import Link from 'next/link';
 import Button from '@/app/components/UI/Button';
 import { useRouter } from 'next/navigation';
 
-const columns: (keyof Region)[] = ['id', 'name', 'city', 'lat', 'long'];
+const columns: (keyof Region)[] = ['id', 'name', 'city', 'lattitude', 'longitude'];
 
 const Regions = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [regions, setRegions] = useState<Region[]>([]);
   const [filteredRegions, setFilteredRegions] = useState<Region[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(filteredRegions.length / rowsPerPage);
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1, 
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
     fetchRegions();
-  }, []);
+  }, [pagination.page]);
 
   const fetchRegions = async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/regions/all?page=${pagination.page}&limit=${pagination.limit}`, { method: 'GET' });
 
-      const response = await fetch(`${apiUrl}/regions`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
-        setFilteredRegions(data); 
+        setRegions(data.data);
+        setFilteredRegions(data.data); 
+        setPagination(data.pagination); // Set pagination data directly from backend
       } else {
         console.error('Failed to fetch data');
       }
@@ -48,23 +54,22 @@ const Regions = () => {
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
 
   const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
     const filtered = regions.filter((region) =>
       region.name.toLowerCase().includes(query.toLowerCase()) ||
       region.city.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredRegions(filtered);
-    setCurrentPage(1); 
+    setPagination(prevState => ({ ...prevState, page: 1 })); 
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
-    console.log('AM here handle action: ', row.id);
     switch (action) {
       case 'details':
         router.push(`/admin/region/detail/${row.id}`);
@@ -83,20 +88,16 @@ const Regions = () => {
   const handleDelete = async (id: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions/${id}`, {method:'DELETE'});
+      const response = await fetch(`${apiUrl}/regions/${id}`, { method: 'DELETE' });
   
       if (!response.ok) {
         throw new Error('Failed to delete the region');
       }
-
-      console.log(`Region with id ${id} deleted successfully`);
-      fetchRegions();
+      fetchRegions(); // Re-fetch after deleting
     } catch (error) {
       console.error('Error deleting the region: ', error);
     }
   };
-
- 
 
   return (
     <BoxWrapper
@@ -105,7 +106,7 @@ const Regions = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+        <div className="flex flex-1 items-center justify-between mb-2 w-full">
         <Search onSearch={handleSearch} placeholder="Search Regions..." buttonText="Search Regions" />
         <Link href="/admin/region/create">
           <Button
@@ -123,17 +124,22 @@ const Regions = () => {
         <div className='ml-2 text-red-500'>Loading...</div>
       ) : (
         <>
-     <Table columns={columns} data={filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)} onAction={handleAction} />
-      <div className="flex justify-end mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+          <Table
+            columns={columns}
+            data={filteredRegions}
+            onAction={handleAction}
+          />
+          <div className="flex justify-end mt-4">
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              hasPrevPage={pagination.hasPrevPage}
+              hasNextPage={pagination.hasNextPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
-    
     </BoxWrapper>
   );
 };

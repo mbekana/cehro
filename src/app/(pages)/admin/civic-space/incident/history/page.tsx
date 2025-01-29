@@ -27,6 +27,15 @@ const IncidentsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [incidentsData, setIncidentData] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true); 
+  const [pagination, setPagination] = useState({
+    totalDocs:0,
+    totalPages:0,
+    page:0, 
+    limit:0,
+    pageCounter:0,
+    hasPrevPage:false, 
+    hasNextPage:false
+  })
   const rowsPerPage = 5;
 
   useEffect(() => {
@@ -36,10 +45,13 @@ const IncidentsList = () => {
   const fetchIncidents = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/civic-space/incident`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/incidents/all?page=${currentPage}&limit=${rowsPerPage}`);
       if (response.ok) {
         const data = await response.json();
-        setIncidentData(data);
+        console.log("INCIDENTS: ", data.data)
+        setIncidentData(data.data);
+        setPagination(data.pagination); 
       } else {
         console.error("Failed to fetch data");
       }
@@ -58,7 +70,7 @@ const IncidentsList = () => {
   );
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= pagination.totalPages) {
       setCurrentPage(page);
     }
   };
@@ -108,7 +120,7 @@ const IncidentsList = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+        <div className="flex flex-1 items-center justify-between mb-2 w-full">
         <Search
           onSearch={handleSearch}
           placeholder="Search Incidents..."
@@ -139,6 +151,8 @@ const IncidentsList = () => {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
               onPageChange={handlePageChange}
             />
           </div>

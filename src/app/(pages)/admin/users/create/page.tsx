@@ -10,129 +10,76 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Toast from "@/app/components/UI/Toast";
 
 const SignupPage: React.FC = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    userName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    role: "",
+  });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
-  const [role, setRole] = useState<string>("");
 
+  // Only fetch roles for the dropdown (no form data fetching here)
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
-  useEffect(()=>{
-    fetchRoles()
-  }, [])
-
-  const fetchRoles = async() =>{
-    try{
+  const fetchRoles = async () => {
+    try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/roles`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-  
+      const response = await fetch(`${apiUrl}/api/v1/roles/all`);
       const data = await response.json();
-      if(data != null){
-        setRoles(data)
-        setError(null)
-      }
-    }catch(error){
-      setError(error)
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case "firstName":
-        setFirstName(value);
-        break;
-      case "lastName":
-        setLastName(value);
-        break;
-      case "username":
-        setUsername(value);
-        break;
-      case "email":
-        setEmail(value);
-        break;
-      case "password":
-        setPassword(value);
-        break;
-      case "confirmPassword":
-        setConfirmPassword(value);
-        break;
-      case "phoneNumber":
-        setPhoneNumber(value);
-        break;
-      case "role":
-        setRole(value);
-      default:
-        break;
+      if (data) setRoles(data.data);
+    } catch (err) {
+      setError("Failed to fetch roles");
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSignup = async () => {
+    const { firstName, lastName, userName, email, password, confirmPassword, phone, role } = formData;
+
     setError(null);
     setSuccess(null);
 
-    if (
-      !firstName ||
-      !lastName ||
-      !username ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !phoneNumber ||
-      !role
-    ) {
+    if (!firstName || !lastName || !userName || !email || !password || !confirmPassword || !phone) {
       setError("All fields are required.");
       return;
     }
 
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
+      setError("Invalid email address.");
       return;
     }
 
-    // const passwordStrengthRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    // if (!passwordStrengthRegex.test(password)) {
-    //   setError(
-    //     "Password must be at least 8 characters long, with at least 1 uppercase letter and 1 number."
-    //   );
-    //   return;
-    // }
-
     if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+      setError("Passwords do not match.");
       return;
     }
 
     setLoading(true);
 
-    const userData = {
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-      phoneNumber,
-      role
-    };
+    const userData = { ...formData, role: role || null };
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/users`, {
+      const response = await fetch(`${apiUrl}/api/v1/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,19 +91,22 @@ const SignupPage: React.FC = () => {
 
       if (response.ok) {
         setSuccess("User created successfully!");
-        setFirstName("");
-        setLastName("");
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setPhoneNumber("");
-        setRole("");
+        setFormData({
+          firstName: "",
+          lastName: "",
+          middleName:"",
+          userName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          phone: "",
+          role: "",
+        });
       } else {
-        setError(data.message || "An error occurred during signup.");
+        setError(data.message || "Signup error.");
       }
     } catch (err) {
-      setError(`${err}`);
+      setError("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -186,66 +136,42 @@ const SignupPage: React.FC = () => {
 
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                name="firstName"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                name="lastName"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="text"
-                placeholder="Username"
-                value={username}
-                name="username"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                name="email"
-                onChange={handleInputChange}
-              />
-
-              <Input
-                type="text"
-                placeholder="Phone Number"
-                value={phoneNumber}
-                name="phoneNumber"
-                onChange={handleInputChange}
-                borderRadius={1}
-              />
+              {["firstName", "middleName", "lastName", "userName", "email", "phone"].map((field, index) => (
+                <Input
+                  key={index}
+                  type={field === "email" ? "email" : field === "phone" ? "text" : "text"}
+                  placeholder={field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+                  value={formData[field]}
+                  name={field}
+                  onChange={handleInputChange}
+                />
+              ))}
 
               <Input
                 type="select"
                 placeholder="Role"
-                value={role}
+                value={formData.role}
                 name="role"
                 onChange={handleInputChange}
                 borderRadius={1}
               >
                 <option value="">Select Role</option>
-                {roles.map((role, index)=>(<option key={index} value={role.id}>{role.name}</option>))}
-                </Input>
+                {roles.map((role, index) => (
+                  <option key={index} value={role.role}>{role.role}</option>
+                ))}
+              </Input>
+
               <Input
                 type="password"
                 placeholder="Password"
-                value={password}
+                value={formData.password}
                 name="password"
                 onChange={handleInputChange}
               />
               <Input
                 type="password"
                 placeholder="Confirm your password"
-                value={confirmPassword}
+                value={formData.confirmPassword}
                 name="confirmPassword"
                 onChange={handleInputChange}
               />

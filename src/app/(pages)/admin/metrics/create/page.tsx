@@ -4,24 +4,29 @@ import React, { useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
+import { Metrics } from "@/app/model/Metrics";
+import Toast from "@/app/components/UI/Toast";
 
-type MetricsFormData = {
-  name: string;
-  remark: string;
-};
+
 
 const MetricsForm = () => {
   
-  const [formData, setFormData] = useState<MetricsFormData>({
-    name: "",
+  const [formData, setFormData] = useState<Metrics>({
+    metrics: "",
     remark: "",
   });
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null); 
+
 
 
   const handleChange = (
@@ -37,36 +42,53 @@ const MetricsForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/metrics`, {
-        method:'POST',
+      const payload = { ...formData, "postedBy": "3f043a16-124b-4205-a6b1-5015fab1a2b2" };
+  
+      const response = await fetch(`${apiUrl}/api/v1/metrics/register`, {
+        method: 'POST',
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
-
-      if (response.ok) {
-      } else {
-        setError("Failed to save metric");
+  
+      
+      if (!response.ok) {
+        const errorData = await response.json(); 
+        throw new Error(errorData.message || "An error occurred while submitting the data.");
       }
-    } catch (err) {
-      setError(`${err}`);
+  
+      setFormData({ metrics: "", remark: "" });
+      setToast({
+        message: "You have created metrics successfully.",
+        type: "success",
+        position: "top-right",
+      });
+  
+    } catch (error) {
+      console.error("Error: ", error);
+        setToast({
+        message: error instanceof Error ? error.message : "An unknown error occurred.",
+        type: "error",
+        position: "top-right",
+      });
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title={"Create Metric"}
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Metric Form"
@@ -81,7 +103,6 @@ const MetricsForm = () => {
             marginBottom="mb-6"
           />
           
-          {error && <div className="text-red-500 mb-4">{error}</div>}
           
           <form  className="space-y-6">
             <div className="flex flex-col space-y-4">
@@ -90,9 +111,9 @@ const MetricsForm = () => {
                   type="text"
                   label="Metrics Name"
                   placeholder="Enter name"
-                  value={formData.name}
+                  value={formData.metrics}
                   onChange={handleChange}
-                  name="name"
+                  name="metrics"
                   className="w-full"
                 />
               </div>
@@ -124,6 +145,14 @@ const MetricsForm = () => {
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

@@ -8,19 +8,22 @@ import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
+import { Education } from "@/app/model/EducationModel";
 
-type EducationFormData = {
-  name: string;
-  remark: string;
-};
+
 
 const EducationForm = () => {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<EducationFormData>({
-    name: "",
+  const [formData, setFormData] = useState<Education>({
+    education: "",
     remark: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -34,39 +37,43 @@ const EducationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate form fields
-    if (!formData.name.trim() || !formData.remark.trim()) {
-      setError("Both fields are required!");
-      return;
-    }
-
-    setError(null); 
-
+    setLoading(true)
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const response = await fetch(`${apiUrl}/educations`, {
+      const payload = {
+        ...formData,
+        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+      };
+      const response = await fetch(`${apiUrl}/api/v1/educations/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create education");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "An error occurred while submitting the data."
+        );
       }
 
-      setSuccessMessage("Education created successfully");
-
-      setFormData({ name: "", remark: "" });
-
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setFormData({ education: "", remark: "" });
+      setToast({
+        message: "You have created occupation successfully.",
+        type: "success",
+        position: "top-right",
+      });
     } catch (error) {
-      setError(`Error: ${error}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,9 +106,9 @@ const EducationForm = () => {
                   type="text"
                   label="Education Level"
                   placeholder="Enter Education"
-                  value={formData.name}
+                  value={formData.education}
                   onChange={handleChange}
-                  name="name"
+                  name="education"
                   className="w-full"
                 />
               </div>
@@ -119,38 +126,29 @@ const EducationForm = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text={loading ? 'Saving' : "Save Education"}
+                size="large"
+                elevation={4}
+                borderRadius={3}
+                disabled={loading}
+                onClick={handleSubmit}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
 
-      {successMessage && (
+      {toast && (
         <Toast
-          message={successMessage}
-          type="success"
-          position="top-right"
-          onClose={() => setSuccessMessage(null)}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
-
-      {error && (
-        <Toast
-          message={error}
-          type="error"
-          position="top-right"
-          onClose={() => setError(null)}
-        />
-      )}
-
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text="Save Education"
-          size="large"
-          elevation={4}
-          borderRadius={3}
-          onClick={handleSubmit}
-        />
-      </div>
     </div>
   );
 };

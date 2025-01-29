@@ -29,16 +29,19 @@ const UpdateUserPage = () => {
       const fetchUserData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          const response = await fetch(`${apiUrl}/users/${id}`);
+          console.log("ID: ", id);
+          const response = await fetch(`${apiUrl}/api/v1/users/${id}`);
           const data = await response.json();
           if (response.ok) {
-            setFirstName(data.firstName);
-            setLastName(data.lastName);
-            setUsername(data.username);
-            setEmail(data.email);
-            setPhoneNumber(data.phoneNumber);
-            setRole(data.role); 
-            } else {
+            console.log("Fetched Data: ", data.data);
+            setFirstName(data.data.firstName);
+            setLastName(data.data.lastName);
+            setUsername(data.data.userName);
+            setEmail(data.data.email);
+            setPhoneNumber(data.data.phone);
+            console.log("setRole(data.data.role) ", data.data)
+            setRole(data.data.role);  
+          } else {
             setError("Failed to fetch user data.");
           }
         } catch (error) {
@@ -54,8 +57,7 @@ const UpdateUserPage = () => {
   const fetchRoles = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/roles`, {
+      const response = await fetch(`${apiUrl}/api/v1/roles/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +66,8 @@ const UpdateUserPage = () => {
 
       const data = await response.json();
       if (data != null) {
-        setRoles(data);
+        console.log("ROLE: ", data.data)
+        setRoles(data.data); 
         setError(null);
       }
     } catch (error) {
@@ -81,9 +84,6 @@ const UpdateUserPage = () => {
       case "lastName":
         setLastName(value);
         break;
-      case "username":
-        setUsername(value);
-        break;
       case "email":
         setEmail(value);
         break;
@@ -91,7 +91,7 @@ const UpdateUserPage = () => {
         setPhoneNumber(value);
         break;
       case "role":
-        setRole(value); 
+        setRole(value);
         break;
       default:
         break;
@@ -103,7 +103,7 @@ const UpdateUserPage = () => {
     setError(null);
     setSuccess(null);
 
-    const updatedUser = { firstName, lastName, username, email, phoneNumber };
+    const updatedUser = { firstName, lastName, email, phoneNumber, role };
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -121,10 +121,9 @@ const UpdateUserPage = () => {
         setSuccess("User updated successfully!");
         setFirstName("");
         setLastName("");
-        setUsername("");
         setEmail("");
         setPhoneNumber("");
-        setRole("")
+        setRole("");
       } else {
         setError(data.message || "An error occurred while updating the user.");
       }
@@ -161,50 +160,44 @@ const UpdateUserPage = () => {
               <Input
                 type="text"
                 placeholder="Enter your first name"
-                value={firstName}
+                value={firstName || ""}
                 name="firstName"
                 onChange={handleInputChange}
               />
               <Input
                 type="text"
                 placeholder="Enter your last name"
-                value={lastName}
+                value={lastName || ""}
                 name="lastName"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                name="username"
                 onChange={handleInputChange}
               />
               <Input
                 type="email"
                 placeholder="Enter your email"
-                value={email}
+                value={email || ""}
                 name="email"
                 onChange={handleInputChange}
               />
               <Input
                 type="text"
                 placeholder="Enter your phone number"
-                value={phoneNumber}
+                value={phoneNumber || ""}
                 name="phoneNumber"
                 onChange={handleInputChange}
-                borderRadius={1}
               />
-               <Input
+              <Input
                 type="select"
                 placeholder="Role"
-                value={role}
+                value={role || ""}
                 name="role"
                 onChange={handleInputChange}
                 borderRadius={1}
               >
                 <option value="">Select Role</option>
                 {roles.map((role, index) => (
-                  <option key={index} value={role.id}>{role.name}</option>
+                  <option key={index} value={role.id}>
+                    {role.name}
+                  </option>
                 ))}
               </Input>
             </div>

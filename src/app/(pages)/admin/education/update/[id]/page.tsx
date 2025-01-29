@@ -4,36 +4,38 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-import { useParams } from "next/navigation"; 
-
-type EducationFormData = {
-  name: string;
-  remark: string;
-};
+import { useParams } from "next/navigation";
+import { Education } from "@/app/model/EducationModel";
+import Toast from "@/app/components/UI/Toast";
 
 const UpdateEducationForm = () => {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);  
-  const { id } = useParams(); 
-  const [formData, setFormData] = useState<EducationFormData>({
-    name: "",
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null); 
+
+  const { id } = useParams();
+  const [formData, setFormData] = useState<Education>({
+    education: "",
     remark: "",
   });
 
   useEffect(() => {
     const fetchEducationData = async () => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       try {
-        const response = await fetch(`/admin/api/education/${id}`);
+        const response = await fetch(`${apiUrl}/api/v1/educations/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch education data");
         }
         const data = await response.json();
         setFormData({
-          name: data.name,
-          remark: data.remark,
+          education: data.data.education,
+          remark: data.data.remark,
         });
       } catch (error) {
         console.error("Error fetching education data:", error);
@@ -60,39 +62,44 @@ const UpdateEducationForm = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const response = await fetch(`${apiUrl}/educations`, {
+      const payload = {
+        ...formData,
+        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+      };
+      const response = await fetch(`${apiUrl}/api/v1/educations/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error("Failed to create education");
       }
-
-      setSuccessMessage("Education created successfully");
-
-      setFormData({ name: "", remark: "" });
-
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setFormData({ education: "", remark: "" });
+      setToast({
+        message: "You have updated education successfully.",
+        type: "success",
+        position: "top-right",
+      });
     } catch (error) {
-      setError(`Error: ${error}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
-
-
 
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Education Maintenance"
+        icon={<FaArrowLeft />}
+        title="Update Education"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Update Education Form"
@@ -114,9 +121,9 @@ const UpdateEducationForm = () => {
                   type="text"
                   label="Education Level"
                   placeholder="Enter Education"
-                  value={formData.name}
+                  value={formData.education}
                   onChange={handleChange}
-                  name="name"
+                  name="education"
                   className="w-full"
                 />
               </div>
@@ -137,14 +144,7 @@ const UpdateEducationForm = () => {
           </form>
         </Card>
       </BoxWrapper>
-      {successMessage && (
-        <div className="mt-4 text-center text-green-500">{successMessage}</div>
-      )}
 
-      {/* Display error message */}
-      {error && (
-        <div className="mt-4 text-center text-red-500">{error}</div>
-      )}
       <div className="flex justify-end mt-4 mr-24 space-x-4">
         <Button
           color="primary"
@@ -154,8 +154,15 @@ const UpdateEducationForm = () => {
           borderRadius={3}
           onClick={handleSubmit}
         />
-    
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

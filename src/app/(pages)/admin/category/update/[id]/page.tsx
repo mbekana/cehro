@@ -4,28 +4,23 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
-
-type RegionFormData = {
-  name: string;
-  remark: string;
-};
+import { Category } from "@/app/model/CategoryModel";
 
 const UpdateCategory = () => {
   const { id } = useParams();
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<RegionFormData>({
-    name: "",
+  const [formData, setFormData] = useState<Category>({
+    category: "",
     remark: "",
   });
   const [loading, setLoading] = useState<boolean>(true);
- 
 
   useEffect(() => {
     if (id) {
@@ -33,16 +28,15 @@ const UpdateCategory = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/categories/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/categories/${id}`);
           if (!response.ok) {
             throw new Error("Failed to fetch category");
           }
           const data = await response.json();
           setFormData({
-            name: data.name,
-            remark: data.remark,
+            category: data.data.category,
+            remark: data.data.remark,
           });
-          
         } catch (error) {
           setError(`${error}`);
         } finally {
@@ -66,10 +60,10 @@ const UpdateCategory = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/categories/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/categories/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +71,7 @@ const UpdateCategory = () => {
         body: JSON.stringify(formData),
       });
       setFormData({
-        name: "",
+        category: "",
         remark: "",
       });
 
@@ -87,14 +81,13 @@ const UpdateCategory = () => {
 
       setSuccess("Category updated successfully");
       setError(null);
-      setLoading(false)    
+      setLoading(false);
     } catch (error) {
       setError(`${error}`);
       setSuccess(null);
-      setLoading(false)
+      setLoading(false);
     }
   };
-
 
   if (error) {
     return <div>{error}</div>;
@@ -103,10 +96,11 @@ const UpdateCategory = () => {
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Category Maintenance"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Update Category"
@@ -128,9 +122,9 @@ const UpdateCategory = () => {
                   type="text"
                   label="Category Name"
                   placeholder="Enter Category Name"
-                  value={formData.name}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="name"
+                  name="category"
                   className="w-full"
                 />
               </div>
@@ -153,29 +147,19 @@ const UpdateCategory = () => {
       </BoxWrapper>
 
       {success && (
-        <Toast
-          type="success"
-          message={success}
-          position={"top-right"}
-        />
+        <Toast type="success" message={success} position={"top-right"} />
       )}
 
-      {error && (
-        <Toast
-          type="error"
-          message={error}
-          position={"top-right"}
-        />
-      )}
+      {error && <Toast type="error" message={error} position={"top-right"} />}
 
       <div className="flex justify-end mt-4 mr-24">
         <Button
           color="primary"
-          text={loading ? "Saving...":"Update Category"}
+          text={loading ? "Saving..." : "Update Category"}
           size="large"
           elevation={4}
           onClick={handleSubmit}
-          icon={<FaPlus/>}
+          icon={<FaPlus />}
         />
       </div>
     </div>

@@ -6,35 +6,38 @@ import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
-import { Education } from "@/app/model/EducationModel";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
+import { Source } from "@/app/model/Source";
 
-const columns: (keyof Education)[] = ["id", "name", "remark"];
+const columns: (keyof Source)[] = ["id", "source", "remark"];
 
 const SourceOfInformation = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1, 
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(sources.length / rowsPerPage);
-
-  const currentData = sources.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
 
   useEffect(() => {
     fetchSources();
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -57,7 +60,7 @@ const SourceOfInformation = () => {
   const handleDelete = async (id: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/sources/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/sources/${id}`, {
         method: "DELETE",
       });
 
@@ -77,11 +80,12 @@ const SourceOfInformation = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setSources(data);
+        setSources(data.data);
         // setFilteredRegions(data);
+        setPagination(data.pagination)
       } else {
         console.error("Failed to fetch data");
       }
@@ -127,12 +131,14 @@ const SourceOfInformation = () => {
         <div>Loading...</div>
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={sources} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>

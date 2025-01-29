@@ -10,18 +10,26 @@ import { Education } from "@/app/model/EducationModel";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
 import { useRouter } from "next/navigation";
+import { Occupation } from "@/app/model/Occupation";
 
-const columns: (keyof Education)[] = ["id", "name", "remark"];
+const columns: (keyof Occupation)[] = ["id", "occupation", "remark"];
 
 const Ocupation = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [occupation, setOccupation] = useState<Education[]>([]);
   const [filteredOccupation, setFilteredOccupation] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1, 
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
-  const rowsPerPage = 5;
 
   useEffect(() => {
     fetchOccupations();
@@ -32,11 +40,12 @@ const Ocupation = () => {
     setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/occupations`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/occupations/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setOccupation(data);
-        setFilteredOccupation(data);
+        setOccupation(data.data);
+        setFilteredOccupation(data.data);
+        setPagination(data.pagination)
       } else {
         throw new Error("Failed to fetch occupations");
       }
@@ -49,20 +58,18 @@ const Ocupation = () => {
   };
 
   const handlePageChange = (page: number) => {
-    if (
-      page >= 1 &&
-      page <= Math.ceil(filteredOccupation.length / rowsPerPage)
-    ) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
 
   const handleSearch = (query: string) => {
-    const filtered = occupation.filter((occup) =>
-      occup.name.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredOccupation(filtered);
-    setCurrentPage(1);
+    // const filtered = occupation.filter((occup) =>
+    //   occup.name.toLowerCase().includes(query.toLowerCase())
+    // );
+    // setFilteredOccupation(filtered);
+    // setCurrentPage(1);
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -108,13 +115,6 @@ const Ocupation = () => {
     return <div>Error: {error}</div>;
   }
 
-  const totalPages = Math.ceil(filteredOccupation.length / rowsPerPage);
-
-  const currentData = filteredOccupation.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
   return (
     <BoxWrapper
       icon={<FaExclamationTriangle />}
@@ -143,12 +143,14 @@ const Ocupation = () => {
         <div className='ml-2 text-red-500'>Loading...</div>
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={occupation} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>

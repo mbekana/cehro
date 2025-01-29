@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaBriefcase } from "react-icons/fa"; 
+import { FaArrowLeft } from "react-icons/fa"; 
 import { useParams } from "next/navigation"; 
-import { Education } from "@/app/model/EducationModel"; 
+import { Occupation } from "@/app/model/Occupation";
 
 const OccupationDetailsPage = () => {
   const { id } = useParams(); 
-  const [occupation, setOccupation] = useState<Education | null>(null); 
+  const [occupation, setOccupation] = useState<Occupation | null>(null); 
   const [loading, setLoading] = useState<boolean>(true); 
 
   useEffect(() => {
@@ -47,10 +47,11 @@ const OccupationDetailsPage = () => {
   return (
     <div className="bg-gray-100">
       <BoxWrapper
-        icon={<FaBriefcase />} 
-        title="Occupation Details"
+        icon={<FaArrowLeft />}
+        title="Occupation Form"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Occupation Information"
@@ -68,7 +69,7 @@ const OccupationDetailsPage = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Occupation Name</h3>
-              <p className="text-gray-600">{occupation.name}</p> 
+              <p className="text-gray-600">{occupation.occupation}</p> 
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Description</h3>

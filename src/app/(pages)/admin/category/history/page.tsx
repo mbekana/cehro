@@ -11,15 +11,21 @@ import Button from "@/app/components/UI/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const columns: (keyof Category)[] = ["id", "name", "remark"];
+const columns: (keyof Category)[] = ["id", "category", "remark"];
 
 const Categories = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-
-  const rowsPerPage = 5;
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1, 
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
     fetchCategories();
@@ -29,10 +35,10 @@ const Categories = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/categories`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/categories/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setCategories(data);
+        setCategories(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -43,18 +49,16 @@ const Categories = () => {
     }
   };
 
-  const totalPages = Math.ceil(categories.length / rowsPerPage);
 
-  const currentData = categories.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
+
+
   const handleAction = (action: string, row: Record<string, any>) => {
     console.log("AM here handle action: ", row.id);
     switch (action) {
@@ -100,15 +104,13 @@ const Categories = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
-        <div className="m-2 w-full">
+        <div className="flex flex-1 items-center justify-between mb-2 w-full">
           <Search
             onSearch={handleSearch}
             placeholder="Search Categories..."
             buttonText="Search Categories"
           />
-        </div>
-        <div className="mr-2">
+      
           <Link href="/admin/category/create">
             <Button
               color="primary"
@@ -122,18 +124,19 @@ const Categories = () => {
               borderRadius={5}
             />
           </Link>
-        </div>
       </div>
       {loading ? (
         <div className="ml-2 text-red-500">Loading...</div>
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={categories} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>
