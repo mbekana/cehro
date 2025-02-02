@@ -23,13 +23,13 @@ const IncidentDetail = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
         method: "GET",
       });
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setIncident(data);
+        setIncident(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -146,6 +146,7 @@ const IncidentDetail = () => {
       title={`Incident Details: ${incident?.region}`}
       borderColor="border-primary"
       borderThickness="border-b-4"
+      shouldGoBack={true}
     >
       <div className="space-y-4">
         {/* Incident Details */}
@@ -157,7 +158,7 @@ const IncidentDetail = () => {
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Residence:</h4>
             <p className="text-sm sm:text-base">
-              {incident?.respondent_residence}
+              {incident?.respondent_address}
             </p>
           </div>
         </div>
@@ -168,8 +169,8 @@ const IncidentDetail = () => {
             <p className="text-sm sm:text-base">{incident?.gender}</p>
           </div>
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">Age Group:</h4>
-            <p className="text-sm sm:text-base">{incident?.age_group}</p>
+            <h4 className="font-semibold text-sm sm:text-base">Age:</h4>
+            <p className="text-sm sm:text-base">{incident?.age}</p>
           </div>
         </div>
 
@@ -203,10 +204,10 @@ const IncidentDetail = () => {
             Incident Details:
           </h4>
           <p className="text-sm sm:text-base">
-            <strong>Woreda:</strong> {incident?.incident_happened?.woreda}
+            <strong>Woreda:</strong> {incident?.woreda_kebele}
           </p>
           <p className="text-sm sm:text-base">
-            <strong>Zone:</strong> {incident?.incident_happened?.zone}
+            <strong>Zone:</strong> {incident?.zone_subcity}
           </p>
           <p className="text-sm sm:text-base">
             <strong>Source of Information:</strong>{" "}

@@ -2,133 +2,157 @@
 
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
-import { useParams } from "next/navigation";
+import { FaArrowLeft, FaSave } from "react-icons/fa";
 import Toast from "@/app/components/UI/Toast";
+import { useParams } from "next/navigation";
+import Cookies from "js-cookie";
 
-const UpdateUserPage = () => {
-  const { id } = useParams();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+const defaultPhoto = "/user.png"; 
+
+const UpdatePage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    userName: "",
+    email: "",
+    phone: "",
+    role: "",
+    avatar: null,
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
-  const [role, setRole] = useState<string>("");
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const { id } = useParams(); 
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     fetchRoles();
-    if (id) {
-      const fetchUserData = async () => {
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          console.log("ID: ", id);
-          const response = await fetch(`${apiUrl}/api/v1/users/${id}`);
-          const data = await response.json();
-          if (response.ok) {
-            console.log("Fetched Data: ", data.data);
-            setFirstName(data.data.firstName);
-            setLastName(data.data.lastName);
-            setUsername(data.data.userName);
-            setEmail(data.data.email);
-            setPhoneNumber(data.data.phone);
-            console.log("setRole(data.data.role) ", data.data)
-            setRole(data.data.role);  
-          } else {
-            setError("Failed to fetch user data.");
-          }
-        } catch (error) {
-          console.log(error);
-          setError("Error fetching user data.");
-        }
-      };
+    fetchUserProfile();
+  }, []);
 
-      fetchUserData();
-    }
-  }, [id]);
+
+useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+      }, []);
+    
 
   const fetchRoles = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/roles/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await fetch(`${apiUrl}/api/v1/roles/all`);
       const data = await response.json();
-      if (data != null) {
-        console.log("ROLE: ", data.data)
-        setRoles(data.data); 
-        setError(null);
+      if (data) setRoles(data.data);
+    } catch (err) {
+      setError("Failed to fetch roles");
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/users/${id}`);
+      const data = await response.json();
+      if (data) {
+        setFormData({
+          firstName: data.data.firstName || "",
+          middleName: data.data.middleName || "",
+          lastName: data.data.lastName || "",
+          userName: data.data.userName || "",
+          email: data.data.email || "",
+          phone: data.data.phone || "",
+          role: data.data.role || "",
+          avatar: null, 
+        });
+        setAvatarPreview(data.data.avatar || defaultPhoto); 
       }
-    } catch (error) {
-      setError(error);
+    } catch (err) {
+      setError("Failed to fetch user data");
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    switch (name) {
-      case "firstName":
-        setFirstName(value);
-        break;
-      case "lastName":
-        setLastName(value);
-        break;
-      case "email":
-        setEmail(value);
-        break;
-      case "phoneNumber":
-        setPhoneNumber(value);
-        break;
-      case "role":
-        setRole(value);
-        break;
-      default:
-        break;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+        setFormData((prev) => ({
+          ...prev,
+          avatar: file,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleUpdate = async () => {
-    setLoading(true);
+    const { firstName, lastName, email, phone, role, avatar, userName } = formData;
+
     setError(null);
     setSuccess(null);
 
-    const updatedUser = { firstName, lastName, email, phoneNumber, role };
+    if (!firstName || !lastName || !userName || !email || !phone) {
+      setError("All fields are required.");
+      return;
+    }
 
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      setError("Invalid email address.");
+      return;
+    }
+
+    setLoading(true);
+
+    const updatedData = { ...formData, role: role || null };
+
+    const formDataToSend = new FormData();
+    Object.keys(updatedData).forEach((key) => {
+      if (key !== "avatar") {
+        formDataToSend.append(key, updatedData[key as keyof typeof updatedData]);
+      }
+    });
+
+    if (avatar) formDataToSend.append("avatar", avatar);
+    formDataToSend.append("approvedby", userData.id)
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/users/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedUser),
+      const response = await fetch(`${apiUrl}/api/v1/users/${id}`, {
+        method: "PATCH",
+        body: formDataToSend,
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setSuccess("User updated successfully!");
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setPhoneNumber("");
-        setRole("");
+        setAvatarPreview(data.data.avatar || null); 
       } else {
-        setError(data.message || "An error occurred while updating the user.");
+        setError(data.message || "Update error.");
       }
     } catch (err) {
-      setError(`${err}`);
+      setError("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -138,13 +162,13 @@ const UpdateUserPage = () => {
     <div>
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Update User"
+        title="Update User Profile"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}
       >
         <Card
-          title="Update Your Account Information"
+          title="Edit Your Account"
           borderColor="border-primary"
           borderThickness="border-1"
           bgColor="bg-white"
@@ -155,59 +179,60 @@ const UpdateUserPage = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-          <form className="space-y-6">
+
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                type="text"
-                placeholder="Enter your first name"
-                value={firstName || ""}
-                name="firstName"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="text"
-                placeholder="Enter your last name"
-                value={lastName || ""}
-                name="lastName"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email || ""}
-                name="email"
-                onChange={handleInputChange}
-              />
-              <Input
-                type="text"
-                placeholder="Enter your phone number"
-                value={phoneNumber || ""}
-                name="phoneNumber"
-                onChange={handleInputChange}
-              />
+              {["firstName", "middleName", "lastName", "userName", "email", "phone"].map((field, index) => (
+                <Input
+                  key={index}
+                  type={field === "email" ? "email" : field === "phone" ? "text" : "text"}
+                  placeholder={field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+                  value={formData[field]}
+                  name={field}
+                  onChange={handleInputChange}
+                />
+              ))}
+
               <Input
                 type="select"
                 placeholder="Role"
-                value={role || ""}
+                value={formData.role}
                 name="role"
                 onChange={handleInputChange}
                 borderRadius={1}
               >
                 <option value="">Select Role</option>
                 {roles.map((role, index) => (
-                  <option key={index} value={role.id}>
-                    {role.name}
-                  </option>
+                  <option key={index} value={role.role}>{role.role}</option>
                 ))}
               </Input>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md"
+                />
+                {avatarPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar Preview"
+                      className="w-24 h-24 object-cover rounded-full"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-4 flex justify-between">
               <Button
-                icon={<FaPlus />}
                 color="primary"
-                text={loading ? "Updating..." : "Update User"}
+                text={loading ? "Updating..." : "Save Changes"}
                 elevation={3}
+                icon={<FaSave />}
                 onClick={handleUpdate}
                 disabled={loading}
                 size="large"
@@ -238,4 +263,4 @@ const UpdateUserPage = () => {
   );
 };
 
-export default UpdateUserPage;
+export default UpdatePage;

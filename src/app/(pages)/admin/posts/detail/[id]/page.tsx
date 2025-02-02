@@ -1,17 +1,18 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { FaCalendar } from 'react-icons/fa';
-import BoxWrapper from '@/app/components/UI/BoxWrapper';
-import Card from '@/app/components/UI/Card';
-import Divider from '@/app/components/UI/Divider';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import BoxWrapper from "@/app/components/UI/BoxWrapper";
+import Card from "@/app/components/UI/Card";
+import Divider from "@/app/components/UI/Divider";
+import { useParams } from "next/navigation";
 
 type Post = {
   id: any;
   title: string;
-  description: string;
-  images: any;
+  body: string;
+  tag: string;
+  image: string;
 };
 
 const PostDetail = () => {
@@ -22,49 +23,29 @@ const PostDetail = () => {
 
   useEffect(() => {
     if (id) {
-      // Check if the post item is already in localStorage
-      const storedPosts = localStorage.getItem('blogPosts');
-      if (storedPosts) {
-        const posts = JSON.parse(storedPosts);
-        const selectedPost = posts.find((post: Post) => post.id == id);
-        
-        if (selectedPost) {
-          setPost(selectedPost); // Use cached data from localStorage
-          setLoading(false); // Stop loading since we have data
-        } else {
-          setError('Post not found');
+      const fetchPostDetailData = async () => {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const response = await fetch(`${apiUrl}/api/v1/posts/${id}`, {
+            method: "GET",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setPost(data.data); // Assuming the image is available in data.data.images
+          } else {
+            console.error("Post not found");
+            setError("Post not found");
+          }
+        } catch (error) {
+          console.error("Error fetching post data", error);
+          setError("Failed to fetch post details.");
+        } finally {
           setLoading(false);
         }
-      } else {
-        const fetchPostsDetails = async () => {
-          setLoading(true);
-          try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            const response = await fetch(`${apiUrl}/posts`);
-            if (response.ok) {
-              const data = await response.json();
-              // Store all posts in localStorage
-              localStorage.setItem('posts', JSON.stringify(data));
+      };
 
-              // Find the post by id from the fetched data
-              const selectedPost = data.find((post: Post) => post.id == id);
-              
-              if (selectedPost) {
-                setPost(selectedPost); // Set the post from the API
-              } else {
-                setError('Post not found');
-              }
-            } else {
-              setError('Failed to fetch posts');
-            }
-          } catch (err) {
-            setError(`Error fetching posts: ${err}`);
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchPostsDetails();
-      }
+      fetchPostDetailData();
     }
   }, [id]);
 
@@ -78,10 +59,11 @@ const PostDetail = () => {
 
   return (
     <BoxWrapper
-      icon={<FaCalendar />}
+      icon={<FaArrowLeft />}
       title="Post Details"
       borderColor="border-primary"
       borderThickness="border-b-4"
+      shouldGoBack={true}
     >
       <Card
         title="Post Information"
@@ -95,7 +77,7 @@ const PostDetail = () => {
           marginTop="mt-1"
           marginBottom="mb-6"
         />
-        
+
         {post && (
           <div className="space-y-6">
             <div>
@@ -103,18 +85,25 @@ const PostDetail = () => {
               <p className="text-gray-600">{post.id}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Post Title</h3>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Post Title
+              </h3>
               <p className="text-gray-600">{post.title}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Description</h3>
-              <p className="text-gray-600">{post.description}</p>
+              <h3 className="text-lg font-semibold text-gray-700">Body</h3>
+              <p className="text-gray-600">{post.body}</p>
             </div>
-            {post.images && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">Tag</h3>
+              <p className="text-gray-600">{post.tag}</p>
+            </div>
+
+            {post.image && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-700">Media</h3>
                 <img
-                  src={post.images} // Assuming 'images' contains a URL or path
+                  src={post.image}
                   alt={post.title}
                   className="w-full max-w-md"
                 />

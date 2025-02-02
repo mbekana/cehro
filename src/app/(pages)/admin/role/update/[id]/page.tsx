@@ -71,11 +71,9 @@ const UpdateRolePage = () => {
 
     try {
       const payload = {
-        ...formData,
-        postedBy: "3f043a16-124b-4205-a6b1-5015fab1a2b2",
-      };
+        ...formData      };
       const response = await fetch(`${apiUrl}/api/v1/roles/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

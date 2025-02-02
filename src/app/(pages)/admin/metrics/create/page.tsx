@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Metrics } from "@/app/model/Metrics";
 import Toast from "@/app/components/UI/Toast";
-
-
+import Cookies from "js-cookie";
 
 const MetricsForm = () => {
   
@@ -18,9 +17,8 @@ const MetricsForm = () => {
     metrics: "",
     remark: "",
   });
-
+  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -28,6 +26,14 @@ const MetricsForm = () => {
   } | null>(null); 
 
 
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+      }, []);
+    
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,7 +51,7 @@ const MetricsForm = () => {
   
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const payload = { ...formData, "postedBy": "3f043a16-124b-4205-a6b1-5015fab1a2b2" };
+      const payload = { ...formData, createdBy: userData?.id};
   
       const response = await fetch(`${apiUrl}/api/v1/metrics/register`, {
         method: 'POST',

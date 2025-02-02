@@ -4,19 +4,22 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
   console.log("Middleware is running...");
 
-  
+  const token = req.cookies.get("accessToken");
+
+  if (req.nextUrl.pathname === '/auth/login' && token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/public/dashboard';
+    return NextResponse.redirect(url);
+  }
+
   if (req.nextUrl.pathname === '/') {
     const url = req.nextUrl.clone();
-    url.pathname = '/public/dashboard'; 
+    url.pathname = '/public/dashboard';
     return NextResponse.redirect(url);
   }
 
   const isAdminRoute = req.nextUrl.pathname.startsWith('/admin');
-  const token = "kndkjs";
-  // const token = req.cookies.get("accessToken");
-  // console.log("TOKEN: ", token)
-  // console.log("Request: ", req.cookies)
-  // console.log("token ", )
+  
   if (isAdminRoute && !token) {
     const loginUrl = req.nextUrl.clone();
     console.log("loginUrl --> ", loginUrl);
@@ -29,5 +32,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/'], 
+  matcher: ['/admin/:path*', '/', '/auth/login'], 
 };

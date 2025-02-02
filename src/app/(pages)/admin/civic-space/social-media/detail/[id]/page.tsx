@@ -7,26 +7,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import Image from "next/image";
-
-type SocialMediaPostData = {
-  id?:string;
-  postCategory: string;
-  affectedArea: string;
-  city: string;
-  region: string;
-  source: string;
-  file: string; 
-  media: string; 
-  metrics: string;
-  remark: string;
-  impact: string;
-  status?:string;
-};
+import { SocialMedia } from "@/app/model/SocialMedia";
 
 const SocialMediaPostDetail = () => {
   const { id } = useParams();
 
-  const [socialMediaPost, setSocialMediaPost] = useState<SocialMediaPostData | null>(null);
+  const [socialMediaPost, setSocialMediaPost] = useState<SocialMedia | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
@@ -38,10 +24,10 @@ const SocialMediaPostDetail = () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        const response = await fetch(`${apiUrl}/socialMediaPosts/${id}`, {method:'GET'});
+        const response = await fetch(`${apiUrl}/api/v1/social-medias/${id}`, {method:'GET'});
         if (response.ok) {
-          const data: SocialMediaPostData = await response.json();
-          setSocialMediaPost(data);
+          const data: any = await response.json();
+          setSocialMediaPost(data.data);
         } else {
           console.error("Failed to fetch social media post data");
         }
@@ -56,8 +42,8 @@ const SocialMediaPostDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (socialMediaPost?.media) {
-      const mediaUrl = socialMediaPost.media;
+    if (socialMediaPost?.video) {
+      const mediaUrl = socialMediaPost.video;
       if (mediaUrl.endsWith(".jpg") || mediaUrl.endsWith(".png") || mediaUrl.endsWith(".jpeg")) {
         setMediaType("image");
       } else if (mediaUrl.includes("youtube.com") || mediaUrl.includes("youtu.be")) {
@@ -181,6 +167,7 @@ const SocialMediaPostDetail = () => {
       title={`Social Media Post Detail: ${socialMediaPost.region}`}
       borderColor="border-primary"
       borderThickness="border-b-4"
+      shouldGoBack={true}
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,15 +176,15 @@ const SocialMediaPostDetail = () => {
             <p className="text-sm sm:text-base">{socialMediaPost?.id}</p>
           </div>
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">Affected Area:</h4>
-            <p className="text-sm sm:text-base">{socialMediaPost.affectedArea}</p>
+            <h4 className="font-semibold text-sm sm:text-base">Title:</h4>
+            <p className="text-sm sm:text-base">{socialMediaPost.title}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">City:</h4>
-            <p className="text-sm sm:text-base">{socialMediaPost.city}</p>
+            <p className="text-sm sm:text-base">{socialMediaPost.zone_subcity}</p>
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -225,8 +212,8 @@ const SocialMediaPostDetail = () => {
 
       
         <div className="space-y-2">
-          <h4 className="font-semibold text-sm sm:text-base">Remarks:</h4>
-          <p className="text-sm sm:text-base">{socialMediaPost.remark}</p>
+          <h4 className="font-semibold text-sm sm:text-base">Cehro's Insight:</h4>
+          <p className="text-sm sm:text-base">{socialMediaPost.cehro_insights}</p>
         </div>
         <h4 className="font-semibold text-sm sm:text-base">
             Status: {renderStatusTag(socialMediaPost?.status)}

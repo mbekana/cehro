@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,6 +9,7 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Occupation } from "@/app/model/Occupation";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const OccupationForm = () => {
   const [toast, setToast] = useState<{
@@ -21,7 +22,9 @@ const OccupationForm = () => {
     occupation: "",
     remark: "",
   });
- const [loading, setLoading] = useState(false); 
+  const [userData, setUserData] = useState<any>(null);
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -33,6 +36,14 @@ const OccupationForm = () => {
     }));
   };
 
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,7 +52,7 @@ const OccupationForm = () => {
     try {
       const payload = {
         ...formData,
-        postedBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+        createdBy: userData?.id,
       };
       const response = await fetch(`${apiUrl}/api/v1/occupations/register`, {
         method: "POST",
@@ -52,8 +63,10 @@ const OccupationForm = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json(); 
-        throw new Error(errorData.message || "An error occurred while submitting the data.");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "An error occurred while submitting the data."
+        );
       }
 
       setFormData({ occupation: "", remark: "" });
@@ -68,8 +81,8 @@ const OccupationForm = () => {
         type: "error",
         position: "top-right",
       });
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 

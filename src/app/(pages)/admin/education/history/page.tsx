@@ -11,16 +11,23 @@ import Link from "next/link";
 import Button from "@/app/components/UI/Button";
 import { useRouter } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
+import PopConfirm from "@/app/components/UI/PopConfirm";
 
 const columns: (keyof Education)[] = ["id", "education", "remark"];
 
 const Educations = () => {
   const router = useRouter();
   const [education, setEducation] = useState<Education[]>([]);
-  const [filteredEducation, setFilteredEducation] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+  const [educationToDelete, setEducationToDelete] = useState<number | null>(null);
+
+  const [toast, setToast] = useState<{
+      message: string;
+      type: "success" | "error";
+      position: "top-right";
+    } | null>(null);
+    
   const [pagination, setPagination] = useState({
     totalDocs: 0,
     totalPages: 0,
@@ -30,25 +37,51 @@ const Educations = () => {
     hasPrevPage: false,
     hasNextPage: false,
   });
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(filteredEducation.length / rowsPerPage);
 
   useEffect(() => {
     fetchEducations();
   }, []);
+
+
+  const searchEducations = async (searchQuery:any) => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/educations/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEducation(data.data);
+        setPagination(data.pagination);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleSearch = (query: string) => {
+    searchEducations(query);  
+  };
+
 
   const fetchEducations = async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/educations/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/educations/all?page=${pagination.page}&limit=${pagination.limit}`, {
         method: "GET",
       });
       if (response.ok) {
         const data = await response.json();
         setEducation(data.data);
-        setFilteredEducation(data.data);
         setPagination(data.pagination);
       } else {
         console.error("Failed to fetch data");
@@ -67,15 +100,6 @@ const Educations = () => {
     }));
   };
 
-  const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
-    const filtered = education.filter((edu) =>
-      edu.education.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredEducation(filtered);
-    // setCurrentPage(1);
-  };
-
   const handleAction = (action: string, row: Record<string, any>) => {
     console.log("AM here handle action: ", row.id);
     switch (action) {
@@ -86,31 +110,54 @@ const Educations = () => {
         router.push(`/admin/education/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id);
+        setEducationToDelete(row.id);
+        setIsPopConfirmOpen(true);
         break;
       default:
         break;
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
+    if (educationToDelete === null) return;
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/educations/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/educations/${educationToDelete}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
         throw new Error("Failed to delete the education");
       }
-      setError(null);
-      setSuccessMessage(`Education with id ${id} deleted successfully`);
-      console.log(`Education with id ${id} deleted successfully`);
+   
+      console.log(`Education with id ${educationToDelete} deleted successfully`);
       fetchEducations();
+      setToast({
+        message: "You have successfully deleted Education.",
+        type: "success",
+        position: "top-right",
+      });
+      setIsPopConfirmOpen(false); 
     } catch (error) {
-      setError(error);
       console.error("Error deleting the education: ", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
+  };
+
+
+  const handleCancel = () => {
+    setIsPopConfirmOpen(false);
+    setEducationToDelete(null);
+  };
+
+  const handleClearSearch = () => {
+    searchEducations("");  
+    fetchEducations();
   };
 
   return (
@@ -124,8 +171,9 @@ const Educations = () => {
         <div className="flex flex-1 items-center justify-between mb-2 w-full">
           <Search
             onSearch={handleSearch}
+            onClear={handleClearSearch}
             placeholder="Search Educations..."
-            buttonText="Search Educations"
+            buttonText="Search"
           />
           <Link href="/admin/education/create">
             <Button
@@ -154,21 +202,20 @@ const Educations = () => {
             </div>
           </>
         )}
+        <PopConfirm
+        isOpen={isPopConfirmOpen}
+        onConfirm={handleDelete}
+        onCancel={handleCancel}
+        message="Are you sure you want to delete this category?"
+        title="Delete Category"
+      />
       </BoxWrapper>
-      {successMessage && (
+      {toast && (
         <Toast
-          message={successMessage}
-          type="success"
-          position="top-right"
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}
-      {error && (
-        <Toast
-          message={error}
-          type="error"
-          position="top-right"
-          onClose={() => setError(null)}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
     </>

@@ -10,11 +10,13 @@ import Search from "@/app/components/UI/Search";
 import Button from "@/app/components/UI/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Toast from "@/app/components/UI/Toast";
+import PopConfirm from "@/app/components/UI/PopConfirm";
 
 const columns: (keyof LegalFramework)[] = [
   "title",
   "source",
-  "city",
+  "zone_subcity",
   "region",
   "metrics",
   "impact",
@@ -22,10 +24,25 @@ const columns: (keyof LegalFramework)[] = [
 
 const LegalFrameworksList = () => {
   const router = useRouter(); 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [legalFrameworksData, setLegalFrameworksData] = useState<LegalFramework[]>([]);
+  const [legalFrameworks, setLegalFrameworks] = useState<LegalFramework[]>([]);
   const [loading, setLoading] = useState(true); 
-  const rowsPerPage = 5;
+  const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+  const [frameworkToDelete, setFrameWorkToDelete] = useState<number | null>(null);
+    const [pagination, setPagination] = useState({
+      totalDocs: 0,
+      totalPages: 0,
+      page: 1, 
+      limit: 10,
+      pageCounter: 0,
+      hasPrevPage: false,
+      hasNextPage: false,
+    });
+  
+    const [toast, setToast] = useState<{
+      message: string;
+      type: "success" | "error";
+      position: "top-right";
+    } | null>(null);
 
   useEffect(() => {
     fetchLegalFrameworks()
@@ -35,10 +52,31 @@ const LegalFrameworksList = () => {
   const fetchLegalFrameworks = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/civic-space/legal-framework`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/all`);
       if (response.ok) {
         const data = await response.json();
-        setLegalFrameworksData(data);
+        setLegalFrameworks(data.data);
+        setPagination(data.pagination)
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchLegalFrameworks = async (searchQuery: any) => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`);
+      if (response.ok) {
+        const data = await response.json();
+        setLegalFrameworks(data.data);
+        setPagination(data.pagination)
       } else {
         console.error("Failed to fetch data");
       }
@@ -50,35 +88,53 @@ const LegalFrameworksList = () => {
   };
 
 
-  const totalPages = Math.ceil(legalFrameworksData.length / rowsPerPage);
-
-  const currentData = legalFrameworksData.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    setPagination(prevState => ({
+      ...prevState,
+      page,
+    }));
   };
+
 
   const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+    searchLegalFrameworks(query);
   };
 
-  const handleDelete = async(id: number) => {
-    try{
+  const handleDelete = async () => {
+    if (frameworkToDelete === null) return;
+
+    try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
-        method: 'DELETE',
-      });      if (response.ok) {
-        fetchLegalFrameworks()
-      } 
-    }catch(error:any){
-      console.log(`Error: ${error}`)
+      const response = await fetch(
+        `${apiUrl}/api/v1/legal-frameworks/${frameworkToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the education");
+      }
+
+      console.log(`Legal Framework with id ${frameworkToDelete} deleted successfully`);
+      fetchLegalFrameworks();
+      setToast({
+        message: "You have successfully deleted Legal Framework.",
+        type: "success",
+        position: "top-right",
+      });
+      setIsPopConfirmOpen(false);
+    } catch (error) {
+      console.error("Error deleting the education: ", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
+  
 
   const handleAction = (action: string, row: Record<string, any>) => {
     console.log("Handle action:", row.id);
@@ -90,23 +146,36 @@ const LegalFrameworksList = () => {
         router.push(`/admin/civic-space/legal-framework/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id);
+        setFrameWorkToDelete(row.id);
+        setIsPopConfirmOpen(true);
         break;
       default:
         break;
     }
   };
 
+  const handleClearSearch = () => {
+    searchLegalFrameworks("");
+    fetchLegalFrameworks();
+  };
+
+  const handleCancel = () => {
+    setIsPopConfirmOpen(false);
+    setFrameWorkToDelete(null);
+  };
+
   return (
+    <>
     <BoxWrapper
       icon={<FaExclamationTriangle />}
       title="Legal Frameworks"
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+      <div className="flex flex-1 items-center justify-between mb-2 w-full">
         <Search
           onSearch={handleSearch}
+          onClear={handleClearSearch}
           placeholder="Search Legal Frameworks..."
           buttonText="Search"
         />
@@ -130,17 +199,35 @@ const LegalFrameworksList = () => {
         <div>Loading...</div> 
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={legalFrameworks} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>
       )}
+      <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this Legal Framework?"
+          title="Legal Framework"
+        />
     </BoxWrapper>
+    {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   );
 };
 

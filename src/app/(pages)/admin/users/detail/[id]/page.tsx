@@ -145,8 +145,9 @@ const UserDetailPage = () => {
                   <p className="text-gray-600">{user.userName}</p>
                 </div>
                 <div className="text-center">
+                  
                   <img
-                    src={defaultPhoto}
+                    src={user?.avatar || defaultPhoto}
                     alt={`${user.firstName} ${user.lastName}`}
                     className="w-20 h-20 rounded-full object-cover mx-auto"
                   />

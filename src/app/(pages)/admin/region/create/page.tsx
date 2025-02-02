@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,10 +9,11 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Region } from "@/app/model/RegionModel";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const RegionForm = () => {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+
   const [formData, setFormData] = useState<Region>({
     name: "",
     lattitude: "",
@@ -23,7 +24,17 @@ const RegionForm = () => {
     message: string;
     type: "success" | "error";
     position: "top-right";
-  } | null>(null); // State to manage Toast
+  } | null>(null); 
+
+  
+   useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -40,12 +51,13 @@ const RegionForm = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
+      const payload = {...formData, createdBy:userData?.id};
       const response = await fetch(`${apiUrl}/api/v1/regions/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -60,11 +72,7 @@ const RegionForm = () => {
 
       setFormData({ name: "", lattitude: "", longitude: "", city: "" });
 
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
     } catch (error) {
-      setError(`Error: ${error.message}`);
       setToast({
         message: `${error.message}`,
         type: "error",

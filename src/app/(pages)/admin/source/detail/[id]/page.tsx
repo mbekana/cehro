@@ -46,10 +46,10 @@ const SourceDetailsPage = () => {
   }
 
   return (
-    <div className="bg-white">
+    <div >
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Occupation Form"
+        title="Source Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}

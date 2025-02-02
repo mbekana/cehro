@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,8 +9,7 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
 import { Education } from "@/app/model/EducationModel";
-
-
+import Cookies from "js-cookie";
 
 const EducationForm = () => {
   const [formData, setFormData] = useState<Education>({
@@ -18,12 +17,22 @@ const EducationForm = () => {
     remark: "",
   });
   const [loading, setLoading] = useState(false);
-
+  const [userData, setUserData] = useState<any>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
+
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -39,11 +48,10 @@ const EducationForm = () => {
     e.preventDefault();
     setLoading(true)
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
     try {
       const payload = {
         ...formData,
-        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+        createdBy: userData?.id,
       };
       const response = await fetch(`${apiUrl}/api/v1/educations/register`, {
         method: "POST",

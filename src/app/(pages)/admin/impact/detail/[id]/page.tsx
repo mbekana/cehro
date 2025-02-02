@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Card from '@/app/components/UI/Card';
 import Divider from '@/app/components/UI/Divider';
@@ -23,11 +23,11 @@ const ImpactDetailsPage = () => {
       const fetchImpactData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
-          const response = await fetch(`${apiUrl}/impacts/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/impacts/${id}`);
 
           if (response.ok) {
             const data = await response.json();
-            setImpact(data); 
+            setImpact(data.data); 
           } else {
             console.error('Impact not found');
           }
@@ -53,10 +53,11 @@ const ImpactDetailsPage = () => {
   return (
     <div className="bg-white">
       <BoxWrapper
-        icon={<FaExclamationTriangle />}
-        title="Impact Details"
-        borderColor="border-primary"
-        borderThickness="border-b-4"
+          icon={<FaArrowLeft />}
+           title="Education Details"
+           borderColor="border-primary"
+           borderThickness="border-b-4"
+           shouldGoBack={true}
       >
         <Card
           title="Impact Information"

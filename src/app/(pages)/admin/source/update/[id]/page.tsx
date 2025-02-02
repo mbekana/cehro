@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
@@ -7,31 +7,42 @@ import Divider from "@/app/components/UI/Divider";
 import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-import { useParams } from "next/navigation"; 
+import { useParams } from "next/navigation";
 import { Source } from "@/app/model/Source";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
+
 
 const UpdateSourceOfInformationForm = () => {
-  const { id } = useParams(); 
- const [loading, setLoading] = useState(false); 
+  const { id } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
-    const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error";
-      position: "top-right";
-    } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
   const [formData, setFormData] = useState<Source>({
     source: "",
     remark: "",
   });
 
+   useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+
   useEffect(() => {
     if (id) {
       const fetchSourceData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          
+
           const response = await fetch(`${apiUrl}/api/v1/sources/${id}`);
           if (response.ok) {
             const data = await response.json();
@@ -69,10 +80,9 @@ const UpdateSourceOfInformationForm = () => {
     try {
       const payload = {
         ...formData,
-        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
       };
       const response = await fetch(`${apiUrl}/api/v1/sources/${id}`, {
-        method: "PUT", 
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -80,8 +90,10 @@ const UpdateSourceOfInformationForm = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json(); 
-        throw new Error(errorData.message || "An error occurred while submitting the data.");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "An error occurred while submitting the data."
+        );
       }
 
       setFormData({ source: "", remark: "" });
@@ -96,17 +108,16 @@ const UpdateSourceOfInformationForm = () => {
         type: "error",
         position: "top-right",
       });
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Occupation Form"
+        title="Sources Form"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}
@@ -153,16 +164,16 @@ const UpdateSourceOfInformationForm = () => {
                 </div>
               </div>
               <div className="flex justify-end mt-4">
-              <Button
-                color="primary"
-                text={loading ? "Saving..." : "Update Source"}
-                size="large"
-                elevation={4}
-                borderRadius={3}
-                disabled={loading}
-                onClick={handleSubmit}
-              />
-            </div>
+                <Button
+                  color="primary"
+                  text={loading ? "Saving..." : "Update Source"}
+                  size="large"
+                  elevation={4}
+                  borderRadius={3}
+                  disabled={loading}
+                  onClick={handleSubmit}
+                />
+              </div>
             </form>
           )}
         </Card>
@@ -175,7 +186,6 @@ const UpdateSourceOfInformationForm = () => {
           onClose={() => setToast(null)}
         />
       )}
-
     </div>
   );
 };

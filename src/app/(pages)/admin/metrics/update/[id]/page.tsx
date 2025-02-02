@@ -67,9 +67,9 @@ const UpdateMetricsForm = () => {
   
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const payload = { ...formData, postedBy: "3f043a16-124b-4205-a6b1-5015fab1a2b2" };
+      const payload = { ...formData};
       const response = await fetch(`${apiUrl}/api/v1/metrics/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
         },

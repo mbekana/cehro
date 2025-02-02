@@ -29,10 +29,10 @@ const LegalFrameworkDetail = () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
+        const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/${id}`);
         if (response.ok) {
           const data: any = await response.json();
-          setLegalFramework(data);
+          setLegalFramework(data.data);
         } else {
           console.error("Failed to fetch legal framework data");
         }
@@ -47,8 +47,8 @@ const LegalFrameworkDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (legalFramework?.media) {
-      const mediaUrl = legalFramework.media;
+    if (legalFramework?.video) {
+      const mediaUrl = legalFramework.video;
       if (
         mediaUrl.endsWith(".jpg") ||
         mediaUrl.endsWith(".png") ||
@@ -79,7 +79,7 @@ const LegalFrameworkDetail = () => {
         status: "APPROVED",
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +113,7 @@ const LegalFrameworkDetail = () => {
         status: "REJECTED",
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/legalFrameworks/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +198,7 @@ const LegalFrameworkDetail = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">City:</h4>
-            <p className="text-sm sm:text-base">{legalFramework.city}</p>
+            <p className="text-sm sm:text-base">{legalFramework.zone_subcity}</p>
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>

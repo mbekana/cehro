@@ -1,53 +1,100 @@
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
 import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-
-type Post = {
-  // id: number; 
-  description: string;
-  title: string;
-  image: string;
-};
+import Cookies from "js-cookie";
+import Toast from "@/app/components/UI/Toast";
 
 const PostForm = () => {
   const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [image, setImage] = useState<string | null>(null);
-  // const router = useRouter();
+  const [body, setBody] = useState<string>("");
+  const [tag, setTag] = useState<string>("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userData, setUserData] = useState<any>(null);
+ const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+  useEffect(() => {
+    const user = Cookies.get("userData") ? JSON.parse(Cookies.get("userData")!) : null;
+    setUserData(user);
+  }, []);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImage(reader.result as string); // Store image as Base64
+        setImage(file);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handlePost = (e: FormEvent) => {
+  const handlePost = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!title || !description || !image) {
-      alert("Please fill all fields and upload an image.");
+    if (!title || !body || !image || !tag) {
+      setToast({
+        message: "Please fill all fields and upload an image.",
+        type: "error",
+        position: "top-right",
+      });
       return;
     }
 
-    const newPost: Post = { title, description, image };
-    const savedPosts: Post[] = JSON.parse(localStorage.getItem("blogPosts") || "[]");
-    savedPosts.push(newPost);
-    localStorage.setItem("blogPosts", JSON.stringify(savedPosts));
+    setLoading(true);
 
-    alert("Blog post published!");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("body", body);
+      formData.append("tag", tag);
+      formData.append("image", image);
+      formData.append("postedBy", userData?.id);
+
+      const response = await fetch(`${apiUrl}/api/v1/posts/register`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "An error occurred while submitting the post.");
+      }
+
+      setTitle("");
+      setBody("");
+      setTag("");
+      setImage(null);
+      setImagePreview(null);
+
+      setToast({
+        message: "Blog post published successfully!",
+        type: "success",
+        position: "top-right",
+      });
+    } catch (error) {
+      setToast({
+        message: error instanceof Error ? error.message : "Something went wrong.",
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-
 
   return (
     <div className="bg-white pb-5">
@@ -70,7 +117,6 @@ const PostForm = () => {
             marginBottom="mb-6"
           />
 
-
           <form className="space-y-6" onSubmit={handlePost}>
             <div className="flex flex-col space-y-4">
               <div>
@@ -88,12 +134,24 @@ const PostForm = () => {
               <div>
                 <Input
                   type="textarea"
-                  label="Description"
-                  placeholder="Enter description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  name="description"
+                  label="Body"
+                  placeholder="Enter body content"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  name="body"
                   borderRadius={3}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <Input
+                  type="text"
+                  label="Tag"
+                  placeholder="Enter a tag"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                  name="tag"
                   className="w-full"
                 />
               </div>
@@ -103,9 +161,13 @@ const PostForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  {image && (
-                    <div className="text-sm text-gray-600 mb-2">
-                      <strong>Selected file:</strong> 
+                  {imagePreview && (
+                    <div className="mb-4">
+                      <img
+                        src={imagePreview}
+                        alt="Selected preview"
+                        className="w-32 h-32 object-cover rounded-lg"
+                      />
                     </div>
                   )}
                   <label
@@ -117,7 +179,7 @@ const PostForm = () => {
                   <input
                     id="media"
                     type="file"
-                    onChange={(e) => handleImageChange(e)}
+                    onChange={handleImageChange}
                     className="hidden"
                   />
                 </div>
@@ -127,17 +189,24 @@ const PostForm = () => {
             <div className="flex justify-end mt-4">
               <Button
                 color="primary"
-                text={"Save Post"}
+                text={loading ? "Publishing..." : "Save Post"}
                 size="large"
                 elevation={4}
                 borderRadius={3}
-                // disabled={loading}
-                // onClick={handleSubmit}
+                disabled={loading}
               />
             </div>
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

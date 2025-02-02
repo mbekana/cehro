@@ -10,11 +10,18 @@ import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import { Category } from "@/app/model/CategoryModel";
+import Cookies from "js-cookie";
 
 const UpdateCategory = () => {
   const { id } = useParams();
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
   const [formData, setFormData] = useState<Category>({
     category: "",
@@ -23,11 +30,18 @@ const UpdateCategory = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
+  useEffect(() => {
     if (id) {
       const fetchCategoryData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
           const response = await fetch(`${apiUrl}/api/v1/categories/${id}`);
           if (!response.ok) {
             throw new Error("Failed to fetch category");
@@ -63,12 +77,13 @@ const UpdateCategory = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const payload = { ...formData };
       const response = await fetch(`${apiUrl}/api/v1/categories/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       setFormData({
         category: "",
@@ -79,19 +94,20 @@ const UpdateCategory = () => {
         throw new Error("Failed to update category");
       }
 
-      setSuccess("Category updated successfully");
-      setError(null);
+      setToast({
+        message: "You have updated category successfully.",
+        type: "success",
+        position: "top-right",
+      });
       setLoading(false);
     } catch (error) {
-      setError(`${error}`);
-      setSuccess(null);
-      setLoading(false);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
-
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   return (
     <div className="bg-white pb-5">
@@ -142,26 +158,28 @@ const UpdateCategory = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text={loading ? "Saving..." : "Update Category"}
+                size="large"
+                elevation={4}
+                onClick={handleSubmit}
+                icon={<FaPlus />}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
 
-      {success && (
-        <Toast type="success" message={success} position={"top-right"} />
-      )}
-
-      {error && <Toast type="error" message={error} position={"top-right"} />}
-
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text={loading ? "Saving..." : "Update Category"}
-          size="large"
-          elevation={4}
-          onClick={handleSubmit}
-          icon={<FaPlus />}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
-      </div>
+      )}
     </div>
   );
 };

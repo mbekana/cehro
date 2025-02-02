@@ -40,15 +40,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   useEffect(() => {
     console.log("HI: ", Cookies.get("userData"));
-    // const user = Cookies.get("userData")
-    //   ? JSON.parse(Cookies.get("userData")!)
-    //   : null;
-    const user = {
-      id: "12345",
-      email: "user@example.com",
-      firstName: "John",
-      lastName: "Doe",
-    };
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
     setUserData(user);
   }, []);
 
@@ -75,7 +69,6 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const userAvatar = userData ? userData.firstName.charAt(0).toUpperCase() : "";
 
   const sidebarLinks = [
     {
@@ -205,7 +198,15 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold focus:outline-none hover:bg-primary-dark transition-colors duration-200"
                 onClick={() => setDropdownOpen((prev) => !prev)}
               >
-                {userData.firstName.charAt(0)}{" "}
+                {userData.avatar ? (
+                  <img
+                    src={userData.avatar}
+                    alt="Avatar"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  userData.firstName.charAt(0) // Fallback to first letter if no avatar
+                )}{" "}
               </button>
 
               <span className="text-sm text-gray-700">

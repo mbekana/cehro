@@ -20,14 +20,15 @@ const SignupPage: React.FC = () => {
     confirmPassword: "",
     phone: "",
     role: "",
+    avatar: null, 
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null); // For previewing the avatar image
 
-  // Only fetch roles for the dropdown (no form data fetching here)
   useEffect(() => {
     fetchRoles();
   }, []);
@@ -51,57 +52,80 @@ const SignupPage: React.FC = () => {
     }));
   };
 
-  const handleSignup = async () => {
-    const { firstName, lastName, userName, email, password, confirmPassword, phone, role } = formData;
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Preview the image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+        setFormData((prev) => ({
+          ...prev,
+          avatar: file,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
+  const handleSignup = async () => {
+    const { firstName, lastName, userName, email, password, confirmPassword, phone, role, avatar } = formData;
+  
     setError(null);
     setSuccess(null);
-
+  
     if (!firstName || !lastName || !userName || !email || !password || !confirmPassword || !phone) {
       setError("All fields are required.");
       return;
     }
-
+  
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
       setError("Invalid email address.");
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
+  
     setLoading(true);
-
+  
     const userData = { ...formData, role: role || null };
-
+  
+    const formDataToSend = new FormData();
+    Object.keys(userData).forEach((key) => {
+      if (key !== "confirmPassword") {
+        formDataToSend.append(key, userData[key as keyof typeof userData]);
+      }
+    });
+    
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            
       const response = await fetch(`${apiUrl}/api/v1/users/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
+        body: formDataToSend, 
       });
 
       const data = await response.json();
-
+  
       if (response.ok) {
         setSuccess("User created successfully!");
         setFormData({
           firstName: "",
           lastName: "",
-          middleName:"",
+          middleName: "",
           userName: "",
           email: "",
           password: "",
           confirmPassword: "",
           phone: "",
           role: "",
+          avatar: null,
         });
+        setAvatarPreview(null); 
       } else {
         setError(data.message || "Signup error.");
       }
@@ -111,6 +135,7 @@ const SignupPage: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div>
@@ -175,6 +200,25 @@ const SignupPage: React.FC = () => {
                 name="confirmPassword"
                 onChange={handleInputChange}
               />
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md"
+                />
+                {avatarPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar Preview"
+                      className="w-24 h-24 object-cover rounded-full"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-4 flex justify-between">

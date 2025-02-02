@@ -38,7 +38,7 @@ const ThematicCategoryForm = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/thematicCategories`, {
+      const response = await fetch(`${apiUrl}/api/v1/thematic-categories`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 export class Impact {
   id?: string;
-  name?: string;
+  impact?: string;
   remark?: string;
 }

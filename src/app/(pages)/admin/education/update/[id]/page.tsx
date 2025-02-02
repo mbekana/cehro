@@ -4,12 +4,13 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import { Education } from "@/app/model/EducationModel";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const UpdateEducationForm = () => {
   const [toast, setToast] = useState<{
@@ -19,10 +20,19 @@ const UpdateEducationForm = () => {
   } | null>(null); 
 
   const { id } = useParams();
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Education>({
     education: "",
     remark: "",
   });
+
+   useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
 
   useEffect(() => {
     const fetchEducationData = async () => {
@@ -60,11 +70,9 @@ const UpdateEducationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
     try {
       const payload = {
-        ...formData,
-        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+        ...formData
       };
       const response = await fetch(`${apiUrl}/api/v1/educations/${id}`, {
         method: "PATCH",

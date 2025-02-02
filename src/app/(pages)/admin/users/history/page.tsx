@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
 import { User } from "@/app/model/user";
+import PopConfirm from "@/app/components/UI/PopConfirm";
+import Toast from "@/app/components/UI/Toast";
 
 const columns: (keyof User)[] = [
   "id",
@@ -22,11 +24,26 @@ const columns: (keyof User)[] = [
 
 const UserList = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const rowsPerPage = 5;
+    const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  
+  const [toast, setToast] = useState<{
+      message: string;
+      type: "success" | "error";
+      position: "top-right";
+    } | null>(null);
+    
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -40,45 +57,71 @@ const UserList = () => {
       if (response.ok) {
         const data = await response.json();
         setUsers(data.data);
+        setPagination(data.pagination)
       } else {
-        setError("Failed to fetch users");
+        console.log("Failed to fetch users")      
       }
-    } catch (err) {
-      setError(`Error fetching users: ${err}`);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const totalPages = Math.ceil(users.length / rowsPerPage);
-  const currentData = users.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+  const searchUsers = async (searchQuery:string) => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/users/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.data);
+        setPagination(data.pagination)
+      } else {
+        console.log("Failed to fetch users")      
+      }
+    } catch (err) {
+      console.log(err)      
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+
+
+  const handlePageChange = (page: number) => {
+    setPagination((prevState) => ({
+      ...prevState,
+      page,
+    }));
   };
 
-  const handleDelete = async (id: string) => {
+  const handleSearch = (query: string) => {
+    searchUsers(query);
+  };
+
+  const handleDelete = async () => {
+    if (userToDelete === null) return;
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/users/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/users/${userToDelete}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
         throw new Error("Failed to delete the incident");
       }
-      console.log(`Incident with id ${id} deleted successfully`);
+      console.log(`Incident with id ${userToDelete} deleted successfully`);
       fetchUsers();
+      setToast({
+        message: "You have successfully deleted user.",
+        type: "success",
+        position: "top-right",
+      });
+      setIsPopConfirmOpen(false); 
     } catch (error) {
       console.error("Error deleting the incident: ", error);
     }
@@ -95,19 +138,26 @@ const UserList = () => {
         router.push(`/admin/users/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id);
+        setUserToDelete(row.id);
+        setIsPopConfirmOpen(true);
         break;
       default:
         break;
     }
   };
 
+  const handleCancel = () => {
+    setIsPopConfirmOpen(false);
+    setUserToDelete(null);
+  };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  const handleClearSearch = () => {
+    searchUsers("");  
+    fetchUsers();
+  };
 
   return (
+    <>
     <BoxWrapper
       icon={<FaUsers />}
       title="Users"
@@ -117,6 +167,7 @@ const UserList = () => {
         <div className="flex flex-1 items-center justify-between m-2 w-full">
           <Search
             onSearch={handleSearch}
+            onClear={handleClearSearch}
             placeholder="Search User..."
             buttonText="Search User"
           />
@@ -137,17 +188,35 @@ const UserList = () => {
         <div>Loading...</div>
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={users} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
             />
           </div>
         </>
       )}
+    <PopConfirm
+        isOpen={isPopConfirmOpen}
+        onConfirm={handleDelete}
+        onCancel={handleCancel}
+        message="Are you sure you want to delete this User?"
+        title="Delete User"
+      />
     </BoxWrapper>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            position={toast.position}
+            onClose={() => setToast(null)}
+          />
+        )}
+    </>
   );
 };
 

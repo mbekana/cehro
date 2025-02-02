@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaArrowLeft, FaUser } from 'react-icons/fa';  // You can replace this with a suitable icon for "Role"
+import { FaArrowLeft, FaUser } from 'react-icons/fa';  
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Card from '@/app/components/UI/Card';
 import Divider from '@/app/components/UI/Divider';

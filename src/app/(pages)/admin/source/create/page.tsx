@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,6 +9,7 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Source } from "@/app/model/Source";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const SourceofInformationForm = () => {
   const [toast, setToast] = useState<{
@@ -17,7 +18,7 @@ const SourceofInformationForm = () => {
     position: "top-right";
   } | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Source>({
     source: "",
     remark: "",
@@ -33,6 +34,15 @@ const SourceofInformationForm = () => {
     }));
   }
 
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+  }, []);
+    
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -40,7 +50,7 @@ const SourceofInformationForm = () => {
     try {
       const payload = {
         ...formData,
-        createdBy: "1c179ec2-0994-416d-9c1d-8f8b034779ce",
+        createdBy: userData?.id,
       };
       console.log("payload ", payload)
       const response = await fetch(`${apiUrl}/api/v1/sources/register`, {
@@ -72,11 +82,13 @@ const SourceofInformationForm = () => {
       setLoading(false)
     }
   };
+
+
   return (
     <div className="bg-white pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Occupation Form"
+        title="Source Form"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}

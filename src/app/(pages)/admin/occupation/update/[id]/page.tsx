@@ -35,7 +35,7 @@ const UpdateOccupationForm = () => {
         }
         const data = await response.json();
         setFormData({
-          occupation: data.data.name,
+          occupation: data.data.occupation,
           remark: data.data.remark,
         });
       } catch (error) {
@@ -64,9 +64,7 @@ const UpdateOccupationForm = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const payload = {
-        ...formData,
-        postedBy: "3f043a16-124b-4205-a6b1-5015fab1a2b2",
-      };
+        ...formData      };
       const response = await fetch(`${apiUrl}/api/v1/occupations/${id}`, {
         method: "PATCH",
         headers: {
@@ -100,10 +98,10 @@ const UpdateOccupationForm = () => {
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
            icon={<FaArrowLeft />}
-           title="Education Details"
+           title="Occupation Update Form"
            borderColor="border-primary"
            borderThickness="border-b-4"
            shouldGoBack={true}

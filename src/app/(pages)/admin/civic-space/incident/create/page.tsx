@@ -10,50 +10,39 @@ import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
 import { Education } from "@/app/model/EducationModel";
 import { Impact } from "@/app/model/Impact";
-
-type IncidentFormData = {
-  region: string;
-  respondent_residence: string;
-  gender: string;
-  age: string;
-  education: string;
-  occupation: string;
-  date_of_incidence: string;
-  location_of_incidence: string;
-  incident_happened: {
-    woreda: string;
-    zone: string;
-  };
-  metrics: string;
-  source_of_information: string;
-  insight: string;
-  impact: string;
-};
+import { Occupation } from "@/app/model/Occupation";
+import { Incident } from "@/app/model/Incident";
+import Cookies from "js-cookie";
 
 const IncidentForm = () => {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [metrics, setMetrics] = useState<any[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [impacts, setImpacts] = useState<Impact[]>([]);
   const [regions, setRegions] = useState<any[]>([]);
-  const [occupation, setOccupation] = useState<Education[]>([]);
+  const [occupations, setOccupations] = useState<Occupation[]>([]);
   const [sources, setSources] = useState<any[]>([]);
-  const [formData, setFormData] = useState<IncidentFormData>({
-    region: "",
-    respondent_residence: "",
+  const [userData, setUserData] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+  const [formData, setFormData] = useState<Incident>({
     gender: "",
     age: "",
     education: "",
     occupation: "",
-    date_of_incidence: "",
-    location_of_incidence: "",
-    incident_happened: { woreda: "", zone: "" },
-    metrics: "",
-    source_of_information: "",
-    insight: "",
     impact: "",
+    region: "",
+    respondent_address: "",
+    zone_subcity: "",
+    metrics: "",
+    cehro_insights: "",
+    date: "",
+    location: "",
+    woreda_kebele: "",
+    source: "",
   });
 
   useEffect(() => {
@@ -61,98 +50,107 @@ const IncidentForm = () => {
     fetchEducations();
     fetchImpacts();
     fetchRegions();
-    fetchOccupations()
-    fetchSources()
+    fetchOccupations();
+    fetchSources();
+  }, []);
+
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
   }, []);
 
   const fetchOccupations = async () => {
     setLoading(true);
-    setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/occupations`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/occupations/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setOccupation(data);
+        setOccupations(data.data);
       } else {
         throw new Error("Failed to fetch occupations");
       }
     } catch (error: any) {
-      setError("Error fetching occupations: " + error.message);
       console.error("Error fetching occupations:", error);
     } finally {
       setLoading(false);
     }
   };
 
-
   const fetchSources = async () => {
     setLoading(true);
-    setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setSources(data);
+        setSources(data.data);
       } else {
         throw new Error("Failed to fetch sources");
       }
     } catch (error: any) {
-      setError("Error fetching sources: " + error.message);
       console.error("Error fetching sources:", error);
     } finally {
       setLoading(false);
     }
   };
 
-
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
-        console.log("Metrics: ", metrics)
+        setMetrics(data.data);
+        console.log("Metrics: ", metrics);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
+        setRegions(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
@@ -160,16 +158,17 @@ const IncidentForm = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/educations`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/educations/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setEducations(data);
+        setEducations(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
@@ -178,21 +177,10 @@ const IncidentForm = () => {
   ) => {
     const { name, value } = e.target;
 
-    if (name.startsWith("incident_happened")) {
-      const field = name.split(".")[1];
-      setFormData((prevData) => ({
-        ...prevData,
-        incident_happened: {
-          ...prevData.incident_happened,
-          [field]: value,
-        },
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -200,16 +188,17 @@ const IncidentForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const formDataWithStatus = {
+      const payload = {
         ...formData,
         status: "PENDING",
+        postedBy: userData?.id
       };
-      const response = await fetch(`${apiUrl}/incidents`, {
+      const response = await fetch(`${apiUrl}/api/v1/incidents/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formDataWithStatus),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -217,29 +206,38 @@ const IncidentForm = () => {
       }
 
       setFormData({
-        region: "",
-        respondent_residence: "",
         gender: "",
         age: "",
         education: "",
         occupation: "",
-        date_of_incidence: "",
-        location_of_incidence: "",
-        incident_happened: { woreda: "", zone: "" },
-        metrics: "",
-        source_of_information: "",
-        insight: "",
         impact: "",
+        region: "",
+        respondent_address: "",
+        zone_subcity: "",
+        metrics: "",
+        cehro_insights: "",
+        date: "",
+        location: "",
+        woreda_kebele: "",
+        source: "",
       });
-      setSuccess("Incident saved successfully!");
-      setError(null);
+      setToast({
+        message: "You have created occupation successfully.",
+        type: "success",
+        position: "top-right",
+      });
       setLoading(false);
       console.log("Incident saved successfully!");
     } catch (error) {
-      setSuccess(null);
-      setError(error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
       setLoading(false);
       console.error("Error saving incident:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -284,15 +282,14 @@ const IncidentForm = () => {
                   ))}
                 </Input>
               </div>
-
               <div>
                 <Input
                   type="text"
                   label="Respondent Residence"
                   placeholder="Respondent Residence"
-                  value={formData.respondent_residence}
+                  value={formData.respondent_address}
                   onChange={handleChange}
-                  name="respondent_residence"
+                  name="respondent_address"
                 />
               </div>
 
@@ -334,8 +331,8 @@ const IncidentForm = () => {
                   <option value="">Select Education</option>
 
                   {educations.map((education, index) => (
-                    <option key={index} value={education.id}>
-                      {education.name}
+                    <option key={index} value={education.education}>
+                      {education.education}
                     </option>
                   ))}
                 </Input>
@@ -343,7 +340,7 @@ const IncidentForm = () => {
 
               <div>
                 <Input
-                  type="text"
+                  type="select"
                   label="Occupation"
                   placeholder=" occupation"
                   value={formData.occupation}
@@ -351,8 +348,13 @@ const IncidentForm = () => {
                   name="occupation"
                 >
                   <option value="">Select Occupation</option>
-                  {occupation.map((oc, index)=>(<option key={index} value={oc.id}>{oc.name}</option>))}
-                  </Input>
+
+                  {occupations.map((occupation, index) => (
+                    <option key={index} value={occupation.occupation}>
+                      {occupation.occupation}
+                    </option>
+                  ))}
+                </Input>
               </div>
 
               <div>
@@ -360,9 +362,9 @@ const IncidentForm = () => {
                   type="date"
                   label="Date of Incidence"
                   placeholder="Select date"
-                  value={formData.date_of_incidence}
+                  value={formData.date}
                   onChange={handleChange}
-                  name="date_of_incidence"
+                  name="date"
                 />
               </div>
 
@@ -371,9 +373,9 @@ const IncidentForm = () => {
                   type="text"
                   label="Location of Incidence"
                   placeholder=" location"
-                  value={formData.location_of_incidence}
+                  value={formData.location}
                   onChange={handleChange}
-                  name="location_of_incidence"
+                  name="location"
                 />
               </div>
 
@@ -387,10 +389,9 @@ const IncidentForm = () => {
                   name="impact"
                 >
                   <option value="">Select Impact</option>
-
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
@@ -400,9 +401,9 @@ const IncidentForm = () => {
                   type="text"
                   label="Woreda/Kebele"
                   placeholder="Woreda/Kebele"
-                  value={formData.incident_happened.woreda}
+                  value={formData.woreda_kebele}
                   onChange={handleChange}
-                  name="incident_happened.woreda"
+                  name="woreda_kebele"
                 />
               </div>
 
@@ -411,9 +412,9 @@ const IncidentForm = () => {
                   type="text"
                   label="Zone/Subcity"
                   placeholder="Zone/Subcity"
-                  value={formData.incident_happened.zone}
+                  value={formData.zone_subcity}
                   onChange={handleChange}
-                  name="incident_happened.zone"
+                  name="zone_subcity"
                 />
               </div>
 
@@ -424,14 +425,15 @@ const IncidentForm = () => {
                   placeholder=" Metrics"
                   value={formData.metrics}
                   onChange={handleChange}
-                  name="category"
+                  name="metrics"
                 >
+                  <option value="">Select Metrics</option>
+
                   {metrics.map((metirc, index) => (
-                    <option key={index} value={metirc.id}>
-                      {metirc.name}
+                    <option key={index} value={metirc.metrics}>
+                      {metirc.metrics}
                     </option>
                   ))}
-                  <option value="">Select Metrics</option>
                 </Input>
               </div>
 
@@ -439,25 +441,26 @@ const IncidentForm = () => {
                 <Input
                   type="select"
                   label="Source of Information"
-                  value={formData.source_of_information}
+                  value={formData.source}
                   onChange={handleChange}
-                  name="source_of_information"
+                  name="source"
                 >
                   <option value="">Select Source</option>
                   {sources.map((source, index) => (
-                    <option key={index} value={source.id}>
-                      {source.name}
+                    <option key={index} value={source.source}>
+                      {source.source}
                     </option>
-                  ))}                </Input>
+                  ))}{" "}
+                </Input>
               </div>
               <div>
                 <Input
                   type="textarea"
                   label="CEHOR's Insight"
                   placeholder="Insight"
-                  value={formData.insight}
+                  value={formData.cehro_insights}
                   onChange={handleChange}
-                  name="insight"
+                  name="cehro_insights"
                 />
               </div>
             </div>
@@ -471,27 +474,17 @@ const IncidentForm = () => {
                 onClick={handleSubmit}
               />
             </div>
-
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
