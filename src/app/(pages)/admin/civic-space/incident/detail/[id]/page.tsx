@@ -6,13 +6,17 @@ import Button from "@/app/components/UI/Button";
 import { FaArrowLeft, FaCheck, FaTimes } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
+import { Incident } from "@/app/model/Incident";
 
 const IncidentDetail = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState<boolean>(false);
-  const [incident, setIncident] = useState<any>();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [incident, setIncident] = useState<Incident>();
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
   useEffect(() => {
     if (id) {
       fetchIncident(Array.isArray(id) ? id[0] : id);
@@ -41,16 +45,14 @@ const IncidentDetail = () => {
   };
 
   const handleApprove = async () => {
-    setLoading(true);
-
     try {
       const updatedIncident = {
         ...incident,
         status: "APPROVED",
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
-        method: "PUT",
+      const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -59,31 +61,41 @@ const IncidentDetail = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setIncident(data);
-        setError(null);
-        setSuccess("You have successfully approved incident.");
+        setIncident(data.data);
+
+        setToast({
+          message: "You have successfully approved incident.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Failed to fetch data");
+        setToast({
+          message: "There was an error saving the incident",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
-      setSuccess(null);
-      setError(error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false);
     }
   };
 
   const handleReject = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const updatedIncident = {
         ...incident,
         status: "REJECTED",
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
-        method: "PUT",
+      const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -92,18 +104,23 @@ const IncidentDetail = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setIncident(data);
-        setError(null);
-        setSuccess("You have successfully rejected incident.");
+        setIncident(data.data);
+        setToast({
+          message: "You have successfully rejected incident.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Failed to fetch data");
+        setToast({
+          message: "There was an error rejecting the incident",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
-      setError(error);
-      setSuccess(null);
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -149,7 +166,6 @@ const IncidentDetail = () => {
       shouldGoBack={true}
     >
       <div className="space-y-4">
-        {/* Incident Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -211,7 +227,7 @@ const IncidentDetail = () => {
           </p>
           <p className="text-sm sm:text-base">
             <strong>Source of Information:</strong>{" "}
-            {incident?.source_of_information}
+            {incident?.source}
           </p>
         </div>
 
@@ -222,36 +238,31 @@ const IncidentDetail = () => {
         </div>
 
         <div className="mt-10 pt-5 flex gap-4 ">
-          <Button
-            color="success"
-            text={loading ? "Approving..." : "Approve"}
-            onClick={handleApprove}
-            icon={<FaCheck />}
-          />
-          <Button
-            color="danger"
-            text={loading ? "Rejecting..." : "Reject"}
-            onClick={handleReject}
-            icon={<FaTimes />}
-          />
+          {incident.status !== "APPROVED" && incident.status !== "REJECTED" && (
+            <>
+              <Button
+                color="success"
+                text={loading ? "Approving..." : "Approve"}
+                onClick={handleApprove}
+                icon={<FaCheck />}
+              />
+              <Button
+                color="danger"
+                text={loading ? "Rejecting..." : "Reject"}
+                onClick={handleReject}
+                icon={<FaTimes />}
+              />
+            </>
+          )}
         </div>
       </div>
 
-      {success && (
+      {toast && (
         <Toast
-          message={success}
-          type="success"
-          position="top-right"
-          onClose={() => setSuccess(null)}
-        />
-      )}
-
-      {error && (
-        <Toast
-          message={error}
-          type="error"
-          position="top-right"
-          onClose={() => setError(null)}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
     </BoxWrapper>

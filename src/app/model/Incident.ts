@@ -14,4 +14,5 @@ export interface Incident {
     metrics: string;
     source?: string;
     cehro_insights: string;
+    status?:string;
   }

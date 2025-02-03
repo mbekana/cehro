@@ -15,4 +15,5 @@ export interface AuthorityDecision {
   summary?: string;
   source?: string;
   cehro_insights: string;
+  status?:string;
 }
