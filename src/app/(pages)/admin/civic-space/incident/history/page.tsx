@@ -140,6 +140,7 @@ const IncidentsList = () => {
       });
     }
   };
+  
   const handleAction = (action: string, row: Record<string, any>) => {
     console.log("AM here handle action: ", row.id);
     switch (action) {

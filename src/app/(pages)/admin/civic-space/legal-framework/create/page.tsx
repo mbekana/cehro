@@ -350,7 +350,8 @@ const LegalFrameworkForm = () => {
         message: `${error.message}`,
         type: "error",
         position: "top-right",
-      });    } finally {
+      });    
+    } finally {
       setLoading(false);
     }
   };
