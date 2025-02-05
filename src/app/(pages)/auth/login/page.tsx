@@ -41,13 +41,14 @@ const LoginPage = () => {
     };
     try {
       const data = await apiRequest(`/api/v1/users/login`, options);
-      if (data.user.accessToken) {
-        Cookies.set("accessToken", data.user.accessToken); 
+      console.log("data ", data?.accessToken)
+      if (data.accessToken) {
+        Cookies.set("accessToken", data.accessToken); 
         if (data.refreshToken) {
-          Cookies.set("refreshToken", data.user.refreshToken); 
+          Cookies.set("refreshToken", data.refreshToken); 
         }
         if(data.user){
-          delete data.user.accessToken;
+          delete data.accessToken;
           Cookies.set("userData", JSON.stringify(data.user))
         }
         router.push(callbackUrl);
