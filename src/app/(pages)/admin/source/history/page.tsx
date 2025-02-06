@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FaExclamationTriangle, FaInfoCircle, FaPlus } from "react-icons/fa";
+import { FaInfoCircle, FaPlus } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
@@ -22,30 +22,51 @@ const SourceOfInformation = () => {
   const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
   const [sourceToDelete, setSourceToDelete] = useState<number | null>(null);
   const [toast, setToast] = useState<{
-        message: string;
-        type: "success" | "error";
-        position: "top-right";
-      } | null>(null);
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
   const [pagination, setPagination] = useState({
     totalDocs: 0,
     totalPages: 0,
-    page: 1, 
+    page: 1,
     limit: 10,
     pageCounter: 0,
     hasPrevPage: false,
     hasNextPage: false,
   });
 
-
   useEffect(() => {
-    fetchSources();
+    fetchSources(pagination.page, pagination.limit);
   }, []);
 
   const handlePageChange = (page: number) => {
-    setPagination(prevState => ({
+    setPagination((prevState) => ({
       ...prevState,
       page,
     }));
+  };
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchSources(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchSources(prevPage, pagination.limit);
+    }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -71,22 +92,25 @@ const SourceOfInformation = () => {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/sources/${sourceToDelete}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/sources/${sourceToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete the Source");
       }
-   
+
       console.log(`Source with id ${sourceToDelete} deleted successfully`);
-      fetchSources();
+      fetchSources(pagination.page, pagination.limit);
       setToast({
         message: "You have successfully deleted Source.",
         type: "success",
         position: "top-right",
       });
-      setIsPopConfirmOpen(false); 
+      setIsPopConfirmOpen(false);
     } catch (error) {
       console.error("Error deleting the Source: ", error);
       setToast({
@@ -97,17 +121,19 @@ const SourceOfInformation = () => {
     }
   };
 
-
-  const fetchSources = async () => {
+  const fetchSources = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/sources/all`, { method: "GET" });
+      const response = await fetch(
+        `${apiUrl}/api/v1/sources/all?page=${page}&limit=${limit}`,
+        { method: "GET" }
+      );
       if (response.ok) {
         const data = await response.json();
         setSources(data.data);
-        setPagination(data.pagination)
+        setPagination(data.pagination);
       } else {
         console.error("Failed to fetch data");
       }
@@ -118,16 +144,19 @@ const SourceOfInformation = () => {
     }
   };
 
-  const searchSources = async (searchQuery:string) => {
+  const searchSources = async (searchQuery: string) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/sources/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`, { method: "GET" });
+      const response = await fetch(
+        `${apiUrl}/api/v1/sources/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`,
+        { method: "GET" }
+      );
       if (response.ok) {
         const data = await response.json();
         setSources(data.data);
-        setPagination(data.pagination)
+        setPagination(data.pagination);
       } else {
         console.error("Failed to fetch data");
       }
@@ -139,13 +168,13 @@ const SourceOfInformation = () => {
   };
 
   const handleSearch = (query: string) => {
-    searchSources(query)
+    searchSources(query);
   };
 
-  const handleClearSearch = () =>{
-    searchSources("");  
-    fetchSources();
-  }
+  const handleClearSearch = () => {
+    searchSources("");
+    fetchSources(pagination.page, pagination.limit);
+  };
 
   const handleCancel = () => {
     setIsPopConfirmOpen(false);
@@ -154,67 +183,69 @@ const SourceOfInformation = () => {
 
   return (
     <>
-    <BoxWrapper
-      icon={<FaInfoCircle />}
-      title="Source Of Information"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
-    >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
-        <Search
-          onSearch={handleSearch}
-          onClear={handleClearSearch}
-          placeholder="Search Source..."
-          buttonText="Search Source"
-        />
-
-        <Link href="/admin/source/create">
-          <Button
-            color="primary"
-            text="Create Source"
-            icon={<FaPlus />}
-            className="ml-auto"
-            size="large"
-            borderRadius={5}
+      <BoxWrapper
+        icon={<FaInfoCircle />}
+        title="Source Of Information"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+      >
+        <div className="flex flex-1 items-center justify-between m-2 w-full">
+          <Search
+            onSearch={handleSearch}
+            onClear={handleClearSearch}
+            placeholder="Search Source..."
+            buttonText="Search Source"
           />
-        </Link>
-      </div>
-      <div className="m-2 w-full"></div>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <Table columns={columns} data={sources} onAction={handleAction} />
-          <div className="flex justify-end mt-4">
-            <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
+          <Link href="/admin/source/create">
+            <Button
+              color="primary"
+              text="Create Source"
+              icon={<FaPlus />}
+              className="ml-auto"
+              size="large"
+              borderRadius={5}
             />
-          </div>
-        </>
-      )}
+          </Link>
+        </div>
+        <div className="m-2 w-full"></div>
 
-      <PopConfirm
-        isOpen={isPopConfirmOpen}
-        onConfirm={handleDelete}
-        onCancel={handleCancel}
-        message="Are you sure you want to delete this Source?"
-        title="Delete Source"
-      />
-    </BoxWrapper>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            position={toast.position}
-            onClose={() => setToast(null)}
-          />
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <>
+            <Table columns={columns} data={sources} onAction={handleAction} />
+            <div className="flex justify-end mt-4">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                hasNextPage={pagination.hasNextPage}
+                hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
+              />
+            </div>
+          </>
         )}
-        </>
+
+        <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this Source?"
+          title="Delete Source"
+        />
+      </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   );
 };
 

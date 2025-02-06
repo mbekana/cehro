@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Cookies from "js-cookie";
@@ -18,13 +18,15 @@ const PostForm = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<any>(null);
- const [toast, setToast] = useState<{
+  const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
   useEffect(() => {
-    const user = Cookies.get("userData") ? JSON.parse(Cookies.get("userData")!) : null;
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
     setUserData(user);
   }, []);
 
@@ -62,7 +64,7 @@ const PostForm = () => {
       formData.append("body", body);
       formData.append("tag", tag);
       formData.append("image", image);
-      formData.append("postedBy", userData?.id);
+      formData.append("postedById", userData?.id);
 
       const response = await fetch(`${apiUrl}/api/v1/posts/register`, {
         method: "POST",
@@ -71,7 +73,9 @@ const PostForm = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "An error occurred while submitting the post.");
+        throw new Error(
+          errorData.message || "An error occurred while submitting the post."
+        );
       }
 
       setTitle("");
@@ -87,7 +91,8 @@ const PostForm = () => {
       });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : "Something went wrong.",
+        message:
+          error instanceof Error ? error.message : "Something went wrong.",
         type: "error",
         position: "top-right",
       });
@@ -97,12 +102,13 @@ const PostForm = () => {
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div>
       <BoxWrapper
-        icon={<FaCalendar />}
-        title={"Create Post"}
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Post Form"

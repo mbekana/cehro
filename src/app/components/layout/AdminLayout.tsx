@@ -198,7 +198,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold focus:outline-none hover:bg-primary-dark transition-colors duration-200"
                 onClick={() => setDropdownOpen((prev) => !prev)}
               >
-                {userData.avatar ? (
+                {/* {userData.avatar} */}
+                {userData?.avatar ? (
                   <img
                     src={userData.avatar}
                     alt="Avatar"

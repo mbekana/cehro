@@ -52,7 +52,7 @@ const OccupationForm = () => {
     try {
       const payload = {
         ...formData,
-        createdBy: userData?.id,
+        createdById: userData?.id,
       };
       const response = await fetch(`${apiUrl}/api/v1/occupations/register`, {
         method: "POST",

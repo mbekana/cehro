@@ -10,11 +10,13 @@ import Button from "@/app/components/UI/Button";
 import { useParams, useRouter } from "next/navigation";
 import { Role } from "@/app/model/Role";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const UpdateRolePage = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState<boolean>(true);
   const [role, setRole] = useState<any | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Role>({
     role: "",
     remark: "",
@@ -24,6 +26,16 @@ const UpdateRolePage = () => {
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
+
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+  }, []);
+  
 
   useEffect(() => {
     if (id) {
@@ -71,7 +83,9 @@ const UpdateRolePage = () => {
 
     try {
       const payload = {
-        ...formData      };
+        ...formData  ,    
+        updatedById:userData?.id
+      };
       const response = await fetch(`${apiUrl}/api/v1/roles/${id}`, {
         method: "PATCH",
         headers: {

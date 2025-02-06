@@ -47,7 +47,7 @@ const ImpactForm = () => {
     setLoading(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     try {
-      const payload = { ...formData, createdBy: userData?.id };
+      const payload = { ...formData, createdById: userData?.id };
       const response = await fetch(`${apiUrl}/api/v1/impacts/register`, {
         method: "POST",
         headers: {

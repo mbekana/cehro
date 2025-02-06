@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import Image from "next/image";
 import { SocialMedia } from "@/app/model/SocialMedia";
+import Cookies from "js-cookie";
 
 const SocialMediaPostDetail = () => {
   const { id } = useParams();
@@ -17,6 +18,7 @@ const SocialMediaPostDetail = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     const fetchSocialMediaPostData = async () => {
@@ -41,14 +43,23 @@ const SocialMediaPostDetail = () => {
     fetchSocialMediaPostData();
   }, [id]);
 
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+  
+
   useEffect(() => {
     if (socialMediaPost?.video) {
       const mediaUrl = socialMediaPost.video;
-      if (mediaUrl.endsWith(".jpg") || mediaUrl.endsWith(".png") || mediaUrl.endsWith(".jpeg")) {
+      if (mediaUrl.name.endsWith(".jpg") || mediaUrl.name.endsWith(".png") || mediaUrl.name.endsWith(".jpeg")) {
         setMediaType("image");
-      } else if (mediaUrl.includes("youtube.com") || mediaUrl.includes("youtu.be")) {
+      } else if (mediaUrl.name.includes("youtube.com") || mediaUrl.name.includes("youtu.be")) {
         setMediaType("video");
-      } else if (mediaUrl.endsWith(".pdf")) {
+      } else if (mediaUrl.name.endsWith(".pdf")) {
         setMediaType("pdf");
       } else {
         setMediaType("none");
@@ -64,6 +75,7 @@ const SocialMediaPostDetail = () => {
       const updatedIncident = {
         ...socialMediaPost,
         status: "APPROVED",
+        approvedById:userData?.id
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${apiUrl}/socialMediaPosts/${id}`, {
@@ -212,7 +224,7 @@ const SocialMediaPostDetail = () => {
 
       
         <div className="space-y-2">
-          <h4 className="font-semibold text-sm sm:text-base">Cehro's Insight:</h4>
+          <h4 className="font-semibold text-sm sm:text-base">Cehros Insight:</h4>
           <p className="text-sm sm:text-base">{socialMediaPost.cehro_insights}</p>
         </div>
         <h4 className="font-semibold text-sm sm:text-base">
@@ -224,7 +236,7 @@ const SocialMediaPostDetail = () => {
             <Button
               color="primary"
               text="Open File"
-              onClick={() => window.open(socialMediaPost.file, "_blank")} // Opens the file in a new tab
+              onClick={() => window.open(socialMediaPost.file.name, "_blank")} // Opens the file in a new tab
               icon={<FaExternalLinkAlt />}
               size="large"
             />
@@ -235,7 +247,7 @@ const SocialMediaPostDetail = () => {
             {/* Render appropriate media based on mediaType */}
             {mediaType === "image" && (
               <Image
-                src={socialMediaPost.media}
+                src={socialMediaPost.video.name}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
                 height="100"
@@ -248,7 +260,7 @@ const SocialMediaPostDetail = () => {
                 <iframe
                   width="100%"
                   height="100%"
-                  src={socialMediaPost.media}
+                  src={socialMediaPost.video.name}
                   title="Video Preview"
                   frameBorder="0"
                   allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
@@ -259,7 +271,7 @@ const SocialMediaPostDetail = () => {
 
             {mediaType === "pdf" && (
               <iframe
-                src={socialMediaPost.media}
+                src={socialMediaPost.file.name}
                 width="100%"
                 height="500px"
                 title="PDF Preview"

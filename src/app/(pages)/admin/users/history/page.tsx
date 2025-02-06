@@ -19,22 +19,22 @@ const columns: (keyof User)[] = [
   "lastName",
   "middleName",
   "userName",
-  "email"
+  "email",
 ];
 
 const UserList = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
-    const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<number | null>(null);
-  
+  const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+
   const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error";
-      position: "top-right";
-    } | null>(null);
-    
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
   const [pagination, setPagination] = useState({
     totalDocs: 0,
     totalPages: 0,
@@ -46,20 +46,22 @@ const UserList = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1, 10);
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/users/all`);
+      const response = await fetch(
+        `${apiUrl}/api/v1/users/all?page=${page}&limit=${limit}`
+      );
       if (response.ok) {
         const data = await response.json();
         setUsers(data.data);
-        setPagination(data.pagination)
+        setPagination(data.pagination);
       } else {
-        console.log("Failed to fetch users")      
+        console.log("Failed to fetch users");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -68,33 +70,55 @@ const UserList = () => {
     }
   };
 
-
-  const searchUsers = async (searchQuery:string) => {
+  const searchUsers = async (searchQuery: string) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/users/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`);
+      const response = await fetch(
+        `${apiUrl}/api/v1/users/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`
+      );
       if (response.ok) {
         const data = await response.json();
         setUsers(data.data);
-        setPagination(data.pagination)
+        setPagination(data.pagination);
       } else {
-        console.log("Failed to fetch users")      
+        console.log("Failed to fetch users");
       }
     } catch (err) {
-      console.log(err)      
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
-
-
 
   const handlePageChange = (page: number) => {
     setPagination((prevState) => ({
       ...prevState,
       page,
     }));
+    fetchUsers(page, pagination.limit);
+  };
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchUsers(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchUsers(prevPage, pagination.limit);
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -115,20 +139,20 @@ const UserList = () => {
         throw new Error("Failed to delete the incident");
       }
       console.log(`Incident with id ${userToDelete} deleted successfully`);
-      fetchUsers();
+      fetchUsers(1, 10);
       setToast({
         message: "You have successfully deleted user.",
         type: "success",
         position: "top-right",
       });
-      setIsPopConfirmOpen(false); 
+      setIsPopConfirmOpen(false);
     } catch (error) {
       console.error("Error deleting the incident: ", error);
     }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
-    console.log("ROW: ", row)
+    console.log("ROW: ", row);
     console.log("AM here handle action: ", row.id);
     switch (action) {
       case "details":
@@ -152,18 +176,18 @@ const UserList = () => {
   };
 
   const handleClearSearch = () => {
-    searchUsers("");  
-    fetchUsers();
+    searchUsers("");
+    fetchUsers(1, 10);
   };
 
   return (
     <>
-    <BoxWrapper
-      icon={<FaUsers />}
-      title="Users"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
-    >
+      <BoxWrapper
+        icon={<FaUsers />}
+        title="Users"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+      >
         <div className="flex flex-1 items-center justify-between m-2 w-full">
           <Search
             onSearch={handleSearch}
@@ -179,43 +203,44 @@ const UserList = () => {
               className="ml-auto mr-2"
               size="large"
               borderRadius={5}
-              
             />
           </Link>
         </div>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <Table columns={columns} data={users} onAction={handleAction} />
-          <div className="flex justify-end mt-4">
-            <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
-            />
-          </div>
-        </>
-      )}
-    <PopConfirm
-        isOpen={isPopConfirmOpen}
-        onConfirm={handleDelete}
-        onCancel={handleCancel}
-        message="Are you sure you want to delete this User?"
-        title="Delete User"
-      />
-    </BoxWrapper>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            position={toast.position}
-            onClose={() => setToast(null)}
-          />
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <>
+            <Table columns={columns} data={users} onAction={handleAction} />
+            <div className="flex justify-end mt-4">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                hasNextPage={pagination.hasNextPage}
+                hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
+              />
+            </div>
+          </>
         )}
+        <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this User?"
+          title="Delete User"
+        />
+      </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </>
   );
 };

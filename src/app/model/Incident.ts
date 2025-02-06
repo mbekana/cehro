@@ -15,4 +15,8 @@ export interface Incident {
     source?: string;
     cehro_insights: string;
     status?:string;
+    approvedBy?:any;
+    postedBy?:any;
+    postedById?:any;
+    approvedById?:any;
   }

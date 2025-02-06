@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Region } from "@/app/model/RegionModel";
@@ -24,17 +24,15 @@ const RegionForm = () => {
     message: string;
     type: "success" | "error";
     position: "top-right";
-  } | null>(null); 
+  } | null>(null);
 
-  
-   useEffect(() => {
-      console.log("HI: ", Cookies.get("userData"));
-      const user = Cookies.get("userData")
-        ? JSON.parse(Cookies.get("userData")!)
-        : null;
-      setUserData(user);
-    }, []);
-
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -51,7 +49,7 @@ const RegionForm = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const payload = {...formData, createdBy:userData?.id};
+      const payload = { ...formData, createdById: userData?.id };
       const response = await fetch(`${apiUrl}/api/v1/regions/register`, {
         method: "POST",
         headers: {
@@ -71,7 +69,6 @@ const RegionForm = () => {
       });
 
       setFormData({ name: "", lattitude: "", longitude: "", city: "" });
-
     } catch (error) {
       setToast({
         message: `${error.message}`,
@@ -84,10 +81,11 @@ const RegionForm = () => {
   return (
     <div className=" pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Region Maintenance"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Region Form"
@@ -165,7 +163,7 @@ const RegionForm = () => {
           message={toast.message}
           type={toast.type}
           position={toast.position}
-          onClose={() => setToast(null)} 
+          onClose={() => setToast(null)}
         />
       )}
     </div>

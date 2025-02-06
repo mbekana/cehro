@@ -4,12 +4,13 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
 import { Occupation } from "@/app/model/Occupation";
+import Cookies from "js-cookie";
 
 const UpdateOccupationForm = () => {
   const { id } = useParams();
@@ -17,13 +18,21 @@ const UpdateOccupationForm = () => {
     occupation: "",
     remark: "",
   });
+  const [userData, setUserData] = useState<any>(null);
 
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   useEffect(() => {
     const fetchOccupationData = async () => {
@@ -64,7 +73,9 @@ const UpdateOccupationForm = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const payload = {
-        ...formData      };
+        ...formData,
+        updatedById: userData?.id,
+      };
       const response = await fetch(`${apiUrl}/api/v1/occupations/${id}`, {
         method: "PATCH",
         headers: {
@@ -92,7 +103,7 @@ const UpdateOccupationForm = () => {
         type: "error",
         position: "top-right",
       });
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -100,11 +111,11 @@ const UpdateOccupationForm = () => {
   return (
     <div className="pb-5">
       <BoxWrapper
-           icon={<FaArrowLeft />}
-           title="Occupation Update Form"
-           borderColor="border-primary"
-           borderThickness="border-b-4"
-           shouldGoBack={true}
+        icon={<FaArrowLeft />}
+        title="Occupation Update Form"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Update Occupation Form"

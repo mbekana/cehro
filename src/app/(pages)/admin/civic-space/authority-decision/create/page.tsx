@@ -19,7 +19,7 @@ const AuthorityDecisionForm = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [sources, setSources] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   
   const [toast, setToast] = useState<{
     message: string;
@@ -116,7 +116,7 @@ const AuthorityDecisionForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/categories/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/thematic-categories/all`, {
         method: "GET",
       });
       if (response.ok) {
@@ -214,6 +214,7 @@ const AuthorityDecisionForm = () => {
     formPayload.append("date", formData.date);
     formPayload.append("impact", formData.impact);
     formPayload.append("region", formData.region);
+    formPayload.append("origin", formData.origin);
     formPayload.append("woreda_kebele", formData.woreda_kebele);
     formPayload.append("zone_subcity", formData.zone_subcity);
     formPayload.append("metrics", formData.metrics);
@@ -409,18 +410,13 @@ const AuthorityDecisionForm = () => {
                   File Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="file"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select File
-                  </label>
+              
                   <input
                     id="file"
                     type="file"
                     accept=".pdf"
                     onChange={(e) => handleFileChange(e, "file")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                   />
                   {formData.file && (
                     <span className="text-sm text-gray-600 ml-2">
@@ -436,19 +432,13 @@ const AuthorityDecisionForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="video"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select Media
-                  </label>
                   <input
                     id="video"
                     type="file"
                     accept="image/*,video/*"
                     onChange={(e) => handleFileChange(e, "video")}
-                    className="hidden"
-                  />
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+                    />
                   {formData.video && (
                     <span className="text-sm text-gray-600 ml-2">
                       {formData.video.name}

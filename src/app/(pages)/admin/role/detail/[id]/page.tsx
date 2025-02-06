@@ -5,7 +5,6 @@ import { FaArrowLeft, FaUser } from 'react-icons/fa';
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Card from '@/app/components/UI/Card';
 import Divider from '@/app/components/UI/Divider';
-
 import { useParams } from 'next/navigation';
 import { Role } from '@/app/model/Role';
 
@@ -14,7 +13,7 @@ const RoleDetailPage = () => {
   const { id } = useParams();  
   const [role, setRole] = useState<Role | null>(null); 
   const [loading, setLoading] = useState<boolean>(true);  
-  const [error, setError] = useState<string | null>(null);  
+  const [error, setError] = useState<string | null>(null); 
   
   useEffect(() => {
     if (id) {

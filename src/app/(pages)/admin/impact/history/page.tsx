@@ -40,14 +40,14 @@ const Impacts = () => {
   });
 
   useEffect(() => {
-    fetchImpacts();
+    fetchImpacts(pagination.page, pagination.limit);
   }, []);
 
-  const fetchImpacts = async () => {
+  const fetchImpacts = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all?page=${page}&limit=${limit}`, {
         method: "GET",
       });
       if (response.ok) {
@@ -120,7 +120,7 @@ const Impacts = () => {
       if (!response.ok) {
         throw new Error("Failed to delete the impact");
       }
-      fetchImpacts();
+      fetchImpacts(pagination.page, pagination.limit);
       setToast({
         message: "You have successfully deleted Education.",
         type: "success",
@@ -146,8 +146,30 @@ const Impacts = () => {
       ...prevState,
       page,
     }));
+    fetchImpacts(page, pagination.limit);
   };
 
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchImpacts(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchImpacts(prevPage, pagination.limit);
+    }
+  };
   const handleCancel = () => {
     setIsPopConfirmOpen(false);
     setImpactToDelete(null);
@@ -155,7 +177,7 @@ const Impacts = () => {
 
   const handleClearSearch = () => {
     searchImpacts("");
-    fetchImpacts();
+    fetchImpacts(pagination.page, pagination.limit);
   };
 
   return (
@@ -196,6 +218,8 @@ const Impacts = () => {
                 onPageChange={handlePageChange}
                 hasNextPage={pagination.hasNextPage}
                 hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
               />
             </div>
           </>

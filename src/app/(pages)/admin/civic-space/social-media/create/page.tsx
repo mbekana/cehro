@@ -181,7 +181,7 @@ const SocialMediaForm = () => {
     formPayload.append("source", formData.source);
     formPayload.append("cehro_insights", formData.cehro_insights);
     formPayload.append("status", "PENDING");
-    formPayload.append("approvedById", userData?.id);
+    formPayload.append("postedById", userData?.id);
   
     if (formData.file) {
       formPayload.append("file", formData.file);

@@ -37,7 +37,7 @@ const UserRoles = () => {
   });
 
   useEffect(() => {
-    fetchRoles();
+    fetchRoles(pagination.page, pagination.limit);
   }, []);
 
   const handlePageChange = (page: number) => {
@@ -45,6 +45,29 @@ const UserRoles = () => {
       ...prevState,
       page,
     }));
+    fetchRoles(pagination.page, pagination.limit); 
+  };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchRoles(pagination.page, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchRoles(pagination.page, pagination.limit);
+    }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -78,7 +101,7 @@ const UserRoles = () => {
       }
 
       console.log(`Role with id ${roleToDelete} deleted successfully`);
-      fetchRoles();
+      fetchRoles(pagination.page, pagination.limit);
       setToast({
         message: "You have successfully deleted Role.",
         type: "success",
@@ -95,12 +118,12 @@ const UserRoles = () => {
     }
   };
 
-  const fetchRoles = async () => {
+  const fetchRoles = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/roles/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/roles/all?page=${page}&limit=${limit}`, {
         method: "GET",
       });
       if (response.ok) {
@@ -154,7 +177,7 @@ const UserRoles = () => {
 
   const handleClearSearch = () => {
     searchRoles("");
-    fetchRoles();
+    fetchRoles(pagination.page, pagination.limit);
   };
 
   return (
@@ -190,11 +213,13 @@ const UserRoles = () => {
             <Table columns={columns} data={roles} onAction={handleAction} />
             <div className="flex justify-end mt-4">
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
-                hasNextPage={pagination.hasNextPage}
-                hasPrevPage={pagination.hasPrevPage}
+                 currentPage={pagination.page}
+                 totalPages={pagination.totalPages}
+                 onPageChange={handlePageChange}
+                 hasNextPage={pagination.hasNextPage}
+                 hasPrevPage={pagination.hasPrevPage}
+                 onNextPage={handleNextPage}
+                 onPrevPage={handlePrevPage}
               />
             </div>
           </>

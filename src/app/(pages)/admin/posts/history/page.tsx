@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { FaExclamationTriangle, FaPlus } from "react-icons/fa";
@@ -16,7 +16,7 @@ type Post = {
   id: number;
   title: string;
   body: string;
-  tag?:string;
+  tag?: string;
   images: any;
 };
 
@@ -29,35 +29,35 @@ const PostList = () => {
   const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error";
-      position: "top-right";
-    } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-    const [pagination, setPagination] = useState({
-      totalDocs: 0,
-      totalPages: 0,
-      page: 1,
-      limit: 10,
-      pageCounter: 0,
-      hasPrevPage: false,
-      hasNextPage: false,
-    });
-
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
-      fetchPosts();
+    fetchPosts(pagination.page, pagination.limit);
   }, []);
 
-
-  const fetchPosts = async () => {
+  const fetchPosts = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/posts/all`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/posts/all?page=${page}&limit=${limit}`,
+        {
+          method: "GET",
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         setPosts(data.data);
@@ -72,17 +72,18 @@ const PostList = () => {
     }
   };
 
-
-  const searchPosts = async (searchQuery:any) => {
+  const searchPosts = async (searchQuery: any) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/posts/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`);
+      const response = await fetch(
+        `${apiUrl}/api/v1/posts/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`
+      );
 
       if (response.ok) {
         const data = await response.json();
         setPosts(data.data);
-        setPagination(data.pagination)
+        setPagination(data.pagination);
         localStorage.setItem("posts", JSON.stringify(data));
       } else {
         console.error("Failed to fetch posts");
@@ -99,6 +100,28 @@ const PostList = () => {
       ...prevState,
       page,
     }));
+  };
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchPosts(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchPosts(prevPage, pagination.limit);
+    }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -130,15 +153,15 @@ const PostList = () => {
       if (!response.ok) {
         throw new Error("Failed to delete the education");
       }
-   
+
       console.log(`Post with id ${postToDelete} deleted successfully`);
-      fetchPosts();
+      fetchPosts(pagination.page, pagination.limit);
       setToast({
         message: "You have successfully deleted Education.",
         type: "success",
         position: "top-right",
       });
-      setIsPopConfirmOpen(false); 
+      setIsPopConfirmOpen(false);
     } catch (error) {
       console.error("Error deleting the education: ", error);
       setToast({
@@ -149,13 +172,13 @@ const PostList = () => {
     }
   };
 
-  const handleSearch = (query:string) => {
-    searchPosts(query);  
-    };
+  const handleSearch = (query: string) => {
+    searchPosts(query);
+  };
 
   const handleClearSearch = () => {
-    searchPosts("");  
-    fetchPosts();
+    searchPosts("");
+    fetchPosts(pagination.page, pagination.limit);
   };
 
   const handleCancel = () => {
@@ -165,13 +188,13 @@ const PostList = () => {
 
   return (
     <>
-    <BoxWrapper
-      icon={<FaExclamationTriangle />}
-      title="Posts"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
-    >
-      <div className="flex items-center justify-between mb-4">
+      <BoxWrapper
+        icon={<FaExclamationTriangle />}
+        title="Posts"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+      >
+        <div className="flex items-center justify-between mb-4">
           <Search
             onSearch={handleSearch}
             onClear={handleClearSearch}
@@ -182,41 +205,41 @@ const PostList = () => {
             <Button
               color="primary"
               text="Create Post"
-              onClick={() => { console.log(""); }}
+              onClick={() => {
+                console.log("");
+              }}
               icon={<FaPlus />}
               size="large"
               borderRadius={5}
             />
           </Link>
-      </div>
+        </div>
 
-      {loading ? (
-        <div className="ml-2 text-red-500">Loading...</div>
-      ) : (
-        <>
-          <Table
-            columns={columns}
-            data={posts}
-            onAction={handleAction}
-          />
-          <div className="flex justify-end mt-4">
-            <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
-            />
-          </div>
-        </>
-      )}
-       <PopConfirm
-        isOpen={isPopConfirmOpen}
-        onConfirm={handleDelete}
-        onCancel={handleCancel}
-        message="Are you sure you want to delete this category?"
-        title="Delete Category"
-      />
+        {loading ? (
+          <div className="ml-2 text-red-500">Loading...</div>
+        ) : (
+          <>
+            <Table columns={columns} data={posts} onAction={handleAction} />
+            <div className="flex justify-end mt-4">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                hasNextPage={pagination.hasNextPage}
+                hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
+              />
+            </div>
+          </>
+        )}
+        <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this category?"
+          title="Delete Category"
+        />
       </BoxWrapper>
       {toast && (
         <Toast
@@ -226,9 +249,8 @@ const PostList = () => {
           onClose={() => setToast(null)}
         />
       )}
-  
     </>
-     ) 
+  );
 };
 
 export default PostList;

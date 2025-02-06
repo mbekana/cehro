@@ -1,30 +1,36 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
-
-type ThematicCategoryFormData = {
-  name: string;
-  remark: string;
-};
+import { ThematicCategory } from "@/app/model/ThematicCategory";
+import Cookies from "js-cookie";
 
 const UpdateThematicCategory = () => {
   const { id } = useParams();
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<ThematicCategoryFormData>({
-    name: "",
+  const [formData, setFormData] = useState<ThematicCategory>({
+    category: "",
     remark: "",
   });
   const [loading, setLoading] = useState<boolean>(true);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -32,16 +38,17 @@ const UpdateThematicCategory = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/thematicCategories/${id}`);
+          const response = await fetch(
+            `${apiUrl}/api/v1/thematic-categories/${id}`
+          );
           if (!response.ok) {
             throw new Error("Failed to fetch thematic category");
           }
           const data = await response.json();
           setFormData({
-            name: data.name,
-            remark: data.remark,
+            category: data.data.category,
+            remark: data.data.remark,
           });
-          
         } catch (error) {
           setError(`${error}`);
         } finally {
@@ -68,15 +75,19 @@ const UpdateThematicCategory = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/thematicCategories/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const payload = { ...formData, updatedById: userData?.id };
+      const response = await fetch(
+        `${apiUrl}/api/v1/thematic-categories/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
       setFormData({
-        name: "",
+        category: "",
         remark: "",
       });
 
@@ -99,12 +110,13 @@ const UpdateThematicCategory = () => {
   }
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Thematic Category Maintenance"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Update Thematic Category"
@@ -126,9 +138,9 @@ const UpdateThematicCategory = () => {
                   type="text"
                   label="Thematic Category Name"
                   placeholder="Enter Thematic Category Name"
-                  value={formData.name}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="name"
+                  name="category"
                   className="w-full"
                 />
               </div>
@@ -151,20 +163,10 @@ const UpdateThematicCategory = () => {
       </BoxWrapper>
 
       {success && (
-        <Toast
-          type="success"
-          message={success}
-          position={"top-right"}
-        />
+        <Toast type="success" message={success} position={"top-right"} />
       )}
 
-      {error && (
-        <Toast
-          type="error"
-          message={error}
-          position={"top-right"}
-        />
-      )}
+      {error && <Toast type="error" message={error} position={"top-right"} />}
 
       <div className="flex justify-end mt-4 mr-24">
         <Button

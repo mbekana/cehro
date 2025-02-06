@@ -80,6 +80,7 @@ const UpdateSourceOfInformationForm = () => {
     try {
       const payload = {
         ...formData,
+        updatedById:userData?.id
       };
       const response = await fetch(`${apiUrl}/api/v1/sources/${id}`, {
         method: "PATCH",

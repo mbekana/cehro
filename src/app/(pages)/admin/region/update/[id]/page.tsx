@@ -10,9 +10,11 @@ import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import { Region } from "@/app/model/RegionModel";
 import Toast from "@/app/components/UI/Toast"; // Import Toast component
+import Cookies from "js-cookie";
 
 const UpdateRegionForm = () => {
   const { id } = useParams();
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Region>({
     name: "",
     lattitude: "",
@@ -26,6 +28,16 @@ const UpdateRegionForm = () => {
     type: "success" | "error";
     position: "top-right";
   } | null>(null); // State to manage Toast
+
+
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+      }, []);
+  
 
   useEffect(() => {
     if (id) {
@@ -71,13 +83,13 @@ const UpdateRegionForm = () => {
     e.preventDefault();
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
+      const payload = {...formData, updatedById:userData?.id};
       const response = await fetch(`${apiUrl}/api/v1/regions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {

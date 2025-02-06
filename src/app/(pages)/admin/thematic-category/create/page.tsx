@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -9,17 +9,18 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
 import { ThematicCategory } from "@/app/model/ThematicCategory";
-
+import Cookies from "js-cookie";
 
 const ThematicCategoryForm = () => {
   const [formData, setFormData] = useState<ThematicCategory>({
-    name: "",
+    category: "",
     remark: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,19 +32,27 @@ const ThematicCategoryForm = () => {
     }));
   };
 
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/api/v1/thematic-categories`, {
+      const payload = { ...formData, createdById: userData?.id };
+      const response = await fetch(`${apiUrl}/api/v1/thematic-categories/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -54,7 +63,7 @@ const ThematicCategoryForm = () => {
       setSuccess(`Thematic Category created successfully: ${result.name}`);
       setError(null);
       setFormData({
-        name: "",
+        category: "",
         remark: "",
       });
     } catch (error: any) {
@@ -94,9 +103,9 @@ const ThematicCategoryForm = () => {
                   type="text"
                   label="Thematic Category Name"
                   placeholder="Enter Thematic Category Name"
-                  value={formData.name}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="name"
+                  name="category"
                   className="w-full"
                 />
               </div>
@@ -119,20 +128,10 @@ const ThematicCategoryForm = () => {
       </BoxWrapper>
 
       {success && (
-        <Toast
-          type="success"
-          message={success}
-          position={"top-right"}
-        />
+        <Toast type="success" message={success} position={"top-right"} />
       )}
 
-      {error && (
-        <Toast
-          type="error"
-          message={error}
-          position={"top-right"}
-        />
-      )}
+      {error && <Toast type="error" message={error} position={"top-right"} />}
 
       <div className="flex justify-end mt-4 mr-24">
         <Button

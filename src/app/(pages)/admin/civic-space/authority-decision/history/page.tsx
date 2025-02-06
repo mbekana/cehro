@@ -44,15 +44,15 @@ const AuthorityDecisionList = () => {
     hasNextPage: false,
   });
   useEffect(() => {
-    fetchAuthorityDecision();
+    fetchAuthorityDecision(1, 10);
   }, []);
 
-  const fetchAuthorityDecision = async () => {
+  const fetchAuthorityDecision = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/authorative-decisions/all`);
+      const response = await fetch(`${apiUrl}/api/v1/authorative-decisions/all?page=${page}&limit=${limit}`);
       if (response.ok) {
         const data = await response.json();
         console.log("Data: ", data.data)
@@ -92,7 +92,31 @@ const AuthorityDecisionList = () => {
       ...prevState,
       page,
     }));
+    fetchAuthorityDecision(page, pagination.limit); 
   };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchAuthorityDecision(nextPage, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchAuthorityDecision(prevPage, pagination.limit);
+    }
+  };
+
 
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
@@ -115,7 +139,7 @@ const AuthorityDecisionList = () => {
       }
 
       console.log(`Authority Decision with id ${decisionToDelete} deleted successfully`);
-      fetchAuthorityDecision();
+      fetchAuthorityDecision(1, 10);
       setToast({
         message: "You have successfully deleted Authority Decision.",
         type: "success",
@@ -152,7 +176,7 @@ const AuthorityDecisionList = () => {
 
   const handleClearSearch = () => {
     searchAuthorityDecision("");
-    fetchAuthorityDecision();
+    fetchAuthorityDecision(1, 10);
   };
 
   const handleCancel = () => {
@@ -168,7 +192,7 @@ const AuthorityDecisionList = () => {
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+      <div className="flex flex-1 items-center justify-between mb-2 w-full">
         <Search
           onSearch={handleSearch}
           onClear={handleClearSearch}
@@ -198,11 +222,13 @@ const AuthorityDecisionList = () => {
           <Table columns={columns} data={authorityDecision} onAction={handleAction} />
           <div className="flex justify-end mt-4">
           <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                hasNextPage={pagination.hasNextPage}
-                hasPrevPage={pagination.hasPrevPage}
-                onPageChange={handlePageChange}
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
+            onNextPage={handleNextPage}
+            onPrevPage={handlePrevPage}
               />
           </div>
         </>

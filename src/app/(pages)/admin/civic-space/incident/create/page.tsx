@@ -191,7 +191,7 @@ const IncidentForm = () => {
       const payload = {
         ...formData,
         status: "PENDING",
-        postedBy: userData?.id
+        postedById: userData?.id
       };
       const response = await fetch(`${apiUrl}/api/v1/incidents/register`, {
         method: "POST",

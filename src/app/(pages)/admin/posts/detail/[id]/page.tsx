@@ -9,17 +9,29 @@ import { Post } from "@/app/model/Post";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaCheck } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 const PostDetail = () => {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
+
+    useEffect(() => {
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+  
 
   const handleApprovePost = async () => {
     if (!post) return;
@@ -27,7 +39,7 @@ const PostDetail = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     try {
       setLoading(true);
-      const payload = { ...post, status: "APPROVED" };
+      const payload = { ...post, status: "APPROVED", approvedById:userData?.id};
       const response = await fetch(`${apiUrl}/api/v1/posts/${id}`, {
         method: "PATCH",
         headers: {

@@ -10,6 +10,7 @@ import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import { Metrics } from "@/app/model/Metrics";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 
 const UpdateMetricsForm = () => {
@@ -19,6 +20,7 @@ const UpdateMetricsForm = () => {
     metrics: "",
     remark: "",
   });
+  const [userData, setUserData] = useState<any>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<{
@@ -27,7 +29,14 @@ const UpdateMetricsForm = () => {
     position: "top-right";
   } | null>(null); 
 
-
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+      }, []);
+    
   useEffect(() => {
     if (id) {
       const fetchMetricData = async () => {
@@ -67,7 +76,7 @@ const UpdateMetricsForm = () => {
   
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const payload = { ...formData};
+      const payload = { ...formData, updatedById:userData?.id};
       const response = await fetch(`${apiUrl}/api/v1/metrics/${id}`, {
         method: 'PATCH',
         headers: {

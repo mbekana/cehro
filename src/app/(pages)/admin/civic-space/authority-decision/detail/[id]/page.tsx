@@ -13,7 +13,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Toast from "@/app/components/UI/Toast";
 import { AuthorityDecision } from "@/app/model/AuthorityDecision";
-
+import Cookies from "js-cookie";
 
 
 const AuthorityDecisionDetail = () => {
@@ -23,11 +23,21 @@ const AuthorityDecisionDetail = () => {
     useState<AuthorityDecision | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [userData, setUserData] = useState<any>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+
   useEffect(() => {
     const fetchAuthorityDecisionData = async () => {
       setLoading(true);
@@ -38,8 +48,8 @@ const AuthorityDecisionDetail = () => {
           { method: "GET" }
         );
         if (response.ok) {
-          const data: AuthorityDecision = await response.json();
-          setAuthorityDecision(data);
+          const data = await response.json();
+          setAuthorityDecision(data.data);
         } else {
           console.error("Failed to fetch authority decision data");
         }
@@ -56,9 +66,9 @@ const AuthorityDecisionDetail = () => {
   useEffect(() => {
     if (authorityDecision?.video) {
       const mediaFile = authorityDecision.video;
-            if (mediaFile instanceof File) {
-        const fileName = mediaFile.name;  
-  
+      if (mediaFile instanceof File) {
+        const fileName = mediaFile.name;
+
         if (
           fileName.endsWith(".jpg") ||
           fileName.endsWith(".png") ||
@@ -66,7 +76,7 @@ const AuthorityDecisionDetail = () => {
         ) {
           setMediaType("image");
         } else if (
-          fileName.endsWith(".mp4") || 
+          fileName.endsWith(".mp4") ||
           fileName.endsWith(".mov") ||
           fileName.endsWith(".avi")
         ) {
@@ -81,7 +91,6 @@ const AuthorityDecisionDetail = () => {
       }
     }
   }, [authorityDecision]);
-  
 
   const handleApprove = async () => {
     setLoading(true);
@@ -89,7 +98,7 @@ const AuthorityDecisionDetail = () => {
     try {
       const updatedIncident = {
         ...authorityDecision,
-        status: "APPROVED",
+        approvedById:userData?.id
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(
@@ -222,19 +231,17 @@ const AuthorityDecisionDetail = () => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">
-              Title:
-            </h4>
-            <p className="text-sm sm:text-base">
-              {authorityDecision.title}
-            </p>
+            <h4 className="font-semibold text-sm sm:text-base">Title:</h4>
+            <p className="text-sm sm:text-base">{authorityDecision.title}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">City:</h4>
-            <p className="text-sm sm:text-base">{authorityDecision.zone_subcity}</p>
+            <p className="text-sm sm:text-base">
+              {authorityDecision.zone_subcity}
+            </p>
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -269,7 +276,9 @@ const AuthorityDecisionDetail = () => {
           <h4 className="font-semibold text-sm sm:text-base">
             CEHRO&apos;s Insight:
           </h4>
-          <p className="text-sm sm:text-base">{authorityDecision.cehro_insights}</p>
+          <p className="text-sm sm:text-base">
+            {authorityDecision.cehro_insights}
+          </p>
         </div>
 
         <div className="space-y-2">

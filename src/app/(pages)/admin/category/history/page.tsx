@@ -37,14 +37,14 @@ const Categories = () => {
   });
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(1, 10);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/categories/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/categories/all?page=${page}&limit=${limit}`, {
         method: "GET",
       });
       if (response.ok) {
@@ -86,6 +86,29 @@ const Categories = () => {
       ...prevState,
       page,
     }));
+    fetchCategories(page, pagination.limit); 
+  };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchCategories(nextPage, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchCategories(prevPage, pagination.limit);
+    }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -122,7 +145,7 @@ const Categories = () => {
       }
 
       console.log(`Category with id ${categoryToDelete} deleted successfully`);
-      fetchCategories();
+      fetchCategories(1, 10);
       setToast({
         message: "You have successfully deleted category.",
         type: "success",
@@ -150,7 +173,7 @@ const Categories = () => {
 
   const handleClearSearch = () => {
     searchCategories("");
-    fetchCategories();
+    fetchCategories(1, 10);
   };
 
   return (
@@ -194,6 +217,8 @@ const Categories = () => {
               onPageChange={handlePageChange}
               hasNextPage={pagination.hasNextPage}
               hasPrevPage={pagination.hasPrevPage}
+              onNextPage={handleNextPage}
+              onPrevPage={handlePrevPage}
             />
           </div>
         </>

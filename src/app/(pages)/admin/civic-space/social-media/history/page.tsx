@@ -48,15 +48,15 @@ const SocialMediaList = () => {
   });
 
   useEffect(() => {
-    fetchIncidents();
+    fetchIncidents(1, 10);
   }, []);
 
-  const fetchIncidents = async () => {
+  const fetchIncidents = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(
-        `${apiUrl}/api/v1/social-medias/all?page=${pagination.page}&limit=${pagination.limit}`,
+        `${apiUrl}/api/v1/social-medias/all?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -112,6 +112,28 @@ const SocialMediaList = () => {
     }));
   };
 
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchIncidents(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchIncidents(prevPage, pagination.limit);
+    }
+  };
+
   const handleSearch = (query: string) => {
     searchIncidents(query);
   };
@@ -135,7 +157,7 @@ const SocialMediaList = () => {
       console.log(
         `Social Media with id ${socialMediaToDelete} deleted successfully`
       );
-      fetchIncidents();
+      fetchIncidents(1, 10);
       setToast({
         message: "You have successfully deleted Social Media.",
         type: "success",
@@ -176,7 +198,7 @@ const SocialMediaList = () => {
 
   const handleClearSearch = () => {
     searchIncidents("");
-    fetchIncidents();
+    fetchIncidents(1, 10);
   };
 
   return (
@@ -228,6 +250,8 @@ const SocialMediaList = () => {
                 onPageChange={handlePageChange}
                 hasNextPage={pagination.hasNextPage}
                 hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
               />
             </div>
           </>

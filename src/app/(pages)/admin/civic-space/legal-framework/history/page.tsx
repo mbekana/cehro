@@ -45,15 +45,15 @@ const LegalFrameworksList = () => {
     } | null>(null);
 
   useEffect(() => {
-    fetchLegalFrameworks()
+    fetchLegalFrameworks(1, 10)
   }, []);
 
 
-  const fetchLegalFrameworks = async () => {
+  const fetchLegalFrameworks = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/all`);
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/all?page=${page}&limit=${limit}`);
       if (response.ok) {
         const data = await response.json();
         setLegalFrameworks(data.data);
@@ -90,11 +90,35 @@ const LegalFrameworksList = () => {
 
 
   const handlePageChange = (page: number) => {
-    setPagination(prevState => ({
+    setPagination((prevState) => ({
       ...prevState,
       page,
     }));
+    fetchLegalFrameworks(page, pagination.limit); 
   };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchLegalFrameworks(nextPage, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchLegalFrameworks(prevPage, pagination.limit);
+    }
+  };
+
 
 
   const handleSearch = (query: string) => {
@@ -118,7 +142,7 @@ const LegalFrameworksList = () => {
       }
 
       console.log(`Legal Framework with id ${frameworkToDelete} deleted successfully`);
-      fetchLegalFrameworks();
+      fetchLegalFrameworks(1, 10);
       setToast({
         message: "You have successfully deleted Legal Framework.",
         type: "success",
@@ -156,7 +180,7 @@ const LegalFrameworksList = () => {
 
   const handleClearSearch = () => {
     searchLegalFrameworks("");
-    fetchLegalFrameworks();
+    fetchLegalFrameworks(1, 10);
   };
 
   const handleCancel = () => {
@@ -202,11 +226,13 @@ const LegalFrameworksList = () => {
           <Table columns={columns} data={legalFrameworks} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                hasNextPage={pagination.hasNextPage}
+                hasPrevPage={pagination.hasPrevPage}
+                onNextPage={handleNextPage}
+                onPrevPage={handlePrevPage}
             />
           </div>
         </>

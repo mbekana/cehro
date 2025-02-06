@@ -25,9 +25,9 @@ const LegalFrameworkForm = () => {
   const [filePreview, setFilePreview] = useState<any>(null);
   const [mediaType, setMediaType] = useState<any>(null);
   const [fileType, setFileType] = useState<any>(null);
-  const [mediaPreview, setMediaPreview] = useState<any>(null)
-    const [userData, setUserData] = useState<any>(null);
-  
+  const [mediaPreview, setMediaPreview] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -40,19 +40,18 @@ const LegalFrameworkForm = () => {
     file: null,
     video: null,
     date: "",
-    category:"",
+    category: "",
     impact: "",
     source: "",
     region: "",
-    woreda_kebele:"",
-    zone_subcity:"",
+    woreda_kebele: "",
+    zone_subcity: "",
     metrics: "",
     cehro_insights: "",
-    status:"",
-    postedBy: ""
-    
+    status: "",
+    postedBy: "",
   });
-  
+
   useEffect(() => {
     console.log("HI: ", Cookies.get("userData"));
     const user = Cookies.get("userData")
@@ -85,7 +84,9 @@ const LegalFrameworkForm = () => {
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
         setMetrics(data.data);
@@ -100,7 +101,9 @@ const LegalFrameworkForm = () => {
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/regions/all`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
         setRegions(data.data);
@@ -115,7 +118,9 @@ const LegalFrameworkForm = () => {
   const fetchSources = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/sources/all`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
         setSources(data.data);
@@ -130,7 +135,9 @@ const LegalFrameworkForm = () => {
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
         setImpacts(data.data);
@@ -251,15 +258,14 @@ const LegalFrameworkForm = () => {
         return;
       }
 
-    
       const filePreview = generateFilePreview(selectedFile);
 
       setFormData((prevData) => {
         const updatedData: any = { ...prevData };
-        if(field === "file"){
+        if (field === "file") {
           updatedData[field] = selectedFile;
-        }else{
-          updatedData['video'] = selectedFile;
+        } else {
+          updatedData["video"] = selectedFile;
         }
 
         if (field === "media") {
@@ -269,7 +275,7 @@ const LegalFrameworkForm = () => {
             : selectedFile.type.includes("video")
             ? "video"
             : "";
-          setMediaType(mediaType)
+          setMediaType(mediaType);
         } else if (field === "file") {
           setFilePreview(filePreview);
           setFileType("pdf");
@@ -282,7 +288,7 @@ const LegalFrameworkForm = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-  
+
     const formDataObj = new FormData();
     formDataObj.append("title", formData.title);
     formDataObj.append("scope", formData.scope);
@@ -297,20 +303,23 @@ const LegalFrameworkForm = () => {
     formDataObj.append("metrics", formData.metrics);
     formDataObj.append("cehro_insights", formData.cehro_insights);
     formDataObj.append("status", "PENDING");
-    formDataObj.append("postedBy", userData?.id);
-  
+    formDataObj.append("postedById", userData?.id);
+
     if (formData.file) formDataObj.append("file", formData.file);
     if (formData.video) formDataObj.append("video", formData.video);
-  
+
     setLoading(true);
-  
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/register`, {
-        method: "POST",
-        body: formDataObj,
-      });
-  
+      const response = await fetch(
+        `${apiUrl}/api/v1/legal-frameworks/register`,
+        {
+          method: "POST",
+          body: formDataObj,
+        }
+      );
+
       if (response.ok) {
         const result = await response.json();
         setToast({
@@ -350,12 +359,12 @@ const LegalFrameworkForm = () => {
         message: `${error.message}`,
         type: "error",
         position: "top-right",
-      });    
+      });
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="pb-5">
       <BoxWrapper
@@ -464,15 +473,18 @@ const LegalFrameworkForm = () => {
                   name="woreda_kebele"
                 />
               </div>
-       
+
               <div>
-                <label htmlFor="media">Upload Image/Video</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Media
+                </label>
                 <input
                   type="file"
                   id="media"
                   name="video"
                   accept="image/*,video/*"
                   onChange={(e) => handleFileChange(e, "media")}
+                  className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                 />
                 {mediaPreview && mediaType === "image" && (
                   <img
@@ -497,6 +509,7 @@ const LegalFrameworkForm = () => {
                   name="file"
                   accept=".pdf"
                   onChange={(e) => handleFileChange(e, "file")}
+                  className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                 />
                 {filePreview && fileType === "pdf" && (
                   <embed src={filePreview} width="200" height="200" />

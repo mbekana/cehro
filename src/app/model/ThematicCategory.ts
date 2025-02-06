@@ -1,5 +1,5 @@
 export class ThematicCategory {
   id?: any;
-  name: string;
+  category: string;
   remark: string;
 }

@@ -36,14 +36,14 @@ const Metricses = () => {
   });
 
   useEffect(() => {
-    fetchMetrics();
+    fetchMetrics(pagination.page, pagination.limit);
   }, []);
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/metrics/all`);
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all?page=${page}&limit=${limit}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -65,6 +65,29 @@ const Metricses = () => {
       page,
     }));
   };
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchMetrics(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchMetrics(prevPage, pagination.limit);
+    }
+  };
+
 
   const searchMetrics = async (searchQuery: any) => {
     setLoading(true);
@@ -118,7 +141,7 @@ const Metricses = () => {
       );
 
       if (response.ok) {
-        fetchMetrics();
+        fetchMetrics(pagination.page, pagination.limit);
         setToast({
           message: "You have successfully deleted Metrics.",
           type: "success",
@@ -149,7 +172,7 @@ const Metricses = () => {
 
   const handleClearSearch = () => {
     searchMetrics("");
-    fetchMetrics();
+    fetchMetrics(pagination.page, pagination.limit);
   };
 
   return (
@@ -187,11 +210,13 @@ const Metricses = () => {
           <Table columns={columns} data={metrics} onAction={handleAction} />
           <div className="flex justify-end mt-4">
             <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
+             currentPage={pagination.page}
+             totalPages={pagination.totalPages}
+             onPageChange={handlePageChange}
+             hasNextPage={pagination.hasNextPage}
+             hasPrevPage={pagination.hasPrevPage}
+             onNextPage={handleNextPage}
+             onPrevPage={handlePrevPage}
             />
           </div>
         </>

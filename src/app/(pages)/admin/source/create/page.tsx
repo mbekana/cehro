@@ -50,7 +50,7 @@ const SourceofInformationForm = () => {
     try {
       const payload = {
         ...formData,
-        createdBy: userData?.id,
+        createdById: userData?.id,
       };
       console.log("payload ", payload)
       const response = await fetch(`${apiUrl}/api/v1/sources/register`, {

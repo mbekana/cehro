@@ -90,7 +90,7 @@ const UpdatePostForm = () => {
       formData.append("title", title);
       formData.append("body", body);
       formData.append("tag", tag);
-      formData.append("postedBy", userData?.id);
+      formData.append("updatedById", userData?.id);
       if (image) {
         formData.append("image", image); 
       }

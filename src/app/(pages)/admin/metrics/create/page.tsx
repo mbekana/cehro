@@ -51,7 +51,7 @@ const MetricsForm = () => {
   
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const payload = { ...formData, createdBy: userData?.id};
+      const payload = { ...formData, createdById: userData?.id};
   
       const response = await fetch(`${apiUrl}/api/v1/metrics/register`, {
         method: 'POST',

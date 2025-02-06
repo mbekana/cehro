@@ -39,6 +39,7 @@ const UserDetailPage = () => {
           if (response.ok) {
             const data = await response.json();
             setUser(data.data);
+            console.log("DATA: ", data.data)
             setDisableStatus(data.data.disabled);
           } else {
             setError("User not found");
@@ -145,7 +146,6 @@ const UserDetailPage = () => {
                   <p className="text-gray-600">{user.userName}</p>
                 </div>
                 <div className="text-center">
-                  
                   <img
                     src={user?.avatar || defaultPhoto}
                     alt={`${user.firstName} ${user.lastName}`}
@@ -180,8 +180,8 @@ const UserDetailPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-700">

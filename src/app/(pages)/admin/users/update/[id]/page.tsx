@@ -11,7 +11,7 @@ import Toast from "@/app/components/UI/Toast";
 import { useParams } from "next/navigation";
 import Cookies from "js-cookie";
 
-const defaultPhoto = "/user.png"; 
+const defaultPhoto = "/user.png";
 
 const UpdatePage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ const UpdatePage: React.FC = () => {
   const [roles, setRoles] = useState<any[]>([]);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
@@ -39,15 +39,13 @@ const UpdatePage: React.FC = () => {
     fetchUserProfile();
   }, []);
 
-
-useEffect(() => {
-        console.log("HI: ", Cookies.get("userData"));
-        const user = Cookies.get("userData")
-          ? JSON.parse(Cookies.get("userData")!)
-          : null;
-        setUserData(user);
-      }, []);
-    
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   const fetchRoles = async () => {
     try {
@@ -74,9 +72,9 @@ useEffect(() => {
           email: data.data.email || "",
           phone: data.data.phone || "",
           role: data.data.role || "",
-          avatar: null, 
+          avatar: null,
         });
-        setAvatarPreview(data.data.avatar || defaultPhoto); 
+        setAvatarPreview(data.data.avatar || defaultPhoto);
       }
     } catch (err) {
       setError("Failed to fetch user data");
@@ -107,7 +105,8 @@ useEffect(() => {
   };
 
   const handleUpdate = async () => {
-    const { firstName, lastName, email, phone, role, avatar, userName } = formData;
+    const { firstName, lastName, email, phone, role, avatar, userName } =
+      formData;
 
     setError(null);
     setSuccess(null);
@@ -130,12 +129,15 @@ useEffect(() => {
     const formDataToSend = new FormData();
     Object.keys(updatedData).forEach((key) => {
       if (key !== "avatar") {
-        formDataToSend.append(key, updatedData[key as keyof typeof updatedData]);
+        formDataToSend.append(
+          key,
+          updatedData[key as keyof typeof updatedData]
+        );
       }
     });
 
     if (avatar) formDataToSend.append("avatar", avatar);
-    formDataToSend.append("approvedby", userData.id)
+    formDataToSend.append("updatedById", userData.id);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${apiUrl}/api/v1/users/${id}`, {
@@ -147,7 +149,7 @@ useEffect(() => {
 
       if (response.ok) {
         setSuccess("User updated successfully!");
-        setAvatarPreview(data.data.avatar || null); 
+        setAvatarPreview(data.data.avatar || null);
       } else {
         setError(data.message || "Update error.");
       }
@@ -182,11 +184,24 @@ useEffect(() => {
 
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {["firstName", "middleName", "lastName", "userName", "email", "phone"].map((field, index) => (
+              {[
+                "firstName",
+                "middleName",
+                "lastName",
+                "userName",
+                "email",
+                "phone",
+              ].map((field, index) => (
                 <Input
                   key={index}
-                  type={field === "email" ? "email" : field === "phone" ? "text" : "text"}
-                  placeholder={field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+                  type={
+                    field === "email"
+                      ? "email"
+                      : field === "phone"
+                      ? "text"
+                      : "text"
+                  }
+                  placeholder={field.replace(/([A-Z])/g, " $1").toUpperCase()}
                   value={formData[field]}
                   name={field}
                   onChange={handleInputChange}
@@ -203,25 +218,31 @@ useEffect(() => {
               >
                 <option value="">Select Role</option>
                 {roles.map((role, index) => (
-                  <option key={index} value={role.role}>{role.role}</option>
+                  <option key={index} value={role.role}>
+                    {role.role}
+                  </option>
                 ))}
               </Input>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Profile Picture
+                </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarChange}
-                  className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md"
+                  className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                 />
                 {avatarPreview && (
-                  <div className="mt-2">
-                    <img
-                      src={avatarPreview}
-                      alt="Avatar Preview"
-                      className="w-24 h-24 object-cover rounded-full"
-                    />
+                  <div className="mt-3">
+                    <div className="flex">
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar Preview"
+                        className="w-24 h-24 object-cover rounded-full shadow-md border-2 border-gray-200"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

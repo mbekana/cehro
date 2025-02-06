@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
 import { LegalFramework } from "@/app/model/LegalFramework";
+import Cookies from "js-cookie";
 
 const LegalFrameworkForm = () => {
   const { id } = useParams();
@@ -18,6 +19,7 @@ const LegalFrameworkForm = () => {
   const [regions, setRegions] = useState<any[]>([]);
   const [sources, setSources] = useState<any[]>([]);
   const [impacts, setImpacts] = useState<Impact[]>([]);
+  const [userData, setUserData] = useState<any>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [origins, setOrigins] = useState<any[]>([]);
@@ -50,6 +52,16 @@ const LegalFrameworkForm = () => {
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+  
+
   useEffect(() => {
     fetchMetrics();
     fetchRegions();
@@ -95,6 +107,16 @@ const LegalFrameworkForm = () => {
             // summary: data.summary,
             // scope:data.scope
           });
+          if (data.data.file) {
+            setFilePreview(generateFilePreview(data.data.file)); 
+            setFileType("pdf");
+          }
+          
+          if (data.data.video) {
+            setMediaPreview(generateFilePreview(data.data.video));
+            setMediaType(data.data.video.split('.').pop()?.toLowerCase() === 'mp4' ? 'video' : 'image');
+          }
+  
         } catch (error) {
           console.error("Error fetching data:", error);
         }
@@ -305,7 +327,7 @@ const LegalFrameworkForm = () => {
     formDataObj.append("metrics", formData.metrics);
     formDataObj.append("cehro_insights", formData.cehro_insights);
     formDataObj.append("status", formData.status);
-    formDataObj.append("postedBy", formData.postedBy);
+    formDataObj.append("approvedById", userData.id);
 
     // Append files (if present)
     if (formData.file) {
@@ -370,6 +392,8 @@ const LegalFrameworkForm = () => {
 
   return (
     <div className="pb-5">
+                        <span>{}</span>
+
       <BoxWrapper
         icon={<FaArrowLeft />}
         title="Legal Framework Maintenance"
@@ -488,20 +512,15 @@ const LegalFrameworkForm = () => {
                   File Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="file"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select File
-                  </label>
                   <input
                     id="file"
                     type="file"
                     accept=".pdf"
                     onChange={(e) => handleFileChange(e, "file")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+
                   />
-                  {filePreview && fileType === "pdf" && (
+                  {filePreview  && (
                     <embed src={filePreview} width="200" height="200" />
                   )}
                 </div>
@@ -512,32 +531,28 @@ const LegalFrameworkForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="media"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select Media
-                  </label>
+             
                   <input
                     id="media"
                     type="file"
                     accept="image/*,video/*"
                     onChange={(e) => handleFileChange(e, "media")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+
                   />
-                     {mediaPreview && mediaType === "image" && (
-                  <img
-                    src={mediaPreview}
-                    alt="Preview"
-                    style={{ width: "100px", height: "auto" }}
-                  />
-                )}
-                {mediaPreview && mediaType === "video" && (
-                  <video width="200" controls>
-                    <source src={mediaPreview} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
+           {mediaPreview && mediaType === "image" && (
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      style={{ width: "100px", height: "auto" }}
+                    />
+                  )}
+                  {mediaPreview && mediaType === "video" && (
+                    <video width="200" controls>
+                      <source src={mediaPreview} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
                 </div>
               </div>
               <div>

@@ -8,6 +8,7 @@ import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const SignupPage: React.FC = () => {
     confirmPassword: "",
     phone: "",
     role: "",
-    avatar: null, 
+    avatar: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,14 @@ const SignupPage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null); // For previewing the avatar image
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUser(user);
+  }, []);
 
   useEffect(() => {
     fetchRoles();
@@ -69,48 +78,68 @@ const SignupPage: React.FC = () => {
   };
 
   const handleSignup = async () => {
-    const { firstName, lastName, userName, email, password, confirmPassword, phone, role, avatar } = formData;
-  
+    const {
+      firstName,
+      lastName,
+      userName,
+      email,
+      password,
+      confirmPassword,
+      phone,
+      role,
+      avatar,
+    } = formData;
+
     setError(null);
     setSuccess(null);
-  
-    if (!firstName || !lastName || !userName || !email || !password || !confirmPassword || !phone) {
+
+    if (
+      !firstName ||
+      !lastName ||
+      !userName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !phone
+    ) {
       setError("All fields are required.");
       return;
     }
-  
+
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
       setError("Invalid email address.");
       return;
     }
-  
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-  
+
     setLoading(true);
-  
+
     const userData = { ...formData, role: role || null };
-  
+
     const formDataToSend = new FormData();
     Object.keys(userData).forEach((key) => {
       if (key !== "confirmPassword") {
         formDataToSend.append(key, userData[key as keyof typeof userData]);
       }
     });
-    
+
+    formDataToSend.append("createdById", user?.id);
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            
+
       const response = await fetch(`${apiUrl}/api/v1/users/register`, {
         method: "POST",
-        body: formDataToSend, 
+        body: formDataToSend,
       });
 
       const data = await response.json();
-  
+
       if (response.ok) {
         setSuccess("User created successfully!");
         setFormData({
@@ -125,7 +154,7 @@ const SignupPage: React.FC = () => {
           role: "",
           avatar: null,
         });
-        setAvatarPreview(null); 
+        setAvatarPreview(null);
       } else {
         setError(data.message || "Signup error.");
       }
@@ -135,7 +164,6 @@ const SignupPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   return (
     <div>
@@ -161,11 +189,24 @@ const SignupPage: React.FC = () => {
 
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {["firstName", "middleName", "lastName", "userName", "email", "phone"].map((field, index) => (
+              {[
+                "firstName",
+                "middleName",
+                "lastName",
+                "userName",
+                "email",
+                "phone",
+              ].map((field, index) => (
                 <Input
                   key={index}
-                  type={field === "email" ? "email" : field === "phone" ? "text" : "text"}
-                  placeholder={field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+                  type={
+                    field === "email"
+                      ? "email"
+                      : field === "phone"
+                      ? "text"
+                      : "text"
+                  }
+                  placeholder={field.replace(/([A-Z])/g, " $1").toUpperCase()}
                   value={formData[field]}
                   name={field}
                   onChange={handleInputChange}
@@ -182,7 +223,9 @@ const SignupPage: React.FC = () => {
               >
                 <option value="">Select Role</option>
                 {roles.map((role, index) => (
-                  <option key={index} value={role.role}>{role.role}</option>
+                  <option key={index} value={role.role}>
+                    {role.role}
+                  </option>
                 ))}
               </Input>
 
@@ -202,7 +245,9 @@ const SignupPage: React.FC = () => {
               />
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Profile Picture
+                </label>
                 <input
                   type="file"
                   accept="image/*"

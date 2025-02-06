@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaExclamationTriangle, FaPlus, FaUserTie } from "react-icons/fa";
+import {  FaPlus, FaUserTie } from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
@@ -42,14 +42,14 @@ const Ocupation = () => {
   });
 
   useEffect(() => {
-    fetchOccupations();
+    fetchOccupations(pagination.page, pagination.limit);
   }, []);
 
-  const fetchOccupations = async () => {
+  const fetchOccupations = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/occupations/all`, {
+      const response = await fetch(`${apiUrl}/api/v1/occupations/all?page=${page}&limit=${limit}`, {
         method: "GET",
       });
       if (response.ok) {
@@ -97,6 +97,28 @@ const Ocupation = () => {
     }));
   };
 
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchOccupations(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchOccupations(prevPage, pagination.limit);
+    }
+  };
+
   const handleSearch = (query: string) => {
     searchOccupations(query);
   };
@@ -138,7 +160,7 @@ const Ocupation = () => {
       console.log(
         `Occupation with id ${occupationToDelete} deleted successfully`
       );
-      fetchOccupations();
+      fetchOccupations(pagination.page, pagination.limit);
       setIsPopConfirmOpen(false); 
 
       setToast({
@@ -159,7 +181,7 @@ const Ocupation = () => {
 
   const handleClearSearch = () => {
     searchOccupations("");
-    fetchOccupations();
+    fetchOccupations(pagination.page, pagination.limit);
   };
 
   return (
@@ -199,11 +221,13 @@ const Ocupation = () => {
             />
             <div className="flex justify-end mt-4">
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
-                hasNextPage={pagination.hasNextPage}
-                hasPrevPage={pagination.hasPrevPage}
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  onPageChange={handlePageChange}
+                  hasNextPage={pagination.hasNextPage}
+                  hasPrevPage={pagination.hasPrevPage}
+                  onNextPage={handleNextPage}
+                  onPrevPage={handlePrevPage}
               />
             </div>
           </>

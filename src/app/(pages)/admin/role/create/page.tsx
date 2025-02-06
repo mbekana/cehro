@@ -11,13 +11,13 @@ import Button from "@/app/components/UI/Button";
 import { Role } from "@/app/model/Role";
 import Cookies from "js-cookie";
 
-
 const UserRoleForm = () => {
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
     position: "top-right";
   } | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Role>({
@@ -25,13 +25,13 @@ const UserRoleForm = () => {
     remark: "",
   });
 
-   useEffect(() => {
-      console.log("HI: ", Cookies.get("userData"));
-      const user = Cookies.get("userData")
-        ? JSON.parse(Cookies.get("userData")!)
-        : null;
-      setUserData(user);
-    }, []);
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,10 +45,10 @@ const UserRoleForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     try {
-      const payload = {...formData, createdBy:userData?.id}
+      const payload = { ...formData, createdById: userData?.id };
       const response = await fetch(`${apiUrl}/api/v1/roles/register`, {
         method: "POST",
         headers: {
@@ -77,7 +77,7 @@ const UserRoleForm = () => {
         type: "error",
         position: "top-right",
       });
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -133,7 +133,7 @@ const UserRoleForm = () => {
             <div className="flex justify-end mt-4 mr-24">
               <Button
                 color="primary"
-                text={loading ? 'Saving' : "Save Education"}
+                text={loading ? "Saving" : "Save Education"}
                 size="large"
                 elevation={4}
                 borderRadius={3}

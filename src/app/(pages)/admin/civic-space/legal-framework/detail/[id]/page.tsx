@@ -11,7 +11,7 @@ import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
-import Image from "next/image";
+import Cookies from "js-cookie";
 
 const LegalFrameworkDetail = () => {
   const { id } = useParams();
@@ -19,7 +19,7 @@ const LegalFrameworkDetail = () => {
   const [legalFramework, setLegalFramework] = useState<any | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-
+  const [userData, setUserData] = useState<any>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -50,6 +50,14 @@ const LegalFrameworkDetail = () => {
   }, [id]);
 
   useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
+  useEffect(() => {
     if (legalFramework?.video) {
       const mediaUrl = legalFramework.video;
       if (
@@ -59,6 +67,7 @@ const LegalFrameworkDetail = () => {
       ) {
         setMediaType("image");
       } else if (
+        mediaUrl.endsWith(".mp4") ||
         mediaUrl.includes("youtube.com") ||
         mediaUrl.includes("youtu.be")
       ) {
@@ -80,6 +89,7 @@ const LegalFrameworkDetail = () => {
       const updatedLegalFramework = {
         ...legalFramework,
         status: "APPROVED",
+        postedById: userData?.id,
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/${id}`, {
@@ -220,7 +230,9 @@ const LegalFrameworkDetail = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">City:</h4>
-            <p className="text-sm sm:text-base">{legalFramework.zone_subcity}</p>
+            <p className="text-sm sm:text-base">
+              {legalFramework.zone_subcity}
+            </p>
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -271,14 +283,14 @@ const LegalFrameworkDetail = () => {
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
             {mediaType === "image" && (
-              <Image
+              <img
                 src={
-                  legalFramework.video.startsWith("/")
+                  legalFramework.video
                     ? legalFramework.video
                     : `/${legalFramework.video}`
                 }
                 alt="Media Preview"
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-[700px] h-[500px] object-cover rounded-lg"
                 height={100}
                 width={100}
               />
@@ -286,10 +298,11 @@ const LegalFrameworkDetail = () => {
 
             {mediaType === "video" && (
               <div className="aspect-w-16 aspect-h-9">
+                <h1>Hi</h1>
                 <iframe
                   width="100%"
                   height="100%"
-                  src={legalFramework.media}
+                  src={legalFramework.video}
                   title="Video Preview"
                   frameBorder="0"
                   allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
@@ -311,31 +324,31 @@ const LegalFrameworkDetail = () => {
           </div>
         </div>
         <div className="mt-10 pt-5 flex gap-4 ">
-          {legalFramework.status !== "APPROVED" && legalFramework.status !== "REJECTED" && (
-            <>
-              <Button
-                color="success"
-                text={loading ? "Approving..." : "Approve"}
-                onClick={handleApprove}
-                icon={<FaCheck />}
-              />
-              <Button
-                color="danger"
-                text={loading ? "Rejecting..." : "Reject"}
-                onClick={handleReject}
-                icon={<FaTimes />}
-              />
-            </>
-          )}
+          {legalFramework.status !== "APPROVED" &&
+            legalFramework.status !== "REJECTED" && (
+              <>
+                <Button
+                  color="success"
+                  text={loading ? "Approving..." : "Approve"}
+                  onClick={handleApprove}
+                  icon={<FaCheck />}
+                />
+                <Button
+                  color="danger"
+                  text={loading ? "Rejecting..." : "Reject"}
+                  onClick={handleReject}
+                  icon={<FaTimes />}
+                />
+              </>
+            )}
         </div>
-   
       </div>
       {toast && (
         <Toast
           message={toast.message}
           type={toast.type}
           position={toast.position}
-          onClose={() => setToast(null)} 
+          onClose={() => setToast(null)}
         />
       )}
     </BoxWrapper>
