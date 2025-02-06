@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-// import { useUserContext } from "@/app/context/UserContext"; // Import the context hook
+import { useState, useEffect, Suspense } from "react";
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
 import LogoWithText from "@/app/components/UI/LogoWithText";
@@ -10,14 +9,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { apiRequest } from "@/app/services/apiService";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null); // For handling errors
-  const callbackUrl =
-    new URLSearchParams(window.location.search).get("callbackUrl") || "/admin";
+  const [callbackUrl, setCallbackUrl] = useState("/admin"); // Default callback URL
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCallback = urlParams.get("callbackUrl");
+      if (urlCallback) {
+        setCallbackUrl(urlCallback);
+      }
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,15 +50,15 @@ const LoginPage = () => {
     };
     try {
       const data = await apiRequest(`/api/v1/users/login`, options);
-      console.log("data ", data?.accessToken)
+      console.log("data ", data?.accessToken);
       if (data.accessToken) {
-        Cookies.set("accessToken", data.accessToken); 
+        Cookies.set("accessToken", data.accessToken);
         if (data.refreshToken) {
-          Cookies.set("refreshToken", data.refreshToken); 
+          Cookies.set("refreshToken", data.refreshToken);
         }
-        if(data.user){
+        if (data.user) {
           delete data.accessToken;
-          Cookies.set("userData", JSON.stringify(data.user))
+          Cookies.set("userData", JSON.stringify(data.user));
         }
         router.push(callbackUrl);
       } else {
@@ -136,9 +145,6 @@ const LoginPage = () => {
             icon={<FaSignInAlt />}
             size="large"
           />
-          {/* <Link href="/pages/auth/signup">
-            <Button color="default" text="Sign Up" />
-          </Link> */}
         </div>
       </div>
 
@@ -154,4 +160,10 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPage />
+    </Suspense>
+  );
+}

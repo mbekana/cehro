@@ -113,7 +113,7 @@ const UserMapFeed = () => {
             {/* Forecast Data (BarChart3D) */}
             <div className="flex flex-col py-6 px-6 bg-gray-100 rounded-lg shadow-md">
               <h1 className="text-2xl font-semibold text-gray-800 mb-4">Forecast</h1>
-              <BarChart3D metrics={metrics} regions={regionsBar} />
+              <BarChart3D   />
             </div>
           </div>
 

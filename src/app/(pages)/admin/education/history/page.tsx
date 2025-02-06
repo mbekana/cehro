@@ -39,7 +39,7 @@ const Educations = () => {
   });
 
   useEffect(() => {
-    fetchEducations();
+    fetchEducations(pagination.page, pagination.limit);
   }, []);
 
 
@@ -71,12 +71,12 @@ const Educations = () => {
   };
 
 
-  const fetchEducations = async () => {
+  const fetchEducations = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/v1/educations/all?page=${pagination.page}&limit=${pagination.limit}`, {
+      const response = await fetch(`${apiUrl}/api/v1/educations/all?page=${page}&limit=${limit}`, {
         method: "GET",
       });
       if (response.ok) {
@@ -98,6 +98,29 @@ const Educations = () => {
       ...prevState,
       page,
     }));
+  };
+
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchEducations(nextPage, pagination.limit);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchEducations(prevPage, pagination.limit);
+    }
   };
 
   const handleAction = (action: string, row: Record<string, any>) => {
@@ -132,7 +155,7 @@ const Educations = () => {
       }
    
       console.log(`Education with id ${educationToDelete} deleted successfully`);
-      fetchEducations();
+      fetchEducations(pagination.page, pagination.limit);
       setToast({
         message: "You have successfully deleted Education.",
         type: "success",
@@ -157,7 +180,7 @@ const Educations = () => {
 
   const handleClearSearch = () => {
     searchEducations("");  
-    fetchEducations();
+    fetchEducations(pagination.page, pagination.limit);
   };
 
   return (
@@ -193,11 +216,13 @@ const Educations = () => {
             <Table columns={columns} data={education} onAction={handleAction} />
             <div className="flex justify-end mt-4">
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
-                hasNextPage={pagination.hasNextPage}
-                hasPrevPage={pagination.hasPrevPage}
+                 currentPage={pagination.page}
+                 totalPages={pagination.totalPages}
+                 onPageChange={handlePageChange}
+                 hasNextPage={pagination.hasNextPage}
+                 hasPrevPage={pagination.hasPrevPage}
+                 onNextPage={handleNextPage}
+                 onPrevPage={handlePrevPage}
               />
             </div>
           </>

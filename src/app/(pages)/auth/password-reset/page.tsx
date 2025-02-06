@@ -7,6 +7,7 @@ import LogoWithText from "@/app/components/UI/LogoWithText";
 import { FaLock } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FaSpinner } from "react-icons/fa"; // Import a spinner icon
 
 const PasswordResetPage = () => {
   const [email, setEmail] = useState("");
@@ -15,9 +16,12 @@ const PasswordResetPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [token, setToken] = useState<string | null>(null); 
+  const [loading, setLoading] = useState(false); // Loading state
   const router = useRouter();
-  const callbackUrl =
-  new URLSearchParams(window.location.search).get("callbackUrl") || "/admin";
+  const callbackUrl = typeof window !== "undefined"
+  ? new URLSearchParams(window.location.search).get("callbackUrl") || "/admin"
+  : "/admin";
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "email") setEmail(value);
@@ -32,6 +36,7 @@ const PasswordResetPage = () => {
       return;
     }
 
+    setLoading(true); // Start loading
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgotpassword/request`, {
         method: "POST",
@@ -52,6 +57,8 @@ const PasswordResetPage = () => {
       }
     } catch (err) {
       setError("Something went wrong, please try again.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -71,6 +78,7 @@ const PasswordResetPage = () => {
       return;
     }
 
+    setLoading(true); // Start loading
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/forgotpassword/reset`, {
         method: "POST",
@@ -84,15 +92,15 @@ const PasswordResetPage = () => {
       if (response.ok) {
         setSuccess(true); 
         setError(null);
-        // alert("Password successfully reset.");
         router.push(callbackUrl);
-
       } else {
         const data = await response.json();
         setError(data.message || "An error occurred.");
       }
     } catch (err) {
       setError("Something went wrong, please try again.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -141,11 +149,12 @@ const PasswordResetPage = () => {
           {!success && (
             <Button
               color="primary"
-              text="Reset Password"
+              text={loading ? "Processing..." : "Reset Password"} // Change text to show processing
               elevation={3}
               onClick={handlePasswordResetRequest}
-              icon={<FaLock />}
+              icon={loading ? <FaSpinner className="animate-spin" /> : <FaLock />} // Show spinner when loading
               size="large"
+              disabled={loading} // Disable button when loading
             />
           )}
 
@@ -176,11 +185,12 @@ const PasswordResetPage = () => {
               />
               <Button
                 color="primary"
-                text="Submit New Password"
+                text={loading ? "Submitting..." : "Submit New Password"}
                 elevation={3}
                 onClick={handlePasswordResetSubmit}
-                icon={<FaLock />}
+                icon={loading ? <FaSpinner className="animate-spin" /> : <FaLock />}
                 size="large"
+                disabled={loading} // Disable button when loading
               />
             </>
           )}
