@@ -6,104 +6,145 @@ import Button from "@/app/components/UI/Button";
 import { FaArrowLeft, FaCheck, FaTimes } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import Toast from "@/app/components/UI/Toast";
+import { Incident } from "@/app/model/Incident"; 
+import Cookies from "js-cookie";
 
 const IncidentDetail = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState<boolean>(false);
-  const [incident, setIncident] = useState<any>();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [incident, setIncident] = useState<Incident | null>(null); 
+  const [userData, setUserData] = useState<any>(null);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
   useEffect(() => {
     if (id) {
       fetchIncident(Array.isArray(id) ? id[0] : id);
     }
   }, [id]);
 
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+
   const fetchIncident = async (id: string) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
         method: "GET",
       });
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setIncident(data);
+        setIncident(data.data);
       } else {
-        console.error("Failed to fetch data");
+        setToast({
+          message: "Failed to fetch incident data.",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+      setToast({
+        message: "Error fetching data.",
+        type: "error",
+        position: "top-right",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleApprove = async () => {
-    setLoading(true);
-
     try {
-      const updatedIncident = {
-        ...incident,
-        status: "APPROVED",
-      };
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedIncident),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log("DATA: ", data);
-        setIncident(data);
-        setError(null);
-        setSuccess("You have successfully approved incident.");
-      } else {
-        console.error("Failed to fetch data");
+      if (incident) {
+        const updatedIncident = {
+          ...incident,
+          status: "APPROVED",
+          approvedById:userData?.id
+        };
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedIncident),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIncident(data.data);
+          setToast({
+            message: "You have successfully approved the incident.",
+            type: "success",
+            position: "top-right",
+          });
+        } else {
+          setToast({
+            message: "There was an error saving the incident.",
+            type: "error",
+            position: "top-right",
+          });
+        }
       }
     } catch (error) {
-      setSuccess(null);
-      setError(error);
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+      console.error("Error:", error);
     }
   };
 
   const handleReject = async () => {
-    setLoading(true);
     try {
-      const updatedIncident = {
-        ...incident,
-        status: "REJECTED",
-      };
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedIncident),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log("DATA: ", data);
-        setIncident(data);
-        setError(null);
-        setSuccess("You have successfully rejected incident.");
-      } else {
-        console.error("Failed to fetch data");
+      if (incident) {
+        const updatedIncident = {
+          ...incident,
+          status: "REJECTED",
+        };
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedIncident),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIncident(data.data);
+          setToast({
+            message: "You have successfully rejected the incident.",
+            type: "success",
+            position: "top-right",
+          });
+        } else {
+          setToast({
+            message: "There was an error rejecting the incident.",
+            type: "error",
+            position: "top-right",
+          });
+        }
       }
     } catch (error) {
-      setError(error);
-      setSuccess(null);
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+      console.error("Error:", error);
     }
   };
 
@@ -129,16 +170,17 @@ const IncidentDetail = () => {
         tagText = "Unknown";
     }
 
-    return (
-      <span className={`inline px-4 py-2 rounded-md ${tagColor}`}>
-        {tagText}
-      </span>
-    );
+    return <span className={`inline px-4 py-2 rounded-md ${tagColor}`}>{tagText}</span>;
   };
 
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  if (!incident) {
+    return <div>No incident data found.</div>;
+  }
+
 
   return (
     <BoxWrapper
@@ -146,9 +188,9 @@ const IncidentDetail = () => {
       title={`Incident Details: ${incident?.region}`}
       borderColor="border-primary"
       borderThickness="border-b-4"
+      shouldGoBack={true}
     >
       <div className="space-y-4">
-        {/* Incident Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -157,7 +199,7 @@ const IncidentDetail = () => {
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Residence:</h4>
             <p className="text-sm sm:text-base">
-              {incident?.respondent_residence}
+              {incident?.respondent_address}
             </p>
           </div>
         </div>
@@ -168,8 +210,8 @@ const IncidentDetail = () => {
             <p className="text-sm sm:text-base">{incident?.gender}</p>
           </div>
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">Age Group:</h4>
-            <p className="text-sm sm:text-base">{incident?.age_group}</p>
+            <h4 className="font-semibold text-sm sm:text-base">Age:</h4>
+            <p className="text-sm sm:text-base">{incident?.age}</p>
           </div>
         </div>
 
@@ -203,54 +245,49 @@ const IncidentDetail = () => {
             Incident Details:
           </h4>
           <p className="text-sm sm:text-base">
-            <strong>Woreda:</strong> {incident?.incident_happened?.woreda}
+            <strong>Woreda:</strong> {incident?.woreda_kebele}
           </p>
           <p className="text-sm sm:text-base">
-            <strong>Zone:</strong> {incident?.incident_happened?.zone}
+            <strong>Zone:</strong> {incident?.zone_subcity}
           </p>
           <p className="text-sm sm:text-base">
             <strong>Source of Information:</strong>{" "}
-            {incident?.source_of_information}
+            {incident?.source}
           </p>
         </div>
 
         <div className="mt-10">
           <h4 className="font-semibold text-sm sm:text-base">
-            Status: {renderStatusTag(incident?.status)}
+            Status: {renderStatusTag(incident?.status) || 'Not Provided'}
           </h4>
         </div>
 
         <div className="mt-10 pt-5 flex gap-4 ">
-          <Button
-            color="success"
-            text={loading ? "Approving..." : "Approve"}
-            onClick={handleApprove}
-            icon={<FaCheck />}
-          />
-          <Button
-            color="danger"
-            text={loading ? "Rejecting..." : "Reject"}
-            onClick={handleReject}
-            icon={<FaTimes />}
-          />
+          {incident.status !== "APPROVED" && incident.status !== "REJECTED" && (
+            <>
+              <Button
+                color="success"
+                text={loading ? "Approving..." : "Approve"}
+                onClick={handleApprove}
+                icon={<FaCheck />}
+              />
+              <Button
+                color="danger"
+                text={loading ? "Rejecting..." : "Reject"}
+                onClick={handleReject}
+                icon={<FaTimes />}
+              />
+            </>
+          )}
         </div>
       </div>
 
-      {success && (
+      {toast && (
         <Toast
-          message={success}
-          type="success"
-          position="top-right"
-          onClose={() => setSuccess(null)}
-        />
-      )}
-
-      {error && (
-        <Toast
-          message={error}
-          type="error"
-          position="top-right"
-          onClose={() => setError(null)}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
     </BoxWrapper>

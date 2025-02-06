@@ -4,96 +4,116 @@ import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaArrowLeft,  FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
-
-type SocialMediaForm = {
-  affectedArea: string;
-  city: string;
-  region: string;
-  file: File | null;
-  media: File | null;
-  mediaType: string;
-  metrics: string;
-  insight: string;
-  impact: string;
-};
+import { SocialMedia } from "@/app/model/SocialMedia";
+import Cookies from "js-cookie";
 
 const SocialMediaForm = () => {
   const [impacts, setImpacts] = useState<Impact[]>([]);
   const [metrics, setMetrics] = useState<any[]>([]);
   const [regions, setRegions] = useState<any[]>([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [sources, setSources] = useState<any[]>([]);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
-  const [formData, setFormData] = useState<SocialMediaForm>({
-    affectedArea: "",
-    city: "",
-    region: "",
-    file: null,
-    media: null,
-    mediaType: "",
-    metrics: "",
-    insight: "",
+  const [formData, setFormData] = useState<SocialMedia>({
+    title: "",
+    link: "",
     impact: "",
-  });
+    file: null,
+    video: null,
+    region: "",
+    woreda_kebele: "",
+    zone_subcity: "",
+    metrics: "",
+    source: "",
+    cehro_insights: "",
+    status: ""
+    });
 
   useEffect(() => {
     fetchMetrics();
     fetchImpacts();
     fetchRegions();
+    fetchSources();
   }, []);
 
-  const fetchMetrics = async () => {
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
+  const fetchSources = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
-        console.log("Metrics: ", metrics);
+        setSources(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
+    }
+  };
+
+  const fetchMetrics = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setMetrics(data.data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
+        setRegions(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
@@ -111,7 +131,7 @@ const SocialMediaForm = () => {
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    field: "file" | "media"
+    field: "file" | "video"
   ) => {
     const file = e.target.files ? e.target.files[0] : null;
     setFormData((prevData) => ({
@@ -124,17 +144,14 @@ const SocialMediaForm = () => {
       if (extension === "jpg" || extension === "png" || extension === "jpeg") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: "image",
         }));
       } else if (extension === "mp4" || extension === "avi") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: "video",
         }));
       } else if (extension === "pdf") {
         setFormData((prevData) => ({
           ...prevData,
-          mediaType: "pdf",
         }));
       }
     }
@@ -142,50 +159,121 @@ const SocialMediaForm = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-
-    const formPayload = {
-      ...formData,
-      file: formData.file ? formData.file.name : null,
-      media: formData.media ? formData.media.name : null,
-      status:'PENDING'
-    };
+  
+    if (!formData.title || !formData.link || !formData.impact || !formData.region || !formData.source) {
+      setToast({
+        message: "Please fill in all required fields.",
+        type: "error",
+        position: "top-right",
+      });
+      return;
+    }
+  
+    const formPayload = new FormData();
+    
+    formPayload.append("title", formData.title);
+    formPayload.append("link", formData.link);
+    formPayload.append("impact", formData.impact);
+    formPayload.append("region", formData.region);
+    formPayload.append("woreda_kebele", formData.woreda_kebele);
+    formPayload.append("zone_subcity", formData.zone_subcity);
+    formPayload.append("metrics", formData.metrics);
+    formPayload.append("source", formData.source);
+    formPayload.append("cehro_insights", formData.cehro_insights);
+    formPayload.append("status", "PENDING");
+    formPayload.append("postedById", userData?.id);
+  
+    if (formData.file) {
+      formPayload.append("file", formData.file);
+    }
+    if (formData.video) {
+      formPayload.append("video", formData.video);
+    }
+  
     setLoading(true);
+  
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/socialMediaPosts`, {
+      const response = await fetch(`${apiUrl}/api/v1/social-medias/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formPayload),
+        body: formPayload, 
       });
-
+  
       if (response.ok) {
         const result = await response.json();
-        console.log("Data saved successfully:", result);
         setFormData({
-          affectedArea: "",
-          city: "",
-          region: "",
-          file: null,
-          media: null,
-          mediaType: "",
-          metrics: "",
-          insight: "",
+          title: "",
+          link: "",
           impact: "",
+          file: null,
+          video: null,
+          region: "",
+          woreda_kebele: "",
+          zone_subcity: "",
+          metrics: "",
+          source: "",
+          cehro_insights: "",
+          status: "",
         });
-        setSuccess("Social Media Saved Successfully!");
-        setError(null);
+        setToast({
+          message: "You have submitted data successfully.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Error saving data", response);
-        setSuccess(null);
-        setError(`Error saving data, ${response}`);
+        throw new Error("Failed to submit data.");
       }
     } catch (error) {
-      setSuccess(null);
-      setError(`${error}`);
+      setToast({
+        message: error.message || "An error occurred while submitting the form.",
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+  
+
+
+  const renderFilePreview = (file: File | null) => {
+    if (!file) return null;
+  
+    const fileUrl = URL.createObjectURL(file);
+  
+    if (file.type.startsWith("image/")) {
+      return (
+        <img
+          src={fileUrl}
+          alt="preview"
+          className="mt-2 w-32 h-32 object-cover"
+        />
+      );
+    }
+  
+    if (file.type.startsWith("video/")) {
+      return (
+        <video controls className="mt-2 w-32 h-32">
+          <source src={fileUrl} />
+        </video>
+      );
+    }
+  
+    if (file.type === "application/pdf") {
+      return (
+        <div className="mt-2 w-32 h-32 overflow-auto">
+          <iframe
+            src={fileUrl}
+            title="pdf preview"
+            className="w-full h-full"
+          ></iframe>
+        </div>
+      );
+    }
+  
+    return null;
+  };
+  
 
   return (
     <div className="pb-5">
@@ -214,22 +302,41 @@ const SocialMediaForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="Affected Area"
-                  placeholder=" affected area"
-                  value={formData.affectedArea}
+                  label="Title"
+                  placeholder="Title"
+                  value={formData.title}
                   onChange={handleChange}
-                  name="affectedArea"
+                  name="title"
                 />
               </div>
-
               <div>
                 <Input
                   type="text"
-                  label="City"
-                  placeholder=" city"
-                  value={formData.city}
+                  label="Link"
+                  placeholder="Link"
+                  value={formData.link}
                   onChange={handleChange}
-                  name="city"
+                  name="link"
+                />
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  label="Woreda/kebele"
+                  placeholder="Woreda/Kebele"
+                  value={formData.woreda_kebele}
+                  onChange={handleChange}
+                  name="woreda_kebele"
+                />
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  label="Zone/Subcity"
+                  placeholder="Zone/Subcity"
+                  value={formData.zone_subcity}
+                  onChange={handleChange}
+                  name="zone_subcity"
                 />
               </div>
 
@@ -247,6 +354,7 @@ const SocialMediaForm = () => {
                   <input
                     id="file"
                     type="file"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, "file")}
                     className="hidden"
                   />
@@ -256,6 +364,7 @@ const SocialMediaForm = () => {
                     </span>
                   )}
                 </div>
+                {renderFilePreview(formData.file)}
               </div>
 
               <div>
@@ -264,25 +373,43 @@ const SocialMediaForm = () => {
                 </label>
                 <div className="mt-1">
                   <label
-                    htmlFor="media"
+                    htmlFor="video"
                     className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
                   >
                     Select Media
                   </label>
                   <input
-                    id="media"
+                    id="video"
                     type="file"
-                    onChange={(e) => handleFileChange(e, "media")}
+                    accept="image/*,video/*"
+                    onChange={(e) => handleFileChange(e, "video")}
                     className="hidden"
                   />
-                  {formData.media && (
+                  {formData.video && (
                     <span className="text-sm text-gray-600 ml-2">
-                      {formData.media.name}
+                      {formData.video.name}
                     </span>
                   )}
                 </div>
+                {renderFilePreview(formData.video)}
               </div>
-
+              <div>
+                <Input
+                  type="select"
+                  label="Source"
+                  placeholder="Source"
+                  value={formData.source}
+                  onChange={handleChange}
+                  name="source"
+                >
+                  <option value="">Select Source</option>
+                  {sources.map((source, index) => (
+                    <option key={index} value={source.source}>
+                      {source.source}
+                    </option>
+                  ))}
+                </Input>
+              </div>
               <div>
                 <Input
                   type="select"
@@ -294,8 +421,8 @@ const SocialMediaForm = () => {
                 >
                   <option value="">Select Metrics</option>
                   {metrics.map((metric, index) => (
-                    <option key={index} value={metric.id}>
-                      {metric.name}
+                    <option key={index} value={metric.metrics}>
+                      {metric.metrics}
                     </option>
                   ))}
                 </Input>
@@ -321,17 +448,6 @@ const SocialMediaForm = () => {
 
               <div>
                 <Input
-                  type="textarea"
-                  label="CEHOR's insight"
-                  placeholder="CEHOR's insight"
-                  value={formData.insight}
-                  onChange={handleChange}
-                  name="insight"
-                />
-              </div>
-
-              <div>
-                <Input
                   type="select"
                   label="Impact"
                   value={formData.impact}
@@ -340,43 +456,44 @@ const SocialMediaForm = () => {
                 >
                   <option value="">Select Impact</option>
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
               </div>
             </div>
-
-            <div className="mt-4">
+            <div>
+              <Input
+                type="textarea"
+                label="CEHOR's insight"
+                placeholder="CEHOR's insight"
+                value={formData.cehro_insights}
+                onChange={handleChange}
+                name="cehro_insights"
+              />
+            </div>
+            <div className="flex justify-end mt-4 mr-24">
+              {" "}
               <Button
                 color="primary"
-                text={loading ?  'Saving...' : "Social Media"}
+                text={loading ? "Saving..." : "Social Media"}
                 onClick={handleSubmit}
                 icon={<FaPlus />}
                 size="large"
               />
             </div>
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

@@ -6,34 +6,67 @@ import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Table from "@/app/components/UI/Table";
 import Pagination from "@/app/components/UI/Pagination";
 import Search from "@/app/components/UI/Search";
-import { Education } from "@/app/model/EducationModel";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/app/components/UI/Button";
+import { Role } from "@/app/model/Role";
+import PopConfirm from "@/app/components/UI/PopConfirm";
+import Toast from "@/app/components/UI/Toast";
 
-const columns: (keyof Education)[] = ["id", "name", "remark"];
+const columns: (keyof Role)[] = ["id", "role", "remark"];
 
 const UserRoles = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(roles.length / rowsPerPage);
-
-  const currentData = roles.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 1,
+    limit: 10,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
 
   useEffect(() => {
-    fetchRoles();
+    fetchRoles(pagination.page, pagination.limit);
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+    setPagination((prevState) => ({
+      ...prevState,
+      page,
+    }));
+    fetchRoles(pagination.page, pagination.limit); 
+  };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchRoles(pagination.page, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchRoles(pagination.page, pagination.limit);
     }
   };
 
@@ -41,46 +74,62 @@ const UserRoles = () => {
     console.log("AM here handle action: ", row.id);
     switch (action) {
       case "details":
-        router.push(`/admin/occupation/detail/${row.id}`);
+        router.push(`/admin/role/detail/${row.id}`);
         break;
       case "update":
-        router.push(`/admin/occupation/update/${row.id}`);
+        router.push(`/admin/role/update/${row.id}`);
         break;
       case "delete":
-        handleDelete(row.id);
+        setRoleToDelete(row.id);
+        setIsPopConfirmOpen(true);
         break;
       default:
         break;
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
+    if (roleToDelete === null) return;
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/roles/${id}`, {
+      const response = await fetch(`${apiUrl}/api/v1/roles/${roleToDelete}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete the region");
+        throw new Error("Failed to delete the Role");
       }
 
-      console.log(`Region with id ${id} deleted successfully`);
-      fetchRoles();
+      console.log(`Role with id ${roleToDelete} deleted successfully`);
+      fetchRoles(pagination.page, pagination.limit);
+      setToast({
+        message: "You have successfully deleted Role.",
+        type: "success",
+        position: "top-right",
+      });
+      setIsPopConfirmOpen(false);
     } catch (error) {
-      console.error("Error deleting the region: ", error);
+      console.error("Error deleting the Role: ", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
-  const fetchRoles = async () => {
+  const fetchRoles = async (page: number, limit: number) => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/roles/all?page=${page}&limit=${limit}`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setRoles(data);
+        setRoles(data.data);
+        setPagination(data.pagination);
         // setFilteredRegions(data);
       } else {
         console.error("Failed to fetch data");
@@ -92,49 +141,107 @@ const UserRoles = () => {
     }
   };
 
+  const searchRoles = async (searchQuery: any) => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(
+        `${apiUrl}/api/v1/roles/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data.data);
+        setPagination(data.pagination);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsPopConfirmOpen(false);
+    setRoleToDelete(null);
+  };
+
   const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+    searchRoles(query);
+  };
+
+  const handleClearSearch = () => {
+    searchRoles("");
+    fetchRoles(pagination.page, pagination.limit);
   };
 
   return (
-    <BoxWrapper
-      icon={<FaExclamationTriangle />}
-      title="User Role"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
-    >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
-      <Search
-          onSearch={handleSearch}
-          placeholder="Search Role..."
-          buttonText="Search Role"
-        />
-        <Link href="/admin/role/create">
-          <Button
-            color="primary"
-            text="Create Role"
-            icon={<FaPlus />}
-            className="ml-auto"
-            size="large"
-            borderRadius={5}
+    <>
+      <BoxWrapper
+        icon={<FaExclamationTriangle />}
+        title="User Role"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+      >
+        <div className="flex flex-1 items-center justify-between mb-2 w-full">
+          <Search
+            onSearch={handleSearch}
+            onClear={handleClearSearch}
+            placeholder="Search Role..."
+            buttonText="Search Role"
           />
-        </Link>
-      </div>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
-          <div className="flex justify-end mt-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+          <Link href="/admin/role/create">
+            <Button
+              color="primary"
+              text="Create Role"
+              icon={<FaPlus />}
+              className="ml-auto"
+              size="large"
+              borderRadius={5}
             />
-          </div>
-        </>
+          </Link>
+        </div>
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <>
+            <Table columns={columns} data={roles} onAction={handleAction} />
+            <div className="flex justify-end mt-4">
+              <Pagination
+                 currentPage={pagination.page}
+                 totalPages={pagination.totalPages}
+                 onPageChange={handlePageChange}
+                 hasNextPage={pagination.hasNextPage}
+                 hasPrevPage={pagination.hasPrevPage}
+                 onNextPage={handleNextPage}
+                 onPrevPage={handlePrevPage}
+              />
+            </div>
+          </>
+        )}
+
+        <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this Role?"
+          title="Delete Role"
+        />
+      </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
       )}
-    </BoxWrapper>
+    </>
   );
 };
 

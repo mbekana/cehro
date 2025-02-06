@@ -1,19 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { useUserContext } from "@/app/context/UserContext"; // Import the context hook
+import { useState, useEffect, Suspense } from "react";
 import Button from "@/app/components/UI/Button";
 import Input from "@/app/components/UI/Input";
 import LogoWithText from "@/app/components/UI/LogoWithText";
 import { FaSignInAlt } from "react-icons/fa";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { apiRequest } from "@/app/services/apiService";
 
 const LoginPage = () => {
-  const { setLogin, setRole } = useUserContext(); // Access context values and setters
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null); // For handling errors
+  const [callbackUrl, setCallbackUrl] = useState("/admin"); // Default callback URL
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCallback = urlParams.get("callbackUrl");
+      if (urlCallback) {
+        setCallbackUrl(urlCallback);
+      }
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,23 +41,37 @@ const LoginPage = () => {
     setRememberMe((prev) => !prev);
   };
 
-  const handleLogin = () => {
-    if (email === "supper@admin.com" && password === "root@123") {
-      setLogin(true);
-      setRole("admin");
-    }
-    //  else if (email === "user@user.com" && password === "password") {
-    //   setLogin(true);
-    //   setRole("user");
-    // } 
-    else {
-      setError("Invalid credentials");
+  const handleLogin = async () => {
+    const credentials = { email, password };
+    const options = {
+      method: "POST",
+      body: { ...credentials },
+      headers: {},
+    };
+    try {
+      const data = await apiRequest(`/api/v1/users/login`, options);
+      console.log("data ", data?.accessToken);
+      if (data.accessToken) {
+        Cookies.set("accessToken", data.accessToken);
+        if (data.refreshToken) {
+          Cookies.set("refreshToken", data.refreshToken);
+        }
+        if (data.user) {
+          delete data.accessToken;
+          Cookies.set("userData", JSON.stringify(data.user));
+        }
+        router.push(callbackUrl);
+      } else {
+        setError("Invalid credentials or something went wrong.");
+      }
+    } catch (error) {
+      setError("Invalid credentials or something went wrong.");
     }
   };
 
   return (
-<div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
-<div className="w-full lg:w-1/2 h-full lg:h-screen bg-white p-6 rounded-sm shadow-lg flex flex-col justify-center px-6 sm:px-8 h-full md:px-12 lg:px-24 xl:px-32"> 
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+      <div className="w-full lg:w-1/2 h-full lg:h-screen bg-white p-6 rounded-sm shadow-lg flex flex-col justify-center px-6 sm:px-8 h-full md:px-12 lg:px-24 xl:px-32">
         <div className="lg:hidden mb-10">
           <LogoWithText
             logoSrc="/logo.jpg"
@@ -115,12 +142,9 @@ const LoginPage = () => {
             text="Login"
             elevation={3}
             onClick={handleLogin}
-            icon={<FaSignInAlt/>}
+            icon={<FaSignInAlt />}
             size="large"
           />
-          {/* <Link href="/pages/auth/signup">
-            <Button color="default" text="Sign Up" />
-          </Link> */}
         </div>
       </div>
 
@@ -136,4 +160,10 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPage />
+    </Suspense>
+  );
+}

@@ -1,26 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
 import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-
-type ImpactFormData = {
-  name: string;
-  remark: string;
-};
+import { Impact } from "@/app/model/Impact";
+import Cookies from "js-cookie";
+import Toast from "@/app/components/UI/Toast";
 
 const ImpactForm = () => {
-  const [formData, setFormData] = useState<ImpactFormData>({
-    name: "",
+  const [formData, setFormData] = useState<Impact>({
+    impact: "",
     remark: "",
   });
-  
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const [userData, setUserData] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -34,33 +44,39 @@ const ImpactForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
     try {
-      const response = await fetch(`${apiUrl}/impacts`, {
+      const payload = { ...formData, createdById: userData?.id };
+      const response = await fetch(`${apiUrl}/api/v1/impacts/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error("Failed to create impact");
       }
 
-      setSuccessMessage("Impact created successfully");
-
       setFormData({
-        name: "",
+        impact: "",
         remark: "",
       });
-
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setToast({
+        message: "You have created occupation successfully.",
+        type: "success",
+        position: "top-right",
+      });
     } catch (error) {
-      setError(`Error: ${error}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,21 +100,21 @@ const ImpactForm = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-    
-          <form  className="space-y-6">
+
+          <form className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
                 <Input
                   type="text"
                   label="Impact Name"
                   placeholder="Enter name"
-                  value={formData.name}
+                  value={formData.impact}
                   onChange={handleChange}
-                  name="name"
+                  name="impact"
                   className="w-full"
                 />
               </div>
-    
+
               <div>
                 <Input
                   type="textarea"
@@ -112,26 +128,28 @@ const ImpactForm = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text={loading ? "Saving..." :"Save Impact"}
+                size="large"
+                elevation={4}
+                borderRadius={3}
+                onClick={handleSubmit}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
-    
-      {successMessage && (
-        <div className="mt-4 text-center text-green-500">{successMessage}</div>
-      )}
 
-      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
-    
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text="Save Impact"
-          size="large"
-          elevation={4}
-          borderRadius={3} 
-          onClick={handleSubmit}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
-      </div>
+      )}
     </div>
   );
 };

@@ -10,34 +10,53 @@ import Button from "@/app/components/UI/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LegalFramework } from "@/app/model/LegalFramework";
-import { DecisionAuthority } from "@/app/model/DecisionAuthority";
+import { AuthorityDecision } from "@/app/model/AuthorityDecision";
+import PopConfirm from "@/app/components/UI/PopConfirm";
+import Toast from "@/app/components/UI/Toast";
 
-const columns: (keyof DecisionAuthority)[] = [
+const columns: (keyof AuthorityDecision)[] = [
+  "id",
   "region",
   "source",
-  "insight",
-  "status"
+  "scope",
+  "summary"
 ];
 
 const AuthorityDecisionList = () => {
   const router = useRouter(); 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [authorityDecision, setAuthorityDecision] = useState<LegalFramework[]>([]);
+  const [authorityDecision, setAuthorityDecision] = useState<AuthorityDecision[]>([]);
   const [loading, setLoading] = useState(true); 
-  const rowsPerPage = 5;
+  const [isPopConfirmOpen, setIsPopConfirmOpen] = useState(false);
+  const [decisionToDelete, setDecisionToDelete] = useState<number | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
+  const [pagination, setPagination] = useState({
+    totalDocs: 0,
+    totalPages: 0,
+    page: 0,
+    limit: 0,
+    pageCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+  });
   useEffect(() => {
-    fetchAuthorityDecision();
+    fetchAuthorityDecision(1, 10);
   }, []);
 
-  const fetchAuthorityDecision = async () => {
+  const fetchAuthorityDecision = async (page: number, limit: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`/admin/api/civic-space/authority-decision`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(`${apiUrl}/api/v1/authorative-decisions/all?page=${page}&limit=${limit}`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Data: ", data)
-        setAuthorityDecision(data);
+        console.log("Data: ", data.data)
+        setAuthorityDecision(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -48,36 +67,92 @@ const AuthorityDecisionList = () => {
     }
   };
 
-  const totalPages = Math.ceil(authorityDecision.length / rowsPerPage);
+  const searchAuthorityDecision = async (searchQuery: any) => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const currentData = authorityDecision.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      const response = await fetch(`${apiUrl}/api/v1/authorative-decisions/all?searchQuery=${searchQuery}&page=${pagination.page}&limit=${pagination.limit}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Data: ", data.data)
+        setAuthorityDecision(data.data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handlePageChange = (page: number) => {
+    setPagination((prevState) => ({
+      ...prevState,
+      page,
+    }));
+    fetchAuthorityDecision(page, pagination.limit); 
+  };
+  
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      const nextPage = pagination.page + 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: nextPage,
+      }));
+      fetchAuthorityDecision(nextPage, pagination.limit);  
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (pagination.hasPrevPage) {
+      const prevPage = pagination.page - 1;
+      setPagination((prevState) => ({
+        ...prevState,
+        page: prevPage,
+      }));
+      fetchAuthorityDecision(prevPage, pagination.limit);
+    }
+  };
+
 
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async () => {
+    if (decisionToDelete === null) return;
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'DELETE'});
+      const response = await fetch(
+        `${apiUrl}/api/v1/authorative-decisions/${decisionToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to delete the Authority Decision");
+        throw new Error("Failed to delete the education");
       }
 
-      console.log(`Authority Decision with id ${id} deleted successfully`);
-      fetchAuthorityDecision(); 
+      console.log(`Authority Decision with id ${decisionToDelete} deleted successfully`);
+      fetchAuthorityDecision(1, 10);
+      setToast({
+        message: "You have successfully deleted Authority Decision.",
+        type: "success",
+        position: "top-right",
+      });
+      setIsPopConfirmOpen(false);
     } catch (error) {
       console.error("Error deleting the Authority Decision: ", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
@@ -91,23 +166,36 @@ const AuthorityDecisionList = () => {
         router.push(`/admin/civic-space/authority-decision/update/${row.id}`); 
         break;
       case "delete":
-        handleDelete(row.id); 
+        setDecisionToDelete(row.id);
+        setIsPopConfirmOpen(true);
         break;
       default:
         break;
     }
   };
 
+  const handleClearSearch = () => {
+    searchAuthorityDecision("");
+    fetchAuthorityDecision(1, 10);
+  };
+
+  const handleCancel = () => {
+    setIsPopConfirmOpen(false);
+    setDecisionToDelete(null);
+  };
+
   return (
+    <>
     <BoxWrapper
       icon={<FaUserShield />}
       title="Authority Decision "
       borderColor="border-primary"
       borderThickness="border-b-4"
     >
-      <div className="flex flex-1 items-center justify-between m-2 w-full">
+      <div className="flex flex-1 items-center justify-between mb-2 w-full">
         <Search
           onSearch={handleSearch}
+          onClear={handleClearSearch}
           placeholder="Search ..."
           buttonText="Search "
         />
@@ -131,17 +219,37 @@ const AuthorityDecisionList = () => {
         <div>Loading...</div> 
       ) : (
         <>
-          <Table columns={columns} data={currentData} onAction={handleAction} />
+          <Table columns={columns} data={authorityDecision} onAction={handleAction} />
           <div className="flex justify-end mt-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
+            onNextPage={handleNextPage}
+            onPrevPage={handlePrevPage}
+              />
           </div>
         </>
       )}
+      <PopConfirm
+          isOpen={isPopConfirmOpen}
+          onConfirm={handleDelete}
+          onCancel={handleCancel}
+          message="Are you sure you want to delete this Authority Decision?"
+          title="Delete Authority Decision"
+        />
     </BoxWrapper>
+     {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        position={toast.position}
+        onClose={() => setToast(null)}
+      />
+    )}
+    </>
   );
 };
 

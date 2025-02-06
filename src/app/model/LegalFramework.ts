@@ -1,18 +1,20 @@
 export interface LegalFramework {
   id?: any;
   title: string;
-  city: string;
-  region: string;
-  source: string;
-  file: File | null;
-  media: File | null;
-  mediaType: string;
-  metrics: string;
-  insight: string;
-  impact: string;
+  scope: string;
   origin: string;
+  file: File | null;
+  video: File | null;
   date: string;
-  geographicScope: string;
-  thematicCategory: string;
-  summary: string;
+  category:string;
+  impact: string;
+  source: string;
+  region: string;
+  woreda_kebele:string;
+  zone_subcity:string
+  metrics: string;
+  cehro_insights: string;
+  status?:string;
+  postedBy?: string;
 }
+

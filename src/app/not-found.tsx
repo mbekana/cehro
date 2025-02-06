@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import React from 'react';
-import { FaRegSadCry } from 'react-icons/fa'; 
+import Link from "next/link";
+import React from "react";
+import { FaRegSadCry } from "react-icons/fa";
 
 const NotFoundPage = () => {
   return (
@@ -9,8 +9,10 @@ const NotFoundPage = () => {
         <FaRegSadCry size={50} />
       </div>
 
-      <h1 className="text-4xl font-extrabold text-white mb-4">404 - Page Not Found</h1>
-      
+      <h1 className="text-4xl font-extrabold text-white mb-4">
+        404 - Page Not Found
+      </h1>
+
       <p className="text-lg text-gray-300 mb-8">
         Sorry, we could not find the page you are looking for.
       </p>
@@ -23,7 +25,7 @@ const NotFoundPage = () => {
           Go to Homepage
         </Link>
         <a
-          href="/contact" 
+          href="/contact"
           className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition"
         >
           Contact Support

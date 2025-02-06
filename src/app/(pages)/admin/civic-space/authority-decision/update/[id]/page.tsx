@@ -9,73 +9,94 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
+import Cookies from "js-cookie";
+import { AuthorityDecision } from "@/app/model/AuthorityDecision";
 import { useParams } from "next/navigation";
 
 const AuthorityDecisionForm = () => {
   const { id } = useParams();
-  const [metrics, setMetrics] = useState<any[]>([]);
-  const [regions, setRegions] = useState<Impact[]>([]);
-  const [sources, setSources] = useState<any[]>([]);
   const [impacts, setImpacts] = useState<Impact[]>([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [origins, setOrigins] = useState<any[]>([]);
-  const [geographicScopes, setGeographicsScopes] = useState<any[]>([]);
-  const [thematicCategories, setThematicCategories] = useState<any[]>([]);
-  const [formData, setFormData] = useState<any>({
+  const [sources, setSources] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [authorityDecision, setAuthorityDecision] =
+    useState<AuthorityDecision>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
+  const [formData, setFormData] = useState<AuthorityDecision>({
     title: "",
-    city: "",
-    region: "",
-    source: "",
+    scope: "",
     file: null,
-    media: null,
-    mediaType: "",
-    metrics: "",
-    insight: "",
-    impact: "",
-    origin: "",
+    video: null,
+    region: "",
     date: "",
-    geographicScope:"",
-    thematicCategory:"",
-    summary:""
+    origin: "",
+    impact: "",
+    woreda_kebele: "",
+    zone_subcity: "",
+    metrics: "",
+    category: "",
+    source: "",
+    summary: "",
+    cehro_insights: "",
   });
 
   useEffect(() => {
     fetchMetrics();
+    fetchImpacts();
     fetchRegions();
     fetchSources();
-    fetchImpacts();
     fetchThematicCategories();
-    if (id && (typeof id === 'string' || typeof id === 'number')) {
-      fetchDataForEdit(id);
-    }
-    
-    const origs = [
-      { id: 1, name: "New" },
-      { id: 2, name: "Revised" },
-    ];
+    fetchAuthorityDecision();
+  }, []);
 
-    const geographicScope = [
-      { id: 1, name: "National" },
-      { id: 2, name: "Regional" },
-    ];
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
-    setOrigins(origs);
-    setGeographicsScopes(geographicScope);
-    setThematicCategories(thematicCategories);
-  }, [id]);
-
-  const fetchDataForEdit = async (id: string) => {
+  const fetchSources = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        console.log("DATA: ", data)
-        setFormData(data); 
+        setSources(data.data);
       } else {
-        console.error("Failed to fetch data for edit");
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchAuthorityDecision = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(
+        `${apiUrl}/api/v1/authorative-decisions/${id}`,
+        {
+          method: "GET",
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAuthorityDecision(data.data);
+        setFormData(data.data);
+      } else {
+        console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -85,40 +106,12 @@ const AuthorityDecisionForm = () => {
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
-      } else {
-        console.error("Failed to fetch data");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const fetchRegions = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
-      if (response.ok) {
-        const data = await response.json();
-        setRegions(data);
-      } else {
-        console.error("Failed to fetch data");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const fetchSources = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
-      if (response.ok) {
-        const data = await response.json();
-        setSources(data);
+        setMetrics(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -130,10 +123,12 @@ const AuthorityDecisionForm = () => {
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -146,10 +141,12 @@ const AuthorityDecisionForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/thematicCategories`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/thematic-categories/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setThematicCategories(data);
+        setCategories(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -160,7 +157,28 @@ const AuthorityDecisionForm = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const fetchRegions = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRegions(data.data);
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -168,54 +186,30 @@ const AuthorityDecisionForm = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: "file" | "media") => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "file" | "video"
+  ) => {
     const file = e.target.files ? e.target.files[0] : null;
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: file,
+    }));
+
     if (file) {
-      const maxFileSize = 5 * 1024 * 1024;
-      if (file.size > maxFileSize) {
-        setError("File size exceeds the maximum limit of 5 MB.");
-        return;
-      }
-
       const extension = file.name.split(".").pop()?.toLowerCase();
-      const allowedImageExtensions = ["jpg", "png", "jpeg"];
-      const allowedVideoExtensions = ["mp4", "avi"];
-      const allowedPdfExtensions = ["pdf"];
-
-      if (
-        (field === "media" &&
-          !allowedImageExtensions.includes(extension) &&
-          !allowedVideoExtensions.includes(extension)) ||
-        (field === "file" && !allowedPdfExtensions.includes(extension))
-      ) {
-        setError("Invalid file type. Please upload a valid file.");
-        return;
-      }
-
-      setError(null);
-
-      setFormData((prevData) => ({
-        ...prevData,
-        [field]: file,
-      }));
-
-      if (extension) {
-        if (allowedImageExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "image",
-          }));
-        } else if (allowedVideoExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "video",
-          }));
-        } else if (allowedPdfExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "pdf",
-          }));
-        }
+      if (extension === "jpg" || extension === "png" || extension === "jpeg") {
+        setFormData((prevData) => ({
+          ...prevData,
+        }));
+      } else if (extension === "mp4" || extension === "avi") {
+        setFormData((prevData) => ({
+          ...prevData,
+        }));
+      } else if (extension === "pdf") {
+        setFormData((prevData) => ({
+          ...prevData,
+        }));
       }
     }
   };
@@ -223,69 +217,143 @@ const AuthorityDecisionForm = () => {
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    const formPayload = {
-      ...formData,
-      file: formData.file ? formData.file.name : null,
-      media: formData.media ? formData.media.name : null,
-      status: "PENDING",
-    };
+    if (
+      !formData.title ||
+      !formData.date ||
+      !formData.impact ||
+      !formData.region ||
+      !formData.source
+    ) {
+      setToast({
+        message: "Please fill in all required fields.",
+        type: "error",
+        position: "top-right",
+      });
+      return;
+    }
+
+    const formPayload = new FormData();
+    formPayload.append("title", formData.title);
+    formPayload.append("date", formData.date);
+    formPayload.append("impact", formData.impact);
+    formPayload.append("region", formData.region);
+    formPayload.append("origin", formData.origin);
+    formPayload.append("woreda_kebele", formData.woreda_kebele);
+    formPayload.append("zone_subcity", formData.zone_subcity);
+    formPayload.append("metrics", formData.metrics);
+    formPayload.append("category", formData.category);
+    formPayload.append("scope", formData.scope);
+    formPayload.append("summary", formData.summary);
+    formPayload.append("cehro_insights", formData.cehro_insights);
+    formPayload.append("source", formData.source);
+    formPayload.append("status", "PENDING");
+    formPayload.append("postedById", userData?.id);
+
+    if (formData.file) {
+      formPayload.append("file", formData.file);
+    }
+    if (formData.video) {
+      formPayload.append("video", formData.video);
+    }
 
     setLoading(true);
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formPayload),
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/authorative-decisions/${id}`,
+        {
+          method: "PATCH",
+          body: formPayload,
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Data updated successfully:", result);
         setFormData({
           title: "",
-          city: "",
-          region: "",
-          source: "",
+          scope: "",
           file: null,
-          media: null,
-          mediaType: "",
-          metrics: "",
-          insight: "",
-          impact: "",
+          video: null,
+          region: "",
+          date: null,
           origin: "",
-          date: "",
-          geographicScope: "",
-          thematicCategory: "",
-          summary: ""
+          impact: "",
+          woreda_kebele: "",
+          zone_subcity: "",
+          metrics: "",
+          category: "",
+          source: "",
+          summary: "",
+          cehro_insights: "",
         });
-        setSuccess("Legal Framework Updated Successfully!");
-        setError(null);
-        setLoading(false);
+        setToast({
+          message: "You have updated data successfully.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Error updating data", response);
-        alert("There was an error updating the legal framework.");
+        throw new Error("Failed to update data.");
       }
     } catch (error) {
-      setSuccess(null);
-      setError(error);
+      setToast({
+        message: error.message || "An error occurred while updating the form.",
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
       setLoading(false);
     }
   };
 
+  const renderFilePreview = (file: File | null) => {
+    if (!file) return null;
+    const fileUrl = URL.createObjectURL(file);
+
+    if (file.type.startsWith("image/")) {
+      return (
+        <img
+          src={fileUrl}
+          alt="preview"
+          className="mt-2 w-32 h-32 object-cover"
+        />
+      );
+    }
+
+    if (file.type.startsWith("video/")) {
+      return (
+        <video controls className="mt-2 w-32 h-32">
+          <source src={fileUrl} />
+        </video>
+      );
+    }
+
+    if (file.type === "application/pdf") {
+      return (
+        <div className="mt-2 w-32 h-32 overflow-auto">
+          <iframe
+            src={fileUrl}
+            title="pdf preview"
+            className="w-full h-full"
+          ></iframe>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
-        title="Authoritative Decision Making"
+        title="Authority Decision"
         borderColor="border-primary"
         borderThickness="border-b-4"
         shouldGoBack={true}
       >
         <Card
-          title="Authoritative Decision Form"
+          title="Authority Decision Form"
           borderColor="border-red-300"
           borderThickness="border-1"
           bgColor="bg-grey-100"
@@ -297,13 +365,13 @@ const AuthorityDecisionForm = () => {
             marginBottom="mb-6"
           />
 
-<form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
                   type="text"
-                  label="Title of Authorative Decision"
-                  placeholder="Title of Authorative Decision"
+                  label="Title"
+                  placeholder="Title"
                   value={formData.title}
                   onChange={handleChange}
                   name="title"
@@ -311,71 +379,29 @@ const AuthorityDecisionForm = () => {
               </div>
               <div>
                 <Input
-                  type="select"
-                  label="Geographic Scope"
-                  placeholder="Geographic Scope"
-                  value={formData.geographicScope}
+                  type="text"
+                  label="Scope"
+                  placeholder="Scope"
+                  value={formData.scope}
                   onChange={handleChange}
-                  name="geographicScope"
-                >
-                  <option value="">Select Geographic Scope</option>
-                  {geographicScopes && geographicScopes.length > 0 ? (
-                    geographicScopes.map((geographicScope, index) => (
-                      <option key={index} value={geographicScope.id}>
-                        {geographicScope.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No origins available</option>
-                  )}
-                </Input>
+                  name="scope"
+                />
               </div>
               <div>
                 <Input
-                  type="select"
-                  label="Source"
-                  placeholder=" source"
-                  value={formData.source}
-                  onChange={handleChange}
-                  name="source"
-                >
-                  <option value="">Select Source</option>
-                  {sources.map((source, index) => (
-                    <option key={index} value={source.id}>
-                      {source.name}
-                    </option>
-                  ))}
-                </Input>
-              </div>
-
-              <div>
-                <Input
-                  type="select"
-                  label="Origin of the Authoritative Decision"
-                  placeholder="Origin of the Authoritative Decision"
+                  type="text"
+                  label="Origin"
+                  placeholder="Origin"
                   value={formData.origin}
                   onChange={handleChange}
                   name="origin"
-                >
-                  <option value="">Select Origin of Legal Framework</option>
-                  {origins && origins.length > 0 ? (
-                    origins.map((origin, index) => (
-                      <option key={index} value={origin.id}>
-                        {origin.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No origins available</option>
-                  )}
-                </Input>
+                />
               </div>
-
-
               <div>
                 <Input
                   type="date"
                   label="Date"
-                  placeholder="Select date"
+                  placeholder="Date"
                   value={formData.date}
                   onChange={handleChange}
                   name="date"
@@ -384,30 +410,35 @@ const AuthorityDecisionForm = () => {
               <div>
                 <Input
                   type="text"
-                  label="City"
-                  placeholder=" city"
-                  value={formData.city}
+                  label="Woreda/kebele"
+                  placeholder="Woreda/Kebele"
+                  value={formData.woreda_kebele}
                   onChange={handleChange}
-                  name="city"
+                  name="woreda_kebele"
                 />
               </div>
-             
+              <div>
+                <Input
+                  type="text"
+                  label="Zone/Subcity"
+                  placeholder="Zone/Subcity"
+                  value={formData.zone_subcity}
+                  onChange={handleChange}
+                  name="zone_subcity"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   File Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="file"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select File
-                  </label>
                   <input
                     id="file"
                     type="file"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, "file")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                   />
                   {formData.file && (
                     <span className="text-sm text-gray-600 ml-2">
@@ -415,6 +446,7 @@ const AuthorityDecisionForm = () => {
                     </span>
                   )}
                 </div>
+                {/* {renderFilePreview(formData.file)} */}
               </div>
 
               <div>
@@ -422,45 +454,54 @@ const AuthorityDecisionForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="media"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select Media
-                  </label>
                   <input
-                    id="media"
+                    id="video"
                     type="file"
-                    onChange={(e) => handleFileChange(e, "media")}
-                    className="hidden"
+                    accept="image/*,video/*"
+                    onChange={(e) => handleFileChange(e, "video")}
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
                   />
-                  {formData.media && (
+                  {formData.video && (
                     <span className="text-sm text-gray-600 ml-2">
-                      {formData.media.name}
+                      {formData.video.name}
                     </span>
                   )}
                 </div>
+                {/* {renderFilePreview(formData.video)} */}
               </div>
-     
               <div>
                 <Input
                   type="select"
-                  label="Region"
-                  placeholder="Region"
-                  value={formData.region}
+                  label="Thematic Category"
+                  value={formData.category}
                   onChange={handleChange}
-                  name="region"
+                  name="category"
                 >
-                  <option value="">Select Regions</option>
-                  {regions.map((region, index) => (
-                    <option key={index} value={region.id}>
-                      {region.name}
+                  <option value="">Select Thematic Category</option>
+                  {categories.map((category, index) => (
+                    <option key={index} value={category.category}>
+                      {category.category}
                     </option>
                   ))}
                 </Input>
               </div>
-
-           
+              <div>
+                <Input
+                  type="select"
+                  label="Source"
+                  placeholder="Source"
+                  value={formData.source}
+                  onChange={handleChange}
+                  name="source"
+                >
+                  <option value="">Select Source</option>
+                  {sources.map((source, index) => (
+                    <option key={index} value={source.source}>
+                      {source.source}
+                    </option>
+                  ))}
+                </Input>
+              </div>
               <div>
                 <Input
                   type="select"
@@ -472,12 +513,31 @@ const AuthorityDecisionForm = () => {
                 >
                   <option value="">Select Metrics</option>
                   {metrics.map((metric, index) => (
-                    <option key={index} value={metric.id}>
-                      {metric.name}
+                    <option key={index} value={metric.metrics}>
+                      {metric.metrics}
                     </option>
                   ))}
                 </Input>
               </div>
+
+              <div>
+                <Input
+                  type="select"
+                  label="Region"
+                  placeholder=" region"
+                  value={formData.region}
+                  onChange={handleChange}
+                  name="region"
+                >
+                  <option value="">Select Region</option>
+                  {regions.map((region, index) => (
+                    <option key={index} value={region.id}>
+                      {region.name}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+
               <div>
                 <Input
                   type="select"
@@ -488,81 +548,54 @@ const AuthorityDecisionForm = () => {
                 >
                   <option value="">Select Impact</option>
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
-              </div>
-
-              <div>
-                <Input
-                  type="select"
-                  label="Thematic Category"
-                  placeholder="Thematic Category"
-                  value={formData.thematicCategory}
-                  onChange={handleChange}
-                  name="thematicCategory"
-                >
-                  <option value="">Select Thematic Category</option>
-                  {thematicCategories.map((thematicCategory, index) => (
-                    <option key={index} value={thematicCategory.id}>
-                      {thematicCategory.name}
-                    </option>
-                  ))}
-                </Input>
-              </div>
-              <div>
-                <Input
-                  type="textarea"
-                  label="Summary of Authoratice Decision"
-                  placeholder="Summary of Authoratice Decision"
-                  value={formData.summary}
-                  onChange={handleChange}
-                  name="summary"
-                />
-              </div>
-              <div>
-                <Input
-                  type="textarea"
-                  label="CEHRO's insight"
-                  placeholder="CEHRO's insight"
-                  value={formData.insight}
-                  onChange={handleChange}
-                  name="insight"
-                />
               </div>
             </div>
-
-            <div className="mt-4">
+            <div>
+              <Input
+                type="textarea"
+                label="Summary"
+                placeholder="Summary"
+                value={formData.summary}
+                onChange={handleChange}
+                name="summary"
+              />
+            </div>
+            <div>
+              <Input
+                type="textarea"
+                label="CEHOR's insight"
+                placeholder="CEHOR's insight"
+                value={formData.cehro_insights}
+                onChange={handleChange}
+                name="cehro_insights"
+              />
+            </div>
+            <div className="flex justify-end mt-4 mr-24">
+              {" "}
               <Button
                 color="primary"
-                text={loading ? "Saving..." : "Authorative Decision"}
+                text={loading ? "Saving..." : "Authority Decision"}
                 onClick={handleSubmit}
                 icon={<FaPlus />}
                 size="large"
               />
             </div>
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

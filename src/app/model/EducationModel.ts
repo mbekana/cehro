@@ -1,6 +1,6 @@
 export interface Education {
-    id: number;
-    name: string;
+    id?: number;
+    education: string;
     remark: string;
   }
   

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
@@ -8,21 +8,21 @@ import { FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
-
-type ImpactFormData = {
-  name: string;
-  remark: string;
-};
+import { Impact } from "@/app/model/Impact";
+import Toast from "@/app/components/UI/Toast";
 
 const UpdateImpactForm = () => {
-  const { id } = useParams(); // Get impact ID from URL
-  const [formData, setFormData] = useState<ImpactFormData>({
-    name: "",
+  const { id } = useParams();
+  const [formData, setFormData] = useState<Impact>({
+    impact: "",
     remark: "",
   });
 
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -30,12 +30,12 @@ const UpdateImpactForm = () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
         try {
-          const response = await fetch(`${apiUrl}/impacts/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/impacts/${id}`);
           if (response.ok) {
             const data = await response.json();
             setFormData({
-              name: data.name,
-              remark: data.remark,
+              impact: data.data.impact,
+              remark: data.data.remark,
             });
           } else {
             console.error("Impact not found");
@@ -49,7 +49,9 @@ const UpdateImpactForm = () => {
     }
   }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -62,8 +64,8 @@ const UpdateImpactForm = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const response = await fetch(`${apiUrl}/impacts/${id}`, {
-        method: "PUT",
+      const response = await fetch(`${apiUrl}/api/v1/impacts/${id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -74,13 +76,18 @@ const UpdateImpactForm = () => {
         throw new Error("Failed to update impact");
       }
 
-      setSuccessMessage("Impact updated successfully");
-
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setFormData({ impact: "", remark: "" });
+      setToast({
+        message: "You have updated Impact successfully.",
+        type: "success",
+        position: "top-right",
+      });
     } catch (error) {
-      setError(`Error: ${error}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
@@ -104,7 +111,7 @@ const UpdateImpactForm = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-    
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col space-y-4">
               <div>
@@ -112,13 +119,13 @@ const UpdateImpactForm = () => {
                   type="text"
                   label="Impact Name"
                   placeholder="Enter name"
-                  value={formData.name}
+                  value={formData.impact}
                   onChange={handleChange}
-                  name="name"
+                  name="impact"
                   className="w-full"
                 />
               </div>
-    
+
               <div>
                 <Input
                   type="textarea"
@@ -132,26 +139,28 @@ const UpdateImpactForm = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text="Save Impact"
+                size="large"
+                elevation={4}
+                borderRadius={3}
+                onClick={handleSubmit}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
-    
-      {successMessage && (
-        <div className="mt-4 text-center text-green-500">{successMessage}</div>
-      )}
 
-      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
-    
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text="Save Impact"
-          size="large"
-          elevation={4}
-          borderRadius={3} 
-          onClick={handleSubmit}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
-      </div>
+      )}
     </div>
   );
 };

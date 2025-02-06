@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { useParams } from "next/navigation";
 
 const SourceDetailsPage = () => {
@@ -18,11 +18,11 @@ const SourceDetailsPage = () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/sources/${id}`, { method: 'GET' }); 
+          const response = await fetch(`${apiUrl}/api/v1/sources/${id}`, { method: 'GET' }); 
           if (response.ok) {
             const data = await response.json();
             console.log("Source Data: ", data);
-            setSource(data); // Set the source data to state
+            setSource(data.data); 
           } else {
             console.error("Source not found");
           }
@@ -46,12 +46,13 @@ const SourceDetailsPage = () => {
   }
 
   return (
-    <div className="bg-white">
+    <div >
       <BoxWrapper
-        icon={<FaInfoCircle />}
-        title="Source of Information Details"
+        icon={<FaArrowLeft />}
+        title="Source Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Source Information"

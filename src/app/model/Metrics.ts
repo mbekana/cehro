@@ -1,5 +1,5 @@
 export class Metrics {
-  id: number;
-  name: string;
+  id?: number;
+  metrics: string;
   remark: string;
 }

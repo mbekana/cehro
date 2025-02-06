@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
@@ -8,21 +8,32 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import Toast from "@/app/components/UI/Toast";
-
-type RegionFormData = {
-  name: string;
-  remark: string;
-};
+import Cookies from "js-cookie";
+import { Category } from "@/app/model/CategoryModel";
 
 const CategoryForm = () => {
-  const [formData, setFormData] = useState<RegionFormData>({
-    name: "",
+  const [formData, setFormData] = useState<Category>({
+    category: "",
     remark: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -41,29 +52,33 @@ const CategoryForm = () => {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/categories`, {
+      const payload = { ...formData, createdBy: userData?.id };
+      const response = await fetch(`${apiUrl}/api/v1/categories/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error("Failed to create category");
       }
-
-      const result = await response.json();
-      setSuccess(`Category created successfully: ${result.name}`);
-      setError(null);
       setFormData({
-        name: "",
+        category: "",
         remark: "",
       });
+      setToast({
+        message: "You have created category successfully.",
+        type: "success",
+        position: "top-right",
+      });
     } catch (error: any) {
-      setSuccess(null);
-      setError(`${error.message}`);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -98,9 +113,9 @@ const CategoryForm = () => {
                   type="text"
                   label="Category Name"
                   placeholder="Enter Category Name"
-                  value={formData.name}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="name"
+                  name="category"
                   className="w-full"
                 />
               </div>
@@ -118,37 +133,28 @@ const CategoryForm = () => {
                 />
               </div>
             </div>
+            <div className="flex justify-end mt-4 mr-24">
+              <Button
+                color="primary"
+                text={isSubmitting ? "Submitting..." : "Save Category"}
+                size="large"
+                elevation={4}
+                disabled={isSubmitting}
+                onClick={handleSubmit}
+                icon={<FaPlus />}
+              />
+            </div>
           </form>
         </Card>
       </BoxWrapper>
-
-      {success && (
+      {toast && (
         <Toast
-          type="success"
-          message={success}
-          position={"top-right"}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
-
-      {error && (
-        <Toast
-          type="error"
-          message={error}
-          position={"top-right"}
-        />
-      )}
-
-      <div className="flex justify-end mt-4 mr-24">
-        <Button
-          color="primary"
-          text={isSubmitting ? "Submitting..." : "Save Category"}
-          size="large"
-          elevation={4}
-          disabled={isSubmitting}
-          onClick={handleSubmit}
-          icon={<FaPlus />}
-        />
-      </div>
     </div>
   );
 };

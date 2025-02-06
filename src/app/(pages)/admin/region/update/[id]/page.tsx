@@ -1,40 +1,59 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
-import { useParams } from "next/navigation"; 
+import { useParams } from "next/navigation";
 import { Region } from "@/app/model/RegionModel";
-
-
+import Toast from "@/app/components/UI/Toast"; // Import Toast component
+import Cookies from "js-cookie";
 
 const UpdateRegionForm = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState<Region>({
     name: "",
-    lat: 0,
-    long: 0,
+    lattitude: "",
+    longitude: "",
     city: "",
   });
-  const [loading, setLoading] = useState<boolean>(true); 
-  const [error, setError] = useState<string | null>(null); 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null); // State to manage Toast
+
+
+  useEffect(() => {
+        console.log("HI: ", Cookies.get("userData"));
+        const user = Cookies.get("userData")
+          ? JSON.parse(Cookies.get("userData")!)
+          : null;
+        setUserData(user);
+      }, []);
+  
 
   useEffect(() => {
     if (id) {
       const fetchRegionData = async () => {
         try {
-          const response = await fetch(`/admin/api/region/${id}`, {method:'GET'});
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const response = await fetch(`${apiUrl}/api/v1/regions/${id}`, {
+            method: "GET",
+          });
           if (response.ok) {
             const data = await response.json();
             setFormData({
-              name: data.name,
-              lat: data.lat, 
-              long: data.long,
-              city: data.city,
+              name: data.data.name,
+              lattitude: data.data.lattitude,
+              longitude: data.data.longitude,
+              city: data.data.city,
             });
           } else {
             setError("Failed to fetch region data");
@@ -56,7 +75,7 @@ const UpdateRegionForm = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === "lat" || name === "long" ? Number(value) : value,
+      [name]: name === "lattitude" || name === "longitude" ? value : value,
     }));
   };
 
@@ -64,22 +83,42 @@ const UpdateRegionForm = () => {
     e.preventDefault();
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/regions/${id}`, {
+      const payload = {...formData, updatedById:userData?.id};
+      const response = await fetch(`${apiUrl}/api/v1/regions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        alert("Region updated successfully!");
+        setToast({
+          message: "Region updated successfully!",
+          type: "success",
+          position: "top-right",
+        });
+        setFormData({
+          name: "",
+          lattitude: "",
+          longitude: "",
+          city: "",
+        });
       } else {
         setError("Failed to update region");
+        setToast({
+          message: "Failed to update region",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
       setError(`${error}`);
+      setToast({
+        message: "An error occurred",
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
@@ -92,12 +131,13 @@ const UpdateRegionForm = () => {
   }
 
   return (
-    <div className="bg-white pb-5">
+    <div className=" pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Region Maintenance"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Region Form"
@@ -112,7 +152,7 @@ const UpdateRegionForm = () => {
             marginBottom="mb-6"
           />
 
-          <form  className="space-y-6">
+          <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -121,29 +161,29 @@ const UpdateRegionForm = () => {
                   placeholder="Enter region name"
                   value={formData.name}
                   onChange={handleChange}
-                  name="regionName"
+                  name="name" // Corrected name attribute
                 />
               </div>
 
               <div>
                 <Input
-                  type="number"
+                  type="text"
                   label="Latitude"
                   placeholder="Enter latitude"
-                  value={formData.lat.toString()}
+                  value={formData.lattitude}
                   onChange={handleChange}
-                  name="lat"
+                  name="lattitude"
                 />
               </div>
 
               <div>
                 <Input
-                  type="number"
+                  type="text"
                   label="Longitude"
                   placeholder="Enter longitude"
-                  value={formData.long.toString()}
+                  value={formData.longitude}
                   onChange={handleChange}
-                  name="long"
+                  name="longitude"
                 />
               </div>
 
@@ -154,7 +194,7 @@ const UpdateRegionForm = () => {
                   placeholder="Enter city name"
                   value={formData.city}
                   onChange={handleChange}
-                  name="main_city"
+                  name="city"
                 />
               </div>
             </div>
@@ -171,8 +211,16 @@ const UpdateRegionForm = () => {
           borderRadius={3}
           onClick={handleSubmit}
         />
- 
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

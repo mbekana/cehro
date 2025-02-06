@@ -10,36 +10,55 @@ import Button from "@/app/components/UI/Button";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
 import { LegalFramework } from "@/app/model/LegalFramework";
-
+import { Region } from "@/app/model/RegionModel";
+import Cookies from "js-cookie";
 
 const LegalFrameworkForm = () => {
   const [metrics, setMetrics] = useState<any[]>([]);
-  const [regions, setRegions] = useState<Impact[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
   const [sources, setSources] = useState<any[]>([]);
   const [impacts, setImpacts] = useState<Impact[]>([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [origins, setOrigins] = useState<any[]>([]);
   const [geographicScopes, setGeographicsScopes] = useState<any[]>([]);
-  const [thematicCategories, setThematicCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [filePreview, setFilePreview] = useState<any>(null);
+  const [mediaType, setMediaType] = useState<any>(null);
+  const [fileType, setFileType] = useState<any>(null);
+  const [mediaPreview, setMediaPreview] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
   const [formData, setFormData] = useState<LegalFramework>({
     title: "",
-    city: "",
-    region: "",
-    source: "",
-    file: null,
-    media: null,
-    mediaType: "",
-    metrics: "",
-    insight: "",
-    impact: "",
+    scope: "",
     origin: "",
+    file: null,
+    video: null,
     date: "",
-    geographicScope:"",
-    thematicCategory:"",
-    summary:""
+    category: "",
+    impact: "",
+    source: "",
+    region: "",
+    woreda_kebele: "",
+    zone_subcity: "",
+    metrics: "",
+    cehro_insights: "",
+    status: "",
+    postedBy: "",
   });
+
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
 
   useEffect(() => {
     fetchMetrics();
@@ -58,17 +77,19 @@ const LegalFrameworkForm = () => {
     ];
 
     setOrigins(origs);
-    setGeographicsScopes(geographicScope)
-    setThematicCategories(thematicCategories)
+    setGeographicsScopes(geographicScope);
+    setCategories(categories);
   }, []);
 
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
+        setMetrics(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -80,10 +101,12 @@ const LegalFrameworkForm = () => {
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
+        setRegions(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -95,10 +118,12 @@ const LegalFrameworkForm = () => {
   const fetchSources = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setSources(data);
+        setSources(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -110,10 +135,12 @@ const LegalFrameworkForm = () => {
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -126,10 +153,12 @@ const LegalFrameworkForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/thematicCategories`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/categories/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setThematicCategories(data);
+        setCategories(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -151,121 +180,193 @@ const LegalFrameworkForm = () => {
       [name]: value,
     }));
   };
+  const validateFile = (
+    selectedFile: File,
+    field: "file" | "media"
+  ): string | null => {
+    const maxFileSize = 5 * 1024 * 1024; // 5MB max
+    if (selectedFile.size > maxFileSize) {
+      return "File size exceeds the maximum limit of 5 MB.";
+    }
+
+    const extension = selectedFile.name.split(".").pop()?.toLowerCase();
+    const allowedImageExtensions = ["jpg", "png", "jpeg"];
+    const allowedVideoExtensions = ["mp4", "avi"];
+    const allowedPdfExtensions = ["pdf"];
+
+    if (
+      (field === "media" &&
+        !allowedImageExtensions.includes(extension) &&
+        !allowedVideoExtensions.includes(extension)) ||
+      (field === "file" && !allowedPdfExtensions.includes(extension))
+    ) {
+      return "Invalid file type. Please upload a valid file.";
+    }
+
+    return null;
+  };
+
+  const generateFilePreview = (selectedFile: File): string => {
+    return URL.createObjectURL(selectedFile);
+  };
+
+  const updateFormData = (
+    field: "file" | "media",
+    selectedFile: File,
+    filePreview: string
+  ) => {
+    const extension = selectedFile.name.split(".").pop()?.toLowerCase();
+    const allowedImageExtensions = ["jpg", "png", "jpeg"];
+    const allowedVideoExtensions = ["mp4", "avi"];
+    const allowedPdfExtensions = ["pdf"];
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: selectedFile,
+      [`${field}Preview`]: filePreview,
+    }));
+
+    if (extension) {
+      if (allowedImageExtensions.includes(extension)) {
+        setFormData((prevData) => ({
+          ...prevData,
+          mediaType: "image",
+        }));
+      } else if (allowedVideoExtensions.includes(extension)) {
+        setFormData((prevData) => ({
+          ...prevData,
+          mediaType: "video",
+        }));
+      } else if (allowedPdfExtensions.includes(extension)) {
+        setFormData((prevData) => ({
+          ...prevData,
+          mediaType: "pdf",
+        }));
+      }
+    }
+  };
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "file" | "media"
   ) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    if (file) {
-      const maxFileSize = 5 * 1024 * 1024;
-      if (file.size > maxFileSize) {
-        setError("File size exceeds the maximum limit of 5 MB.");
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+
+    if (selectedFile) {
+      const fileError = validateFile(selectedFile, field);
+      if (fileError) {
         return;
       }
 
-      const extension = file.name.split(".").pop()?.toLowerCase();
-      const allowedImageExtensions = ["jpg", "png", "jpeg"];
-      const allowedVideoExtensions = ["mp4", "avi"];
-      const allowedPdfExtensions = ["pdf"];
+      const filePreview = generateFilePreview(selectedFile);
 
-      if (
-        (field === "media" &&
-          !allowedImageExtensions.includes(extension) &&
-          !allowedVideoExtensions.includes(extension)) ||
-        (field === "file" && !allowedPdfExtensions.includes(extension))
-      ) {
-        setError("Invalid file type. Please upload a valid file.");
-        return;
-      }
-
-      setError(null);
-
-      setFormData((prevData) => ({
-        ...prevData,
-        [field]: file,
-      }));
-
-      if (extension) {
-        if (allowedImageExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "image",
-          }));
-        } else if (allowedVideoExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "video",
-          }));
-        } else if (allowedPdfExtensions.includes(extension)) {
-          setFormData((prevData) => ({
-            ...prevData,
-            mediaType: "pdf",
-          }));
+      setFormData((prevData) => {
+        const updatedData: any = { ...prevData };
+        if (field === "file") {
+          updatedData[field] = selectedFile;
+        } else {
+          updatedData["video"] = selectedFile;
         }
-      }
+
+        if (field === "media") {
+          setMediaPreview(filePreview);
+          const mediaType = selectedFile.type.includes("image")
+            ? "image"
+            : selectedFile.type.includes("video")
+            ? "video"
+            : "";
+          setMediaType(mediaType);
+        } else if (field === "file") {
+          setFilePreview(filePreview);
+          setFileType("pdf");
+        }
+
+        return updatedData;
+      });
     }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    const formPayload = {
-      ...formData,
-      file: formData.file ? formData.file.name : null,
-      media: formData.media ? formData.media.name : null,
-      status: "PENDING",
-    };
+    const formDataObj = new FormData();
+    formDataObj.append("title", formData.title);
+    formDataObj.append("scope", formData.scope);
+    formDataObj.append("origin", formData.origin);
+    formDataObj.append("date", formData.date);
+    formDataObj.append("category", formData.category);
+    formDataObj.append("impact", formData.impact);
+    formDataObj.append("source", formData.source);
+    formDataObj.append("region", formData.region);
+    formDataObj.append("woreda_kebele", formData.woreda_kebele);
+    formDataObj.append("zone_subcity", formData.zone_subcity);
+    formDataObj.append("metrics", formData.metrics);
+    formDataObj.append("cehro_insights", formData.cehro_insights);
+    formDataObj.append("status", "PENDING");
+    formDataObj.append("postedById", userData?.id);
+
+    if (formData.file) formDataObj.append("file", formData.file);
+    if (formData.video) formDataObj.append("video", formData.video);
 
     setLoading(true);
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(`${apiUrl}/legalFrameworks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formPayload),
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/legal-frameworks/register`,
+        {
+          method: "POST",
+          body: formDataObj,
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Data saved successfully:", result);
+        setToast({
+          message: "Data saved successfully.",
+          type: "success",
+          position: "top-right",
+        });
         setFormData({
           title: "",
-          city: "",
-          region: "",
-          source: "",
-          file: null,
-          media: null,
-          mediaType: "",
-          metrics: "",
-          insight: "",
-          impact: "",
+          scope: "",
           origin: "",
+          file: null,
+          video: null,
           date: "",
-          geographicScope:"",
-          thematicCategory:"",
-          summary:""
+          category: "",
+          impact: "",
+          source: "",
+          region: "",
+          woreda_kebele: "",
+          zone_subcity: "",
+          metrics: "",
+          cehro_insights: "",
+          status: "",
+          postedBy: "",
         });
-        setSuccess("Legal Framework Saved Successfully!");
-        setError(null);
-        setLoading(false);
       } else {
         console.error("Error saving data", response);
-
-        alert("There was an error saving the legal framework.");
+        setToast({
+          message: "There was an error saving the legal framework",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
-      setSuccess(null);
-      setError(error);
+      console.error("Submission error:", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
         icon={<FaArrowLeft />}
         title="Legal Framework Maintenance"
@@ -303,22 +404,23 @@ const LegalFrameworkForm = () => {
                   type="select"
                   label="Geographic Scope"
                   placeholder="Geographic Scope"
-                  value={formData.geographicScope}
+                  value={formData.scope}
                   onChange={handleChange}
-                  name="geographicScope"
+                  name="scope"
                 >
                   <option value="">Select Geographic Scope</option>
                   {geographicScopes && geographicScopes.length > 0 ? (
                     geographicScopes.map((geographicScope, index) => (
-                      <option key={index} value={geographicScope.id}>
+                      <option key={index} value={geographicScope.name}>
                         {geographicScope.name}
                       </option>
                     ))
                   ) : (
-                    <option value="">No origins available</option>
+                    <option value="">No geographic scopes available</option>
                   )}
                 </Input>
               </div>
+
               <div>
                 <Input
                   type="select"
@@ -341,7 +443,6 @@ const LegalFrameworkForm = () => {
                 </Input>
               </div>
 
-
               <div>
                 <Input
                   type="date"
@@ -356,80 +457,82 @@ const LegalFrameworkForm = () => {
                 <Input
                   type="text"
                   label="City"
-                  placeholder=" city"
-                  value={formData.city}
+                  placeholder="City"
+                  value={formData.zone_subcity}
                   onChange={handleChange}
-                  name="city"
+                  name="zone_subcity"
                 />
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  label="Woreda/Kebele"
+                  placeholder="Woreda/Kebele"
+                  value={formData.woreda_kebele}
+                  onChange={handleChange}
+                  name="woreda_kebele"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Media
+                </label>
+                <input
+                  type="file"
+                  id="media"
+                  name="video"
+                  accept="image/*,video/*"
+                  onChange={(e) => handleFileChange(e, "media")}
+                  className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+                />
+                {mediaPreview && mediaType === "image" && (
+                  <img
+                    src={mediaPreview}
+                    alt="Preview"
+                    style={{ width: "100px", height: "auto" }}
+                  />
+                )}
+                {mediaPreview && mediaType === "video" && (
+                  <video width="200" controls>
+                    <source src={mediaPreview} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="file">Upload PDF</label>
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  accept=".pdf"
+                  onChange={(e) => handleFileChange(e, "file")}
+                  className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+                />
+                {filePreview && fileType === "pdf" && (
+                  <embed src={filePreview} width="200" height="200" />
+                )}
               </div>
               <div>
                 <Input
                   type="select"
                   label="Source"
-                  placeholder=" source"
+                  placeholder="Source"
                   value={formData.source}
                   onChange={handleChange}
                   name="source"
                 >
                   <option value="">Select Source</option>
                   {sources.map((source, index) => (
-                    <option key={index} value={source.id}>
-                      {source.name}
+                    <option key={index} value={source.source}>
+                      {source.source}
                     </option>
                   ))}
                 </Input>
               </div>
 
-          
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  File Upload
-                </label>
-                <div className="mt-1">
-                  <label
-                    htmlFor="file"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select File
-                  </label>
-                  <input
-                    id="file"
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "file")}
-                    className="hidden"
-                  />
-                  {formData.file && (
-                    <span className="text-sm text-gray-600 ml-2">
-                      {formData.file.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Media Upload
-                </label>
-                <div className="mt-1">
-                  <label
-                    htmlFor="media"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select Media
-                  </label>
-                  <input
-                    id="media"
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "media")}
-                    className="hidden"
-                  />
-                  {formData.media && (
-                    <span className="text-sm text-gray-600 ml-2">
-                      {formData.media.name}
-                    </span>
-                  )}
-                </div>
-              </div>
               <div>
                 <Input
                   type="select"
@@ -439,33 +542,33 @@ const LegalFrameworkForm = () => {
                   onChange={handleChange}
                   name="region"
                 >
-                  <option value="">Select Regions</option>
+                  <option value="">Select Region</option>
                   {regions.map((region, index) => (
-                    <option key={index} value={region.id}>
+                    <option key={index} value={region.name}>
                       {region.name}
                     </option>
                   ))}
                 </Input>
               </div>
 
-           
               <div>
                 <Input
                   type="select"
                   label="Metrics"
-                  placeholder=" metrics"
+                  placeholder="Metrics"
                   value={formData.metrics}
                   onChange={handleChange}
                   name="metrics"
                 >
                   <option value="">Select Metrics</option>
                   {metrics.map((metric, index) => (
-                    <option key={index} value={metric.id}>
-                      {metric.name}
+                    <option key={index} value={metric.name}>
+                      {metric.metrics}
                     </option>
                   ))}
                 </Input>
               </div>
+
               <div>
                 <Input
                   type="select"
@@ -476,8 +579,8 @@ const LegalFrameworkForm = () => {
                 >
                   <option value="">Select Impact</option>
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
@@ -487,70 +590,51 @@ const LegalFrameworkForm = () => {
                 <Input
                   type="select"
                   label="Thematic Category"
-                  placeholder="Thematic Category"
-                  value={formData.thematicCategory}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="thematicCategory"
+                  name="category"
                 >
                   <option value="">Select Thematic Category</option>
-                  {thematicCategories.map((thematicCategory, index) => (
-                    <option key={index} value={thematicCategory.id}>
-                      {thematicCategory.name}
+                  {categories.map((category, index) => (
+                    <option key={index} value={category.category}>
+                      {category.category}
                     </option>
                   ))}
                 </Input>
               </div>
+
               <div>
                 <Input
-                  type="textarea"
-                  label="Summary of Legal Framerwork"
-                  placeholder="Summary of Legal Framerwork"
-                  value={formData.summary}
+                  type="text"
+                  label="Cehros Insight"
+                  placeholder="Enter Insight"
+                  value={formData.cehro_insights}
                   onChange={handleChange}
-                  name="summary"
+                  name="cehro_insights"
                 />
               </div>
-              <div>
-                <Input
-                  type="textarea"
-                  label="CEHRO's insight"
-                  placeholder="CEHRO's insight"
-                  value={formData.insight}
-                  onChange={handleChange}
-                  name="insight"
+
+              <div className="mt-4">
+                <Button
+                  color="primary"
+                  text={loading ? "Saving..." : "Legal Framework"}
+                  onClick={handleSubmit}
+                  icon={<FaPlus />}
+                  size="large"
                 />
               </div>
             </div>
-
-            <div className="mt-4">
-              <Button
-                color="primary"
-                text={loading ? "Saving..." : "Legal Framework"}
-                onClick={handleSubmit}
-                icon={<FaPlus />}
-                size="large"
-              />
-            </div>
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,24 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaUser } from 'react-icons/fa';  // You can replace this with a suitable icon for "Role"
+import { FaArrowLeft, FaUser } from 'react-icons/fa';  
 import BoxWrapper from '@/app/components/UI/BoxWrapper';
 import Card from '@/app/components/UI/Card';
 import Divider from '@/app/components/UI/Divider';
-
 import { useParams } from 'next/navigation';
+import { Role } from '@/app/model/Role';
 
-type Role = {
-  id?: string;
-  name: string;
-  remark: string;
-};
 
 const RoleDetailPage = () => {
   const { id } = useParams();  
   const [role, setRole] = useState<Role | null>(null); 
   const [loading, setLoading] = useState<boolean>(true);  
-  const [error, setError] = useState<string | null>(null);  
+  const [error, setError] = useState<string | null>(null); 
   
   useEffect(() => {
     if (id) {
@@ -26,11 +21,11 @@ const RoleDetailPage = () => {
         setLoading(true);
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
-          const response = await fetch(`${apiUrl}/roles/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/roles/${id}`);
           
           if (response.ok) {
             const data = await response.json();
-            setRole(data);  
+            setRole(data.data);  
           } else {
             setError('Role not found');
           }
@@ -54,10 +49,11 @@ const RoleDetailPage = () => {
 
   return (
     <BoxWrapper
-      icon={<FaUser />}
-      title="Role Details"
-      borderColor="border-primary"
-      borderThickness="border-b-4"
+        icon={<FaArrowLeft />}
+        title="Role Detail"
+        borderColor="border-primary"
+        borderThickness="border-b-4"
+        shouldGoBack={true}
     >
       <Card
         title="Role Information"
@@ -80,7 +76,7 @@ const RoleDetailPage = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Role Name</h3>
-              <p className="text-gray-600">{role.name}</p>
+              <p className="text-gray-600">{role.role}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Remark</h3>

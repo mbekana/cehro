@@ -10,24 +10,8 @@ import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
-
-type LegalFrameworkFormData = {
-  title: string;
-  city: string;
-  region: string;
-  source: string;
-  file: any;
-  media: any;
-  mediaType: string;
-  metrics: string;
-  insight: string;
-  impact: string;
-  origin: string;
-  date: string;
-  geographicScope: string;
-  thematicCategory: string;
-  summary: string;
-};
+import { LegalFramework } from "@/app/model/LegalFramework";
+import Cookies from "js-cookie";
 
 const LegalFrameworkForm = () => {
   const { id } = useParams();
@@ -35,29 +19,48 @@ const LegalFrameworkForm = () => {
   const [regions, setRegions] = useState<any[]>([]);
   const [sources, setSources] = useState<any[]>([]);
   const [impacts, setImpacts] = useState<Impact[]>([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [userData, setUserData] = useState<any>(null);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [origins, setOrigins] = useState<any[]>([]);
   const [geographicScopes, setGeographicsScopes] = useState<any[]>([]);
   const [thematicCategories, setThematicCategories] = useState<any[]>([]);
-  const [formData, setFormData] = useState<LegalFrameworkFormData>({
+  const [filePreview, setFilePreview] = useState<any>(null);
+  const [mediaType, setMediaType] = useState<any>(null);
+  const [fileType, setFileType] = useState<any>(null);
+  const [mediaPreview, setMediaPreview] = useState<any>(null);
+  const [formData, setFormData] = useState<LegalFramework>({
     title: "",
-    city: "",
-    region: "",
-    source: "",
-    file: null,
-    media: null,
-    mediaType: "",
-    metrics: "",
-    insight: "",
-    impact: "",
+    scope: "",
     origin: "",
+    file: null,
+    video: null,
     date: "",
-    geographicScope: "",
-    thematicCategory: "",
-    summary: "",
+    category: "",
+    impact: "",
+    source: "",
+    region: "",
+    woreda_kebele: "",
+    zone_subcity: "",
+    metrics: "",
+    cehro_insights: "",
+    status: "",
+    postedBy: "",
   });
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
+  
 
   useEffect(() => {
     fetchMetrics();
@@ -76,31 +79,44 @@ const LegalFrameworkForm = () => {
     ];
 
     setOrigins(origs);
-    setGeographicsScopes(geographicScope)
-    setThematicCategories(thematicCategories)
+    setGeographicsScopes(geographicScope);
+    setThematicCategories(thematicCategories);
     if (id) {
       const fetchData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          const response = await fetch(`${apiUrl}/legalFrameworks/${id}`);
+          const response = await fetch(
+            `${apiUrl}/api/v1/legal-frameworks/${id}`
+          );
           const data = await response.json();
           setFormData({
-            title: data.title,
-            city: data.city,
-            region: data.region,
-            source: data.source,
-            file: data.file ? { name: getFileNameFromPath(data.file) } : null,
-            media: data.media ? { name: getFileNameFromPath(data.media) } : null,
-            mediaType: data.mediaType,
-            metrics: data.metrics,
-            insight: data.remark,
-            impact: data.impact,
-            origin: data.origin,
-            date: data.date,
-            geographicScope: data.geographicScope,
-            thematicCategory: data.thematicCategory,
-            summary: data.summary,
+            title: data.data.title,
+            zone_subcity: data.data.zone_subcity,
+            region: data.data.region,
+            source: data.data.source,
+            file: data.data.file,
+            video: data.data.video,
+            metrics: data.data.metrics,
+            cehro_insights: data.data.cehro_insights,
+            impact: data.data.impact,
+            origin: data.data.origin,
+            date: data.data.date,
+            scope: data.data.geographicScope,
+            category: data.data.category,
+            woreda_kebele: data.data.woreda_kebele,
+            // summary: data.summary,
+            // scope:data.scope
           });
+          if (data.data.file) {
+            setFilePreview(generateFilePreview(data.data.file)); 
+            setFileType("pdf");
+          }
+          
+          if (data.data.video) {
+            setMediaPreview(generateFilePreview(data.data.video));
+            setMediaType(data.data.video.split('.').pop()?.toLowerCase() === 'mp4' ? 'video' : 'image');
+          }
+  
         } catch (error) {
           console.error("Error fetching data:", error);
         }
@@ -114,10 +130,12 @@ const LegalFrameworkForm = () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/thematicCategories`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/categories/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setThematicCategories(data);
+        setThematicCategories(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -131,10 +149,12 @@ const LegalFrameworkForm = () => {
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
+        setMetrics(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -146,10 +166,12 @@ const LegalFrameworkForm = () => {
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
+        setRegions(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -161,10 +183,12 @@ const LegalFrameworkForm = () => {
   const fetchSources = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/sources`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setSources(data);
+        setSources(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -176,10 +200,12 @@ const LegalFrameworkForm = () => {
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
@@ -188,10 +214,7 @@ const LegalFrameworkForm = () => {
     }
   };
 
-  const getFileNameFromPath = (
-    filePath: string,
-    maxLength = 20
-  ): string => {
+  const getFileNameFromPath = (filePath: string, maxLength = 20): string => {
     const fileName = filePath.split("/").pop()?.split("\\").pop() || "";
 
     if (fileName.length > maxLength) {
@@ -213,102 +236,164 @@ const LegalFrameworkForm = () => {
     }));
   };
 
+  const validateFile = (
+    selectedFile: File,
+    field: "file" | "media"
+  ): string | null => {
+    const maxFileSize = 5 * 1024 * 1024; // 5MB max
+    if (selectedFile.size > maxFileSize) {
+      return "File size exceeds the maximum limit of 5 MB.";
+    }
+
+    const extension = selectedFile.name.split(".").pop()?.toLowerCase();
+    const allowedImageExtensions = ["jpg", "png", "jpeg"];
+    const allowedVideoExtensions = ["mp4", "avi"];
+    const allowedPdfExtensions = ["pdf"];
+
+    if (
+      (field === "media" &&
+        !allowedImageExtensions.includes(extension) &&
+        !allowedVideoExtensions.includes(extension)) ||
+      (field === "file" && !allowedPdfExtensions.includes(extension))
+    ) {
+      return "Invalid file type. Please upload a valid file.";
+    }
+
+    return null;
+  };
+
+  const generateFilePreview = (selectedFile: File): string => {
+    return URL.createObjectURL(selectedFile);
+  };
+
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "file" | "media"
   ) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: file,
-    }));
+    const selectedFile = e.target.files ? e.target.files[0] : null;
 
-    if (file) {
-      const extension = file.name.split(".").pop()?.toLowerCase();
-      if (extension === "jpg" || extension === "png" || extension === "jpeg") {
-        setFormData((prevData) => ({
-          ...prevData,
-          mediaType: "image",
-        }));
-      } else if (extension === "mp4" || extension === "avi") {
-        setFormData((prevData) => ({
-          ...prevData,
-          mediaType: "video",
-        }));
-      } else if (extension === "pdf") {
-        setFormData((prevData) => ({
-          ...prevData,
-          mediaType: "pdf",
-        }));
+    if (selectedFile) {
+      const fileError = validateFile(selectedFile, field);
+      if (fileError) {
+        return;
       }
+
+      const filePreview = generateFilePreview(selectedFile);
+
+      setFormData((prevData) => {
+        const updatedData: any = { ...prevData };
+        if (field === "file") {
+          updatedData[field] = selectedFile;
+        } else {
+          updatedData["video"] = selectedFile;
+        }
+
+        if (field === "media") {
+          setMediaPreview(filePreview);
+          const mediaType = selectedFile.type.includes("image")
+            ? "image"
+            : selectedFile.type.includes("video")
+            ? "video"
+            : "";
+          setMediaType(mediaType);
+        } else if (field === "file") {
+          setFilePreview(filePreview);
+          setFileType("pdf");
+        }
+
+        return updatedData;
+      });
     }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setLoading(true);
-    const formPayload = {
-      ...formData,
-      file: formData.file ? formData.file.name : null,
-      media: formData.media ? formData.media.name : null,
-    };
+
+    // Create a new FormData object
+    const formDataObj = new FormData();
+
+    // Append form data (excluding files)
+    formDataObj.append("title", formData.title);
+    formDataObj.append("scope", formData.scope);
+    formDataObj.append("origin", formData.origin);
+    formDataObj.append("date", formData.date);
+    formDataObj.append("category", formData.category);
+    formDataObj.append("impact", formData.impact);
+    formDataObj.append("source", formData.source);
+    formDataObj.append("region", formData.region);
+    formDataObj.append("woreda_kebele", formData.woreda_kebele);
+    formDataObj.append("zone_subcity", formData.zone_subcity);
+    formDataObj.append("metrics", formData.metrics);
+    formDataObj.append("cehro_insights", formData.cehro_insights);
+    formDataObj.append("status", formData.status);
+    formDataObj.append("approvedById", userData.id);
+
+    // Append files (if present)
+    if (formData.file) {
+      formDataObj.append("file", formData.file);
+    }
+
+    if (formData.video) {
+      formDataObj.append("media", formData.video);
+    }
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = id
-        ? await fetch(`${apiUrl}/legalFrameworks/${id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formPayload),
-          })
-        : await fetch(`${apiUrl}/legalFrameworks`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formPayload),
-          });
+      const response = await fetch(`${apiUrl}/api/v1/legal-frameworks/${id}`, {
+        method: "PUT",
+        body: formDataObj, // Send FormData directly, no need to stringify
+      });
 
       if (response.ok) {
         const result = await response.json();
         console.log("Data saved successfully:", result);
         setFormData({
           title: "",
-          city: "",
-          region: "",
-          source: "",
-          file: null,
-          media: null,
-          mediaType: "",
-          metrics: "",
-          insight: "",
-          impact: "",
+          scope: "",
           origin: "",
+          file: null,
+          video: null,
           date: "",
-          geographicScope: "",
-          thematicCategory: "",
-          summary: "",
+          category: "",
+          impact: "",
+          source: "",
+          region: "",
+          woreda_kebele: "",
+          zone_subcity: "",
+          metrics: "",
+          cehro_insights: "",
+          status: "",
+          postedBy: "",
         });
-        setSuccess("Legal Framework Saved Successfully!");
-        setError(null);
-        setLoading(false);
+        setToast({
+          message: "Legal Framework Saved Successfully",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        setSuccess(null);
-        setError("An error occurred while saving the data.");
-        setLoading(false);
+        setToast({
+          message: "There was an error saving the legal framework",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      setSuccess(null);
-      setError(error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
+                        <span>{}</span>
+
       <BoxWrapper
         icon={<FaArrowLeft />}
         title="Legal Framework Maintenance"
@@ -346,9 +431,9 @@ const LegalFrameworkForm = () => {
                   type="select"
                   label="Geographic Scope"
                   placeholder="Geographic Scope"
-                  value={formData.geographicScope}
+                  value={formData.scope}
                   onChange={handleChange}
-                  name="geographicScope"
+                  name="scope"
                 >
                   <option value="">Select Geographic Scope</option>
                   {geographicScopes && geographicScopes.length > 0 ? (
@@ -384,7 +469,6 @@ const LegalFrameworkForm = () => {
                 </Input>
               </div>
 
-
               <div>
                 <Input
                   type="date"
@@ -400,9 +484,9 @@ const LegalFrameworkForm = () => {
                   type="text"
                   label="City"
                   placeholder=" city"
-                  value={formData.city}
+                  value={formData.zone_subcity}
                   onChange={handleChange}
-                  name="city"
+                  name="zone_subcity"
                 />
               </div>
               <div>
@@ -416,35 +500,28 @@ const LegalFrameworkForm = () => {
                 >
                   <option value="">Select Source</option>
                   {sources.map((source, index) => (
-                    <option key={index} value={source.id}>
-                      {source.name}
+                    <option key={index} value={source.source}>
+                      {source.source}
                     </option>
                   ))}
                 </Input>
               </div>
 
-          
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   File Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="file"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select File
-                  </label>
                   <input
                     id="file"
                     type="file"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, "file")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+
                   />
-                  {formData.file && (
-                    <span className="text-sm text-gray-600 ml-2">
-                      {formData.file.name}
-                    </span>
+                  {filePreview  && (
+                    <embed src={filePreview} width="200" height="200" />
                   )}
                 </div>
               </div>
@@ -454,22 +531,27 @@ const LegalFrameworkForm = () => {
                   Media Upload
                 </label>
                 <div className="mt-1">
-                  <label
-                    htmlFor="media"
-                    className="inline-block cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-                  >
-                    Select Media
-                  </label>
+             
                   <input
                     id="media"
                     type="file"
+                    accept="image/*,video/*"
                     onChange={(e) => handleFileChange(e, "media")}
-                    className="hidden"
+                    className="mt-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:hover:bg-gray-200"
+
                   />
-                  {formData.media && (
-                    <span className="text-sm text-gray-600 ml-2">
-                      {formData.media.name}
-                    </span>
+           {mediaPreview && mediaType === "image" && (
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      style={{ width: "100px", height: "auto" }}
+                    />
+                  )}
+                  {mediaPreview && mediaType === "video" && (
+                    <video width="200" controls>
+                      <source src={mediaPreview} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   )}
                 </div>
               </div>
@@ -491,7 +573,6 @@ const LegalFrameworkForm = () => {
                 </Input>
               </div>
 
-           
               <div>
                 <Input
                   type="select"
@@ -503,8 +584,8 @@ const LegalFrameworkForm = () => {
                 >
                   <option value="">Select Metrics</option>
                   {metrics.map((metric, index) => (
-                    <option key={index} value={metric.id}>
-                      {metric.name}
+                    <option key={index} value={metric.metrics}>
+                      {metric.metrics}
                     </option>
                   ))}
                 </Input>
@@ -519,8 +600,8 @@ const LegalFrameworkForm = () => {
                 >
                   <option value="">Select Impact</option>
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
@@ -531,19 +612,19 @@ const LegalFrameworkForm = () => {
                   type="select"
                   label="Thematic Category"
                   placeholder="Thematic Category"
-                  value={formData.thematicCategory}
+                  value={formData.category}
                   onChange={handleChange}
-                  name="thematicCategory"
+                  name="category"
                 >
                   <option value="">Select Thematic Category</option>
                   {thematicCategories.map((thematicCategory, index) => (
-                    <option key={index} value={thematicCategory.id}>
-                      {thematicCategory.name}
+                    <option key={index} value={thematicCategory.category}>
+                      {thematicCategory.category}
                     </option>
                   ))}
                 </Input>
               </div>
-              <div>
+              {/* <div>
                 <Input
                   type="textarea"
                   label="Summary of Legal Framerwork"
@@ -552,15 +633,15 @@ const LegalFrameworkForm = () => {
                   onChange={handleChange}
                   name="summary"
                 />
-              </div>
+              </div> */}
               <div>
                 <Input
                   type="textarea"
                   label="CEHRO's insight"
                   placeholder="CEHRO's insight"
-                  value={formData.insight}
+                  value={formData.cehro_insights}
                   onChange={handleChange}
-                  name="insight"
+                  name="cehro_insights"
                 />
               </div>
             </div>
@@ -574,29 +655,19 @@ const LegalFrameworkForm = () => {
                 size="large"
               />
             </div>
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
 
 export default LegalFrameworkForm;
-

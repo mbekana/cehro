@@ -1,48 +1,42 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
-import { useParams } from "next/navigation"; 
-
-
-type CategoryDetails = {
-  name: string;
-  remark: string;
-};
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { useParams } from "next/navigation";
+import { Category } from "@/app/model/CategoryModel";
 
 const CategoryDetailsPage = () => {
-  const { id } = useParams(); 
-  const [category, setCategory] = useState<CategoryDetails | null>(null); 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const { id } = useParams();
+  const [category, setCategory] = useState<Category | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("ID: ", id)
+    console.log("ID: ", id);
     if (id) {
       const fetchCategoryData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/categories/${id}`);
+          const response = await fetch(`${apiUrl}/api/v1/categories/${id}`);
           if (response.ok) {
             const data = await response.json();
-            setCategory(data);
+            setCategory(data.data);
           } else {
             console.error("Category not found");
           }
         } catch (error) {
           console.error("Error fetching category data", error);
         } finally {
-          setLoading(false); 
+          setLoading(false);
         }
       };
 
       fetchCategoryData();
     }
   }, [id]);
-
 
   if (loading) {
     return <div>Loading...</div>;
@@ -53,12 +47,13 @@ const CategoryDetailsPage = () => {
   }
 
   return (
-    <div className="bg-gray-100">
+    <div>
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Category Details"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Category Information"
@@ -72,11 +67,17 @@ const CategoryDetailsPage = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-          
+
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Category Name</h3>
-              <p className="text-gray-600">{category.name}</p>
+              <h3 className="text-lg font-semibold text-gray-700">ID</h3>
+              <p className="text-gray-600">{category.id}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Category Name
+              </h3>
+              <p className="text-gray-600">{category.category}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Remark</h3>
@@ -85,8 +86,6 @@ const CategoryDetailsPage = () => {
           </div>
         </Card>
       </BoxWrapper>
-
-
     </div>
   );
 };

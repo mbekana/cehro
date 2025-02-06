@@ -1,39 +1,42 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaUsers } from "react-icons/fa";  // You can use a different icon for the Role if preferred
-import { useParams } from "next/navigation"; 
+import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
+import { useParams } from "next/navigation";
 
-const RoleDetailsPage = () => {
-  const { id } = useParams(); 
-  const [role, setRole] = useState<any | null>(null); 
-  const [loading, setLoading] = useState<boolean>(true); 
+const RegionDetailsPage = () => {
+  const { id } = useParams();
+  const [region, setRegion] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (id) {
-      const fetchRoleData = async () => {
+      const fetchRegionData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          console.log("Region ID: ", id);
+          const response = await fetch(`${apiUrl}/api/v1/regions/${id}`, {
+            method: "GET",
+          });
 
-          const response = await fetch(`${apiUrl}/roles/${id}`, { method: 'GET' }); 
           if (response.ok) {
             const data = await response.json();
-            console.log("Role Data: ", data);
-            setRole(data);
+            console.log("Region Data: ", data);
+            setRegion(data.data);
           } else {
-            console.error("Role not found");
+            console.error("Region not found");
           }
         } catch (error) {
-          console.error("Error fetching role data", error);
+          console.error("Error fetching region data", error);
         } finally {
-          setLoading(false); 
+          setLoading(false);
         }
       };
 
-      fetchRoleData();
+      fetchRegionData();
     }
   }, [id]);
 
@@ -41,20 +44,21 @@ const RoleDetailsPage = () => {
     return <div>Loading...</div>;
   }
 
-  if (!role) {
-    return <div>Role not found</div>;
+  if (!region) {
+    return <div>Region not found</div>;
   }
 
   return (
-    <div className="bg-white">
+    <div>
       <BoxWrapper
-        icon={<FaUsers />}
-        title="Role Details"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
-          title="Role Information"
+          title="Region Information"
           borderColor="border-primary"
           borderThickness="border-1"
           bgColor="bg-white"
@@ -65,19 +69,57 @@ const RoleDetailsPage = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-          
+
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Role ID</h3>
-              <p className="text-gray-600">{role.id}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">Region ID</h3>
+              <p className="text-gray-600">{region.id}</p>{" "}
+              {/* Display region ID */}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Role Name</h3>
-              <p className="text-gray-600">{role.name}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">
+                Region Name
+              </h3>
+              <p className="text-gray-600">{region.name}</p>{" "}
+              {/* Display region name */}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Remark</h3>
-              <p className="text-gray-600">{role.remark}</p> 
+              <h3 className="text-lg font-semibold text-gray-700">City</h3>
+              <p className="text-gray-600">{region.city}</p>{" "}
+              {/* Display city name */}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">Latitude</h3>
+              <p className="text-gray-600">{region.lattitude}</p>{" "}
+              {/* Display latitude */}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">Longitude</h3>
+              <p className="text-gray-600">{region.longitude}</p>{" "}
+              {/* Display longitude */}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">Status</h3>
+              <p className="text-gray-600">{region.status}</p>{" "}
+              {/* Display region status */}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Created At
+              </h3>
+              <p className="text-gray-600">
+                {new Date(region.createdAt).toLocaleString()}
+              </p>{" "}
+              {/* Display created date */}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Updated At
+              </h3>
+              <p className="text-gray-600">
+                {new Date(region.updatedAt).toLocaleString()}
+              </p>{" "}
+              {/* Display updated date */}
             </div>
           </div>
         </Card>
@@ -86,4 +128,4 @@ const RoleDetailsPage = () => {
   );
 };
 
-export default RoleDetailsPage;
+export default RegionDetailsPage;

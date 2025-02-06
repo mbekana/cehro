@@ -1,40 +1,39 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar } from "react-icons/fa";
-import { useParams } from "next/navigation"; 
-
-type ThematicCategoryDetails = {
-  name: string;
-  remark: string;
-};
+import { FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { useParams } from "next/navigation";
+import { ThematicCategory } from "@/app/model/ThematicCategory";
 
 const ThematicCategoryDetailsPage = () => {
-  const { id } = useParams(); 
-  const [thematicCategory, setThematicCategory] = useState<ThematicCategoryDetails | null>(null); 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const { id } = useParams();
+  const [thematicCategory, setThematicCategory] =
+    useState<ThematicCategory | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("ID: ", id)
+    console.log("ID: ", id);
     if (id) {
       const fetchThematicCategoryData = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-          const response = await fetch(`${apiUrl}/thematicCategories/${id}`);
+          const response = await fetch(
+            `${apiUrl}/api/v1/thematic-categories/${id}`
+          );
           if (response.ok) {
             const data = await response.json();
-            setThematicCategory(data);
+            setThematicCategory(data.data);
           } else {
             console.error("Thematic Category not found");
           }
         } catch (error) {
           console.error("Error fetching thematic category data", error);
         } finally {
-          setLoading(false); 
+          setLoading(false);
         }
       };
 
@@ -51,12 +50,13 @@ const ThematicCategoryDetailsPage = () => {
   }
 
   return (
-    <div className="bg-gray-100">
+    <div>
       <BoxWrapper
-        icon={<FaCalendar />}
-        title="Thematic Category Details"
+        icon={<FaArrowLeft />}
+        title="Education Details"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Thematic Category Information"
@@ -70,11 +70,13 @@ const ThematicCategoryDetailsPage = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-          
+
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-700">Thematic Category Name</h3>
-              <p className="text-gray-600">{thematicCategory.name}</p>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Thematic Category Name
+              </h3>
+              <p className="text-gray-600">{thematicCategory.category}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Remark</h3>

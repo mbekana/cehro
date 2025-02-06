@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 import LogoWithText from "../UI/LogoWithText";
 import Button from "@/app/components/UI/Button";
 import {
-  FaSignOutAlt,
-  FaSignInAlt,
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
@@ -29,12 +27,12 @@ const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     { label: "About", href: "/coming-soon" },
     {
       label: "Data",
-      href: "/user/data",
+      href: "/public/data",
       hasDropdown: true,
       icon: <FaChevronDown />,
       openIcon: <FaChevronUp />,
       dropdownLinks: [
-        { label: "Data", href: "/user/data" },
+        { label: "Data", href: "/public/data" },
         {
           label: "Forecasts with summary",
           href: "/coming-soon",
@@ -49,7 +47,7 @@ const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               icon: <FaChevronDown />,
               openIcon: <FaChevronUp />,
               subDropdownLinks: [
-                { label: "Graph 1", href: "/user/forecast-summary" },
+                { label: "Graph 1", href: "/public/forecast-summary" },
                 { label: "Graph 2", href: "/coming-soon/graphs/2" },
               ],
             },
@@ -65,7 +63,7 @@ const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     },
     {
       label: "Analysis",
-      href: "/user/settings",
+      href: "/public/settings",
       hasDropdown: true,
       icon: <FaChevronDown />,
       openIcon: <FaChevronUp />,
@@ -239,31 +237,6 @@ const UserLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
             ))}
           </ul>
         </nav>
-
-        {loggedIn ? (
-          <span className="mr-4 hidden md:block">
-            <Button
-              color="text"
-              text="Logout"
-              onClick={() => console.log("Logout")}
-              icon={<FaSignOutAlt />}
-              size="medium"
-            />
-          </span>
-        ) : (
-          <span className="mr-4 hidden md:block">
-            <Link href="/auth/login">
-              <Button
-                color="text"
-                text="Login"
-                onClick={() => console.log("Login")}
-                icon={<FaSignInAlt />}
-                size="medium"
-                className="text-indi"
-              />
-            </Link>
-          </span>
-        )}
       </header>
 
       <div className="flex-1 p-6">

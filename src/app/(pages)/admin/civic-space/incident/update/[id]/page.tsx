@@ -4,32 +4,15 @@ import React, { useState, useEffect } from "react";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Card from "@/app/components/UI/Card";
 import Divider from "@/app/components/UI/Divider";
-import { FaCalendar, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import { useParams } from "next/navigation";
 import { Education } from "@/app/model/EducationModel";
 import { Impact } from "@/app/model/Impact";
 import Toast from "@/app/components/UI/Toast";
-
-type IncidentFormData = {
-  region: string;
-  respondent_residence: string;
-  gender: string;
-  age_group: string;
-  education: string;
-  occupation: string;
-  date_of_incidence: string;
-  location_of_incidence: string;
-  incident_happened: {
-    woreda: string;
-    zone: string;
-  };
-  metrics: string;
-  impact: string;
-  source_of_information: string;
-  insite: string;
-};
+import { Incident } from "@/app/model/Incident";
+import Cookies from "js-cookie";
 
 const UpdateIncidentForm = () => {
   const { id } = useParams();
@@ -39,25 +22,40 @@ const UpdateIncidentForm = () => {
   const [impacts, setImpacts] = useState<Impact[]>([]);
   const [regions, setRegions] = useState<any[]>([]);
   const [occupation, setOccupation] = useState<any[]>([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [formData, setFormData] = useState<IncidentFormData>({
-    region: "",
-    respondent_residence: "",
+  const [userData, setUserData] = useState<any>(null);
+  const [sources, setSources] = useState<any[]>([]);
+
+  const [formData, setFormData] = useState<Incident>({
     gender: "",
-    age_group: "",
+    age: "",
     education: "",
     occupation: "",
-    date_of_incidence: "",
-    location_of_incidence: "",
-    incident_happened: { woreda: "", zone: "" },
-    metrics: "",
     impact: "",
-    source_of_information: "",
-    insite: "",
+    region: "",
+    respondent_address: "",
+    zone_subcity: "",
+    metrics: "",
+    cehro_insights: "",
+    date: "",
+    location: "",
+    woreda_kebele: "",
+    source: "",
   });
 
-  // Fetch the incident data using the incidentId from the URL
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
+  useEffect(() => {
+    console.log("HI: ", Cookies.get("userData"));
+    const user = Cookies.get("userData")
+      ? JSON.parse(Cookies.get("userData")!)
+      : null;
+    setUserData(user);
+  }, []);
+
   useEffect(() => {
     if (!id) {
       console.log("No incident ID provided");
@@ -67,18 +65,15 @@ const UpdateIncidentForm = () => {
     const fetchIncidentData = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-        const response = await fetch(`${apiUrl}/incidents/${id}`);
+        const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`);
         if (!response.ok) {
           console.error("Failed to fetch incident data", response.status);
           return;
         }
 
         const data = await response.json();
-        console.log("Fetched incident data:", data);
-
-        // Set the form data with the fetched incident data
-        setFormData(data);
+        console.log("Incident: ", data.data)
+        setFormData(data.data);
       } catch (error) {
         console.error("Error fetching incident data:", error);
       }
@@ -93,23 +88,44 @@ const UpdateIncidentForm = () => {
     fetchImpacts();
     fetchRegions();
     fetchOccupations();
+    fetchSources();
   }, []);
 
   const fetchOccupations = async () => {
     setLoading(true);
-    setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/occupations`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/occupations/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setOccupation(data);
+        setOccupation(data.data);
       } else {
         throw new Error("Failed to fetch occupations");
       }
     } catch (error: any) {
-      setError("Error fetching occupations: " + error.message);
       console.error("Error fetching occupations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSources = async () => {
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/sources/all`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSources(data.data);
+      } else {
+        throw new Error("Failed to fetch sources");
+      }
+    } catch (error: any) {
+      console.error("Error fetching sources:", error);
     } finally {
       setLoading(false);
     }
@@ -118,66 +134,66 @@ const UpdateIncidentForm = () => {
   const fetchMetrics = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/metrics`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/metrics/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
-        console.log("Metrics: ", metrics);
+        setMetrics(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchImpacts = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/impacts`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/impacts/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setImpacts(data);
+        setImpacts(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchRegions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/regions`, { method: "GET" });
+      const response = await fetch(`${apiUrl}/api/v1/regions/all`, {
+        method: "GET",
+      });
       if (response.ok) {
         const data = await response.json();
-        setRegions(data);
+        setRegions(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
   const fetchEducations = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       const response = await fetch(`${apiUrl}/educations`, { method: "GET" });
       if (response.ok) {
         const data = await response.json();
-        setEducations(data);
+        setEducations(data.data);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
     }
   };
 
@@ -185,63 +201,63 @@ const UpdateIncidentForm = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    if (name.startsWith("incident_happened")) {
-      const field = name.split(".")[1];
-      setFormData((prevData) => ({
-        ...prevData,
-        incident_happened: {
-          ...prevData.incident_happened,
-          [field]: value,
-        },
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!id) {
-      console.error("Incident ID is required to update the incident");
+    if (!formData.region || !formData.gender || !formData.age) {
+      setToast({
+        message: "Please check all fields",
+        type: "error",
+        position: "top-right",
+      });
       return;
     }
+
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/incidents/${id}`, {
-        method: "PATCH",
+      const payload = { ...formData, approvedBy: userData?.id };
+      const response = await fetch(`${apiUrl}/api/v1/incidents/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error("Failed to update incident");
       }
-      setSuccess("Incident updated successfully!");
-      setError(null);
+      setToast({
+        message: "You have updated Incident successfully.",
+        type: "success",
+        position: "top-right",
+      });
       setLoading(false);
-      console.log("Incident updated successfully!");
     } catch (error) {
       setLoading(false);
-      setSuccess(null);
-      setError(error);
-      console.error("Error updating incident:", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     }
   };
 
   return (
-    <div className="bg-white pb-5">
+    <div className="pb-5">
       <BoxWrapper
-        icon={<FaCalendar />}
+        icon={<FaArrowLeft />}
         title="Incident Maintenance"
         borderColor="border-primary"
         borderThickness="border-b-4"
+        shouldGoBack={true}
       >
         <Card
           title="Incident Form"
@@ -255,7 +271,6 @@ const UpdateIncidentForm = () => {
             marginTop="mt-1"
             marginBottom="mb-6"
           />
-
           <form className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -281,9 +296,9 @@ const UpdateIncidentForm = () => {
                   type="text"
                   label="Respondent Residence"
                   placeholder="Respondent Residence"
-                  value={formData.respondent_residence}
+                  value={formData.respondent_address}
                   onChange={handleChange}
-                  name="respondent_residence"
+                  name="respondent_address"
                 />
               </div>
 
@@ -306,10 +321,10 @@ const UpdateIncidentForm = () => {
                 <Input
                   type="text"
                   label="Age Group"
-                  placeholder=" age group"
-                  value={formData.age_group}
+                  placeholder="age group"
+                  value={formData.age}
                   onChange={handleChange}
-                  name="age_group"
+                  name="age"
                 />
               </div>
 
@@ -317,16 +332,15 @@ const UpdateIncidentForm = () => {
                 <Input
                   type="select"
                   label="Education"
-                  placeholder=" Education"
+                  placeholder="Education"
                   value={formData.education}
                   onChange={handleChange}
                   name="education"
                 >
                   <option value="">Select Education</option>
-
                   {educations.map((education, index) => (
-                    <option key={index} value={education.id}>
-                      {education.name}
+                    <option key={index} value={education.education}>
+                      {education.education}
                     </option>
                   ))}
                 </Input>
@@ -334,17 +348,17 @@ const UpdateIncidentForm = () => {
 
               <div>
                 <Input
-                  type="text"
+                  type="select"
                   label="Occupation"
-                  placeholder=" occupation"
+                  placeholder="Occupation"
                   value={formData.occupation}
                   onChange={handleChange}
                   name="occupation"
                 >
                   <option value="">Select Occupation</option>
                   {occupation.map((oc, index) => (
-                    <option key={index} value={oc.id}>
-                      {oc.name}
+                    <option key={index} value={oc.occupation}>
+                      {oc.occupation}
                     </option>
                   ))}
                 </Input>
@@ -355,9 +369,9 @@ const UpdateIncidentForm = () => {
                   type="date"
                   label="Date of Incidence"
                   placeholder="Select date"
-                  value={formData.date_of_incidence}
+                  value={formData.date}
                   onChange={handleChange}
-                  name="date_of_incidence"
+                  name="date"
                 />
               </div>
 
@@ -365,10 +379,10 @@ const UpdateIncidentForm = () => {
                 <Input
                   type="text"
                   label="Location of Incidence"
-                  placeholder=" location"
-                  value={formData.location_of_incidence}
+                  placeholder="Location"
+                  value={formData.location}
                   onChange={handleChange}
-                  name="location_of_incidence"
+                  name="location"
                 />
               </div>
 
@@ -382,22 +396,22 @@ const UpdateIncidentForm = () => {
                   name="impact"
                 >
                   <option value="">Select Impact</option>
-
                   {impacts.map((impact, index) => (
-                    <option key={index} value={impact.id}>
-                      {impact.name}
+                    <option key={index} value={impact.impact}>
+                      {impact.impact}
                     </option>
                   ))}
                 </Input>
               </div>
+
               <div>
                 <Input
                   type="text"
                   label="Woreda"
-                  placeholder=" woreda"
-                  value={formData.incident_happened.woreda}
+                  placeholder="Woreda"
+                  value={formData.woreda_kebele}
                   onChange={handleChange}
-                  name="incident_happened.woreda"
+                  name="woreda_kebele"
                 />
               </div>
 
@@ -405,10 +419,10 @@ const UpdateIncidentForm = () => {
                 <Input
                   type="text"
                   label="Zone"
-                  placeholder=" zone"
-                  value={formData.incident_happened.zone}
+                  placeholder="Zone"
+                  value={formData.zone_subcity}
                   onChange={handleChange}
-                  name="incident_happened.zone"
+                  name="zone_subcity"
                 />
               </div>
 
@@ -416,40 +430,50 @@ const UpdateIncidentForm = () => {
                 <Input
                   type="select"
                   label="Metrics"
-                  placeholder=" Metrics"
+                  placeholder="Metrics"
                   value={formData.metrics}
                   onChange={handleChange}
-                  name="category"
+                  name="metrics"
                 >
-                  {metrics.map((metirc, index) => (
-                    <option key={index} value={metirc.id}>
-                      {metirc.name}
+                  <option value="">Select Metrics</option>
+                  {metrics.map((metric, index) => (
+                    <option key={index} value={metric.metrics}>
+                      {metric.metrics}
                     </option>
                   ))}
-                  <option value="">Select Metrics</option>
+                </Input>
+              </div>
+
+    
+              <div>
+                <Input
+                  type="select"
+                  label="Source of Information"
+                  value={formData.source}
+                  onChange={handleChange}
+                  name="source"
+                >
+                  <option value="">Select Source</option>
+                  {sources.map((source, index) => (
+                    <option key={index} value={source.source}>
+                      {source.source}
+                    </option>
+                  ))}{" "}
                 </Input>
               </div>
 
               <div>
                 <Input
                   type="textarea"
-                  label="Source of Information"
-                  value={formData.source_of_information}
+                  label="CEHOR's Insight"
+                  placeholder="Insight"
+                  value={formData.cehro_insights}
                   onChange={handleChange}
-                  name="source_of_information"
-                />
-              </div>
-              <div>
-                <Input
-                  type="textarea"
-                  label="CEHOR's insite"
-                  placeholder="Insite"
-                  value={formData.insite}
-                  onChange={handleChange}
-                  name="insite"
+                  name="cehro_insights"
                 />
               </div>
             </div>
+
             <div className="flex justify-end mt-4 mr-24">
               <Button
                 icon={<FaPlus />}
@@ -460,27 +484,17 @@ const UpdateIncidentForm = () => {
                 onClick={handleSubmit}
               />
             </div>
-
-            {success && (
-              <Toast
-                message={success}
-                type="success"
-                position="top-right"
-                onClose={() => setSuccess(null)}
-              />
-            )}
-
-            {error && (
-              <Toast
-                message={error}
-                type="error"
-                position="top-right"
-                onClose={() => setError(null)}
-              />
-            )}
           </form>
         </Card>
       </BoxWrapper>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

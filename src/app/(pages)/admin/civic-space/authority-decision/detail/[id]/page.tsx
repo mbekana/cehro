@@ -1,50 +1,60 @@
 "use client";
 
-import { FaArrowLeft, FaCheck, FaExternalLinkAlt, FaTimes } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaCheck,
+  FaExternalLinkAlt,
+  FaTimes,
+} from "react-icons/fa";
 import BoxWrapper from "@/app/components/UI/BoxWrapper";
 import Button from "@/app/components/UI/Button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Toast from "@/app/components/UI/Toast";
+import { AuthorityDecision } from "@/app/model/AuthorityDecision";
+import Cookies from "js-cookie";
 
-type AuthorityDecisionData = {
-  affectedArea: string;
-  city: string;
-  region: string;
-  source: string;
-  file: string; 
-  media: string; 
-  metrics: string;
-  insight: string;
-  impact: string;
-  decision: string; 
-  status?:string;
-};
 
 const AuthorityDecisionDetail = () => {
-    const { id } = useParams();
+  const { id } = useParams();
 
-  const [authorityDecision, setAuthorityDecision] = useState<AuthorityDecisionData | null>(null);
+  const [authorityDecision, setAuthorityDecision] =
+    useState<AuthorityDecision | null>(null);
   const [mediaType, setMediaType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [userData, setUserData] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+    position: "top-right";
+  } | null>(null);
+
+    useEffect(() => {
+      console.log("HI: ", Cookies.get("userData"));
+      const user = Cookies.get("userData")
+        ? JSON.parse(Cookies.get("userData")!)
+        : null;
+      setUserData(user);
+    }, []);
 
   useEffect(() => {
     const fetchAuthorityDecisionData = async () => {
       setLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {method:'GET'});
+        const response = await fetch(
+          `${apiUrl}/api/v1/authorative-decisions/${id}`,
+          { method: "GET" }
+        );
         if (response.ok) {
-          const data: AuthorityDecisionData = await response.json();
-          setAuthorityDecision(data);
+          const data = await response.json();
+          setAuthorityDecision(data.data);
         } else {
           console.error("Failed to fetch authority decision data");
         }
       } catch (error) {
-        console.error("Error fetching authority decision data:", error);
+        console.error("Error fetching .dataauthority decision data:", error);
       } finally {
         setLoading(false);
       }
@@ -54,16 +64,30 @@ const AuthorityDecisionDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (authorityDecision?.media) {
-      const mediaUrl = authorityDecision.media;
-      if (mediaUrl.endsWith(".jpg") || mediaUrl.endsWith(".png") || mediaUrl.endsWith(".jpeg")) {
-        setMediaType("image");
-      } else if (mediaUrl.includes("youtube.com") || mediaUrl.includes("youtu.be")) {
-        setMediaType("video");
-      } else if (mediaUrl.endsWith(".pdf")) {
-        setMediaType("pdf");
+    if (authorityDecision?.video) {
+      const mediaFile = authorityDecision.video;
+      if (mediaFile instanceof File) {
+        const fileName = mediaFile.name;
+
+        if (
+          fileName.endsWith(".jpg") ||
+          fileName.endsWith(".png") ||
+          fileName.endsWith(".jpeg")
+        ) {
+          setMediaType("image");
+        } else if (
+          fileName.endsWith(".mp4") ||
+          fileName.endsWith(".mov") ||
+          fileName.endsWith(".avi")
+        ) {
+          setMediaType("video");
+        } else if (fileName.endsWith(".pdf")) {
+          setMediaType("pdf");
+        } else {
+          setMediaType("none");
+        }
       } else {
-        setMediaType("none");
+        console.error("Expected a File object but got:", mediaFile);
       }
     }
   }, [authorityDecision]);
@@ -74,29 +98,41 @@ const AuthorityDecisionDetail = () => {
     try {
       const updatedIncident = {
         ...authorityDecision,
-        status: "APPROVED",
+        approvedById:userData?.id
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedIncident),
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/authorative-decisions/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedIncident),
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setAuthorityDecision(data);
-        setError(null);
-        setSuccess("You have successfully approved incident.");
+        setAuthorityDecision(data.data);
+        setToast({
+          message: "You have successfully approved authorative decision.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Failed to fetch data");
+        setToast({
+          message: "There was an error approving the authorative decision",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
-      setSuccess(null);
-      setError(error);
-      console.error("Error fetching data:", error);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
     } finally {
       setLoading(false);
     }
@@ -110,25 +146,38 @@ const AuthorityDecisionDetail = () => {
         status: "REJECTED",
       };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/authorityDecisions/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedIncident),
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/authorative-decisions/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedIncident),
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         console.log("DATA: ", data);
-        setAuthorityDecision(data);
-        setError(null);
-        setSuccess("You have successfully rejected authority decision.");
+        setAuthorityDecision(data.data);
+        setToast({
+          message: "You have successfully rejected authority decision.",
+          type: "success",
+          position: "top-right",
+        });
       } else {
-        console.error("Failed to fetch data");
+        setToast({
+          message: "There was an error rejecting the authority decision.",
+          type: "error",
+          position: "top-right",
+        });
       }
     } catch (error) {
-      setError(error);
-      setSuccess(null);
+      setToast({
+        message: `${error.message}`,
+        type: "error",
+        position: "top-right",
+      });
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
@@ -182,15 +231,17 @@ const AuthorityDecisionDetail = () => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-semibold text-sm sm:text-base">Affected Area:</h4>
-            <p className="text-sm sm:text-base">{authorityDecision.affectedArea}</p>
+            <h4 className="font-semibold text-sm sm:text-base">Title:</h4>
+            <p className="text-sm sm:text-base">{authorityDecision.title}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold text-sm sm:text-base">City:</h4>
-            <p className="text-sm sm:text-base">{authorityDecision.city}</p>
+            <p className="text-sm sm:text-base">
+              {authorityDecision.zone_subcity}
+            </p>
           </div>
           <div>
             <h4 className="font-semibold text-sm sm:text-base">Region:</h4>
@@ -208,9 +259,9 @@ const AuthorityDecisionDetail = () => {
             <p className="text-sm sm:text-base">{authorityDecision.metrics}</p>
           </div>
           <div>
-          <h4 className="font-semibold text-sm sm:text-base">
-            Status: {renderStatusTag(authorityDecision?.status)}
-          </h4>
+            <h4 className="font-semibold text-sm sm:text-base">
+              Status: {renderStatusTag(authorityDecision?.status)}
+            </h4>
           </div>
         </div>
 
@@ -222,13 +273,17 @@ const AuthorityDecisionDetail = () => {
         </div>
 
         <div className="space-y-2">
-        <h4 className="font-semibold text-sm sm:text-base">CEHRO&apos;s Insight:</h4>
-        <p className="text-sm sm:text-base">{authorityDecision.insight}</p>
+          <h4 className="font-semibold text-sm sm:text-base">
+            CEHRO&apos;s Insight:
+          </h4>
+          <p className="text-sm sm:text-base">
+            {authorityDecision.cehro_insights}
+          </p>
         </div>
 
         <div className="space-y-2">
-          <h4 className="font-semibold text-sm sm:text-base">Decision:</h4>
-          <p className="text-sm sm:text-base">{authorityDecision.decision}</p>
+          <h4 className="font-semibold text-sm sm:text-base">Summary:</h4>
+          <p className="text-sm sm:text-base">{authorityDecision.summary}</p>
         </div>
 
         <div className="space-y-4">
@@ -237,7 +292,7 @@ const AuthorityDecisionDetail = () => {
             <Button
               color="primary"
               text="Open File"
-              onClick={() => window.open(authorityDecision.file, "_blank")} 
+              onClick={() => window.open(authorityDecision.file.name, "_blank")}
               icon={<FaExternalLinkAlt />}
               size="large"
             />
@@ -247,7 +302,7 @@ const AuthorityDecisionDetail = () => {
             <h4 className="font-semibold text-sm sm:text-base">Media:</h4>
             {mediaType === "image" && (
               <Image
-                src={authorityDecision.media}
+                src={authorityDecision.video.name}
                 alt="Media Preview"
                 className="w-full h-64 object-cover rounded-lg"
                 height={100}
@@ -260,7 +315,7 @@ const AuthorityDecisionDetail = () => {
                 <iframe
                   width="100%"
                   height="100%"
-                  src={authorityDecision.media}
+                  src={authorityDecision.video.name}
                   title="Video Preview"
                   frameBorder="0"
                   allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
@@ -271,7 +326,7 @@ const AuthorityDecisionDetail = () => {
 
             {mediaType === "pdf" && (
               <iframe
-                src={authorityDecision.media}
+                src={authorityDecision.file.name}
                 width="100%"
                 height="500px"
                 title="PDF Preview"
@@ -297,21 +352,13 @@ const AuthorityDecisionDetail = () => {
           />
         </div>
       </div>
-      {success && (
-        <Toast
-          message={success}
-          type="success"
-          position="top-right"
-          onClose={() => setSuccess(null)}
-        />
-      )}
 
-      {error && (
+      {toast && (
         <Toast
-          message={error}
-          type="error"
-          position="top-right"
-          onClose={() => setError(null)}
+          message={toast.message}
+          type={toast.type}
+          position={toast.position}
+          onClose={() => setToast(null)}
         />
       )}
     </BoxWrapper>
