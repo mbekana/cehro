@@ -7,7 +7,7 @@ import LogoWithText from "@/app/components/UI/LogoWithText";
 import { FaLock } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaSpinner } from "react-icons/fa"; // Import a spinner icon
+import { FaSpinner } from "react-icons/fa"; 
 
 const PasswordResetPage = () => {
   const [email, setEmail] = useState("");
@@ -16,7 +16,7 @@ const PasswordResetPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [token, setToken] = useState<string | null>(null); 
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); 
   const router = useRouter();
   const callbackUrl = typeof window !== "undefined"
   ? new URLSearchParams(window.location.search).get("callbackUrl") || "/admin"
