@@ -49,7 +49,7 @@ const LoginPage = () => {
       headers: {},
     };
     try {
-      const data = await apiRequest(`api/v1/users/login`, options);
+      const data = await apiRequest(`/api/v1/users/login`, options);
       console.log("data ", data?.accessToken);
       if (data.accessToken) {
         Cookies.set("accessToken", data.accessToken);
