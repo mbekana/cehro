@@ -43,22 +43,24 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     const credentials = { email, password };
-    const options = {
-      method: "POST",
-      body: { ...credentials },
-      headers: {},
-    };
     try {
-      const data = await apiRequest(`api/v1/users/login`, options);
-      console.log("data ", data?.accessToken);
+      const apiUrl  = process.env.NEXT_PUBLIC_API_URL;
+      const response = await  fetch(`${apiUrl}/api/v1/users/login`, {
+        method: "POST",
+        body: JSON.stringify({...credentials}),
+        headers: {
+          "Content-Type": "application/json"},
+      });
+      const data = await response.json();
+      console.log("data ", data.data?.accessToken);
       if (data.accessToken) {
-        Cookies.set("accessToken", data.accessToken);
+        Cookies.set("accessToken", data.data.accessToken);
         if (data.refreshToken) {
-          Cookies.set("refreshToken", data.refreshToken);
+          Cookies.set("refreshToken", data.data.refreshToken);
         }
-        if (data.user) {
-          delete data.accessToken;
-          Cookies.set("userData", JSON.stringify(data.user));
+        if (data.data.user) {
+          delete data.data.accessToken;
+          Cookies.set("userData", JSON.stringify(data.data.user));
         }
         router.push(callbackUrl);
       } else {
